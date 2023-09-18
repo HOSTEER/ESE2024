@@ -1,10 +1,10 @@
 #For CubeIDE
 *.ld
 *.mxproject
-Drivers
-Core/Startup
-.settings/*
-!*.resources
+*/Drivers
+*/Core/Startup
+*/.settings/*
+!*/.settings/org.eclipse.core.resources.prefs
 
 # For C code
 # Prerequisites
