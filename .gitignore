@@ -1,10 +1,10 @@
 #For CubeIDE
 *.ld
 *.mxproject
-/Drivers
-/.settings/language.settings
-/.settings/stm32cubeide.project.prefs
-/Core
+Drivers
+.settings/language.settings
+.settings/stm32cubeide.project.prefs
+Core
 !/Core/Src/main.c
 
 # For C code
