@@ -3,7 +3,6 @@
 *.mxproject
 */Drivers
 */Debug
-*/Core/Startup
 */.settings/*
 !*/.settings/org.eclipse.core.resources.prefs
 
