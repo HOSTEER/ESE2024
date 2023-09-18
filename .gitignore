@@ -2,8 +2,9 @@
 *.ld
 *.mxproject
 Drivers
+Core/Startup
 .settings/*
-!*.settings/org.eclipse.core.resources
+!*.resources
 
 # For C code
 # Prerequisites
