@@ -3,7 +3,7 @@
 *.mxproject
 Drivers
 .settings/*
-!.settings/org.eclipse.core.resources
+!*.settings/org.eclipse.core.resources
 
 # For C code
 # Prerequisites
