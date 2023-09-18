@@ -2,10 +2,8 @@
 *.ld
 *.mxproject
 Drivers
-.settings/*
 .settings/stm32cubeide.project.prefs
-Core/*
-!main.c
+Core
 !org.eclipse.core.resources
 
 # For C code
