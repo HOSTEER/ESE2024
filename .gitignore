@@ -5,7 +5,7 @@ Drivers
 .settings/language.settings
 .settings/stm32cubeide.project.prefs
 Core
-!/Core/Src/main.c
+!Core/Src/main.c
 
 # For C code
 # Prerequisites
