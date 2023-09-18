@@ -4,11 +4,8 @@
     Théo Césari
     Victor Lesne
 ------
-Activer doxygen dans les propriétés du projet -> général C/C++, tuto doxygen 
-[![Watch the video](https://img.youtube.com/watch?v=GC9Xy7nLxyw/hqdefault.jpg)](https://www.youtube.com/watch?v=GC9Xy7nLxyw)
+Activer doxygen dans les propriétés du projet -> général C/C++, tuto doxygen https://www.youtube.com/watch?v=GC9Xy7nLxyw
 
-[<img src="https://img.youtube.com/watch?v=GC9Xy7nLxyw/hqdefault.jpg" width="600" height="300"
-/>](https://www.youtube.com/watch?v=GC9Xy7nLxyw)
 pour retirer un fichier "add" par erreur faire un "git reset nom_du_fichier", un reset seul retirera tout les add fait
 
 Convention à avoir pour le stockage des sources :
