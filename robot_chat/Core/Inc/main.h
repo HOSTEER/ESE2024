@@ -57,6 +57,38 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BT_RX_Pin GPIO_PIN_11
+#define BT_RX_GPIO_Port GPIOC
+#define L_MOTOR_Pin GPIO_PIN_12
+#define L_MOTOR_GPIO_Port GPIOC
+#define USW_EXTI_Pin GPIO_PIN_0
+#define USW_EXTI_GPIO_Port GPIOC
+#define FBD_EXTI_Pin GPIO_PIN_1
+#define FBD_EXTI_GPIO_Port GPIOC
+#define BBD_EXTI_Pin GPIO_PIN_2
+#define BBD_EXTI_GPIO_Port GPIOC
+#define BAT_SENSOR_Pin GPIO_PIN_0
+#define BAT_SENSOR_GPIO_Port GPIOA
+#define ST_LINK_TX_Pin GPIO_PIN_2
+#define ST_LINK_TX_GPIO_Port GPIOA
+#define ST_LINK_RX_Pin GPIO_PIN_3
+#define ST_LINK_RX_GPIO_Port GPIOA
+#define BT_TX_Pin GPIO_PIN_5
+#define BT_TX_GPIO_Port GPIOA
+#define R_ENCODE_B_Pin GPIO_PIN_6
+#define R_ENCODE_B_GPIO_Port GPIOA
+#define R_ENCODE_A_Pin GPIO_PIN_7
+#define R_ENCODE_A_GPIO_Port GPIOA
+#define LIDAR_TX_Pin GPIO_PIN_4
+#define LIDAR_TX_GPIO_Port GPIOC
+#define LIDAR_RX_Pin GPIO_PIN_5
+#define LIDAR_RX_GPIO_Port GPIOC
+#define R_MOTOR_Pin GPIO_PIN_14
+#define R_MOTOR_GPIO_Port GPIOB
+#define L_ENCODE_B_Pin GPIO_PIN_8
+#define L_ENCODE_B_GPIO_Port GPIOA
+#define L_ENCODE_A_Pin GPIO_PIN_9
+#define L_ENCODE_A_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
