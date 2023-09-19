@@ -4,6 +4,7 @@
     Théo Césari
     Victor Lesne
 ------
+
 Activer doxygen dans les propriétés du projet -> général C/C++, tuto doxygen https://www.youtube.com/watch?v=GC9Xy7nLxyw
 
 pour importer sur cubeIDE il faut faire "File" -> "Import" -> "General" -> "Project from Folder or Archive" sélectionner le directory exemple "C:\Users\louis\Desktop\ProjetCubeIDE" et ensuite faire "finish"
@@ -19,4 +20,4 @@ Pour vérifier qu'une branch est ok cloner un 2nd repo de la branch et la tester
 
 Ensuite il faut résoudre les conflits entre .cproject ( globalement garder le code du main ); .ioc (globalement fusionner les pins ajoutés et faire gaffe au pin, en double) et enfin le main.c ( où il faut fusionner )
 
-<img src="Schema fonctionnel.png" alt="Schema fonctionnel du robot chat">
+![Schema fonctionnel du robot chat](images/SchemaFonctionnel.png)
