@@ -5,7 +5,6 @@
     Victor Lesne
 ------
 
-![ça c'est notre chat](images/shah.jpg)
 Activer doxygen dans les propriétés du projet -> général C/C++, tuto doxygen https://www.youtube.com/watch?v=GC9Xy7nLxyw
 
 pour importer sur cubeIDE il faut faire "File" -> "Import" -> "General" -> "Project from Folder or Archive" sélectionner le directory exemple "C:\Users\louis\Desktop\ProjetCubeIDE" et ensuite faire "finish"
