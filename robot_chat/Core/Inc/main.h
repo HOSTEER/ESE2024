@@ -49,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -59,16 +61,16 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BT_RX_Pin GPIO_PIN_11
 #define BT_RX_GPIO_Port GPIOC
-#define L_MOTOR_Pin GPIO_PIN_12
-#define L_MOTOR_GPIO_Port GPIOC
+#define R_FORWARD_Pin GPIO_PIN_12
+#define R_FORWARD_GPIO_Port GPIOC
 #define USW_EXTI_Pin GPIO_PIN_0
 #define USW_EXTI_GPIO_Port GPIOC
 #define FBD_EXTI_Pin GPIO_PIN_1
 #define FBD_EXTI_GPIO_Port GPIOC
 #define BBD_EXTI_Pin GPIO_PIN_2
 #define BBD_EXTI_GPIO_Port GPIOC
-#define BAT_SENSOR_Pin GPIO_PIN_0
-#define BAT_SENSOR_GPIO_Port GPIOA
+#define BAT_ADC_Pin GPIO_PIN_0
+#define BAT_ADC_GPIO_Port GPIOA
 #define ST_LINK_TX_Pin GPIO_PIN_2
 #define ST_LINK_TX_GPIO_Port GPIOA
 #define ST_LINK_RX_Pin GPIO_PIN_3
@@ -83,12 +85,16 @@ void Error_Handler(void);
 #define LIDAR_TX_GPIO_Port GPIOC
 #define LIDAR_RX_Pin GPIO_PIN_5
 #define LIDAR_RX_GPIO_Port GPIOC
-#define R_MOTOR_Pin GPIO_PIN_14
-#define R_MOTOR_GPIO_Port GPIOB
+#define L_FORWARD_Pin GPIO_PIN_14
+#define L_FORWARD_GPIO_Port GPIOB
 #define L_ENCODE_B_Pin GPIO_PIN_8
 #define L_ENCODE_B_GPIO_Port GPIOA
 #define L_ENCODE_A_Pin GPIO_PIN_9
 #define L_ENCODE_A_GPIO_Port GPIOA
+#define L_REVERSE_Pin GPIO_PIN_0
+#define L_REVERSE_GPIO_Port GPIOD
+#define R_REVERSE_Pin GPIO_PIN_1
+#define R_REVERSE_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
