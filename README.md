@@ -18,3 +18,5 @@ Ensuite les ajouter dans "Project" -> "Properties" -> "C/C++ General" -> "Paths 
 Pour vérifier qu'une branch est ok cloner un 2nd repo de la branch et la tester pour voir si 0 error, sinon ça veut dire qu'il manque un truc à commit
 
 Ensuite il faut résoudre les conflits entre .cproject ( globalement garder le code du main ); .ioc (globalement fusionner les pins ajoutés et faire gaffe au pin, en double) et enfin le main.c ( où il faut fusionner )
+
+<img src="Schema fonctionnel.png" alt="Schema fonctionnel du robot chat">
