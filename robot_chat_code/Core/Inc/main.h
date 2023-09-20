@@ -63,8 +63,8 @@ void Error_Handler(void);
 #define BT_RX_GPIO_Port GPIOC
 #define R_FORWARD_Pin GPIO_PIN_12
 #define R_FORWARD_GPIO_Port GPIOC
-#define USW_EXTI_Pin GPIO_PIN_0
-#define USW_EXTI_GPIO_Port GPIOC
+#define BUMP_EXTI_Pin GPIO_PIN_0
+#define BUMP_EXTI_GPIO_Port GPIOC
 #define FBD_EXTI_Pin GPIO_PIN_1
 #define FBD_EXTI_GPIO_Port GPIOC
 #define BBD_EXTI_Pin GPIO_PIN_2
@@ -87,6 +87,8 @@ void Error_Handler(void);
 #define LIDAR_RX_GPIO_Port GPIOC
 #define L_FORWARD_Pin GPIO_PIN_14
 #define L_FORWARD_GPIO_Port GPIOB
+#define LIDAR_SPEED_Pin GPIO_PIN_15
+#define LIDAR_SPEED_GPIO_Port GPIOB
 #define L_ENCODE_B_Pin GPIO_PIN_8
 #define L_ENCODE_B_GPIO_Port GPIOA
 #define L_ENCODE_A_Pin GPIO_PIN_9
@@ -95,14 +97,16 @@ void Error_Handler(void);
 #define L_REVERSE_GPIO_Port GPIOD
 #define R_REVERSE_Pin GPIO_PIN_1
 #define R_REVERSE_GPIO_Port GPIOD
-#define USER_LED0_Pin GPIO_PIN_6
+#define USER_LED0_Pin GPIO_PIN_4
 #define USER_LED0_GPIO_Port GPIOB
-#define USER_LED1_Pin GPIO_PIN_7
+#define USER_LED1_Pin GPIO_PIN_5
 #define USER_LED1_GPIO_Port GPIOB
 #define USER_LED2_Pin GPIO_PIN_8
 #define USER_LED2_GPIO_Port GPIOB
 #define USER_LED3_Pin GPIO_PIN_9
 #define USER_LED3_GPIO_Port GPIOB
+#define USER_LED4_Pin GPIO_PIN_10
+#define USER_LED4_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 
