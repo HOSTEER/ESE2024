@@ -287,13 +287,14 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**TIM15 GPIO Configuration
     PB14     ------> TIM15_CH1
+    PB15     ------> TIM15_CH2
     */
-    GPIO_InitStruct.Pin = L_FORWARD_Pin;
+    GPIO_InitStruct.Pin = L_FORWARD_Pin|LIDAR_SPEED_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF5_TIM15;
-    HAL_GPIO_Init(L_FORWARD_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM15_MspPostInit 1 */
 
