@@ -53,7 +53,7 @@
     (stroke (width 0.1524) (type solid))
     (fill (color 0 0 0 0.0000))
     (uuid 7d20d460-b97c-44b2-b496-8b3ce571e49d)
-    (property "Sheetname" "Capteurs" (at 80.01 123.7484 0)
+    (property "Sheetname" "Captors" (at 80.01 123.7484 0)
       (effects (font (size 1.27 1.27)) (justify left bottom))
     )
     (property "Sheetfile" "captors.kicad_sch" (at 80.01 147.9046 0)
