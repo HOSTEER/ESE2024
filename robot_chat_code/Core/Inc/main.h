@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define BT_RX_GPIO_Port GPIOC
 #define R_FORWARD_Pin GPIO_PIN_12
 #define R_FORWARD_GPIO_Port GPIOC
+#define SW_GAME_STATUS_Pin GPIO_PIN_13
+#define SW_GAME_STATUS_GPIO_Port GPIOC
 #define BUMP_EXTI_Pin GPIO_PIN_0
 #define BUMP_EXTI_GPIO_Port GPIOC
 #define FBD_EXTI_Pin GPIO_PIN_1

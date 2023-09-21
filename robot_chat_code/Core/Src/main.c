@@ -739,8 +739,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : BUMP_EXTI_Pin FBD_EXTI_Pin BBD_EXTI_Pin */
-  GPIO_InitStruct.Pin = BUMP_EXTI_Pin|FBD_EXTI_Pin|BBD_EXTI_Pin;
+  /*Configure GPIO pins : SW_GAME_STATUS_Pin BUMP_EXTI_Pin FBD_EXTI_Pin BBD_EXTI_Pin */
+  GPIO_InitStruct.Pin = SW_GAME_STATUS_Pin|BUMP_EXTI_Pin|FBD_EXTI_Pin|BBD_EXTI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
