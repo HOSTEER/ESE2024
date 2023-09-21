@@ -87,6 +87,10 @@ void Error_Handler(void);
 #define LIDAR_TX_GPIO_Port GPIOC
 #define LIDAR_RX_Pin GPIO_PIN_5
 #define LIDAR_RX_GPIO_Port GPIOC
+#define I_READ_L_Pin GPIO_PIN_0
+#define I_READ_L_GPIO_Port GPIOB
+#define I_READ_R_Pin GPIO_PIN_1
+#define I_READ_R_GPIO_Port GPIOB
 #define L_FORWARD_Pin GPIO_PIN_14
 #define L_FORWARD_GPIO_Port GPIOB
 #define LIDAR_SPEED_Pin GPIO_PIN_15
@@ -95,6 +99,10 @@ void Error_Handler(void);
 #define L_ENCODE_B_GPIO_Port GPIOA
 #define L_ENCODE_A_Pin GPIO_PIN_9
 #define L_ENCODE_A_GPIO_Port GPIOA
+#define LIDAR_EN_Pin GPIO_PIN_6
+#define LIDAR_EN_GPIO_Port GPIOC
+#define LIDAR_RANGING_EN_Pin GPIO_PIN_7
+#define LIDAR_RANGING_EN_GPIO_Port GPIOC
 #define L_REVERSE_Pin GPIO_PIN_0
 #define L_REVERSE_GPIO_Port GPIOD
 #define R_REVERSE_Pin GPIO_PIN_1

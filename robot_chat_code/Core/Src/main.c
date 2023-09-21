@@ -734,15 +734,22 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LIDAR_EN_Pin|LIDAR_RANGING_EN_Pin|USER_LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SW_GAME_STATUS_Pin BUMP_EXTI_Pin FBD_EXTI_Pin BBD_EXTI_Pin */
   GPIO_InitStruct.Pin = SW_GAME_STATUS_Pin|BUMP_EXTI_Pin|FBD_EXTI_Pin|BBD_EXTI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LIDAR_EN_Pin LIDAR_RANGING_EN_Pin USER_LED4_Pin */
+  GPIO_InitStruct.Pin = LIDAR_EN_Pin|LIDAR_RANGING_EN_Pin|USER_LED4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : USER_LED0_Pin USER_LED1_Pin USER_LED2_Pin USER_LED3_Pin */
@@ -751,13 +758,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USER_LED4_Pin */
-  GPIO_InitStruct.Pin = USER_LED4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(USER_LED4_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
