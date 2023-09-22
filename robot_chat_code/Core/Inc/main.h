@@ -107,6 +107,12 @@ void Error_Handler(void);
 #define L_REVERSE_GPIO_Port GPIOD
 #define R_REVERSE_Pin GPIO_PIN_1
 #define R_REVERSE_GPIO_Port GPIOD
+#define SPI_CS_Pin GPIO_PIN_2
+#define SPI_CS_GPIO_Port GPIOD
+#define IMU_INT1_Pin GPIO_PIN_3
+#define IMU_INT1_GPIO_Port GPIOD
+#define IMU_INT2_Pin GPIO_PIN_4
+#define IMU_INT2_GPIO_Port GPIOD
 #define USER_LED0_Pin GPIO_PIN_4
 #define USER_LED0_GPIO_Port GPIOB
 #define USER_LED1_Pin GPIO_PIN_5
