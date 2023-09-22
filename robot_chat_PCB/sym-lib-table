@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "MP1475")(type "KiCad")(uri "${KIPRJMOD}/MP1475.kicad_sym")(options "")(descr ""))
+  (lib (name "NCS199A3RSQT2G")(type "KiCad")(uri "${KIPRJMOD}/NCS199A3RSQT2G/NCS199A3RSQT2G.kicad_sym")(options "")(descr ""))
+)
