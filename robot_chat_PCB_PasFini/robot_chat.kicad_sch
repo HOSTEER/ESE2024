@@ -1,0 +1,119 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 74bedd9b-ffd1-4d8b-87e0-848eab324d95)
+
+  (paper "A4")
+
+  (title_block
+    (title "robot chat")
+    (date "2023-09-19")
+    (rev "1.0")
+    (company "ENSEA")
+  )
+
+  (lib_symbols
+  )
+
+
+  (wire (pts (xy 90.17 46.99) (xy 110.49 46.99))
+    (stroke (width 0) (type default))
+    (uuid 86e26291-69c0-45d1-9d5a-15cb69a95519)
+  )
+
+  (sheet (at 190.5 30.48) (size 55.88 52.07) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 3a48450b-e017-4419-b5cf-8fa4cfefad60)
+    (property "Sheetname" "Motor drivers" (at 190.5 29.7684 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "motor_drivers.kicad_sch" (at 190.5 83.1346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 36.83 33.02) (size 53.34 49.53) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 40cef5c0-b6f0-48c1-9841-cd0790d0edde)
+    (property "Sheetname" "STM" (at 36.83 32.3084 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "stm.kicad_sch" (at 36.83 83.1346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (pin "VBAT_READ" input (at 90.17 46.99 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+      (uuid 18e5c7ad-8d3f-4921-897c-f60fc79bab9c)
+    )
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 110.49 107.95) (size 54.61 52.07) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 441afe0d-0943-424c-9067-85108082b51d)
+    (property "Sheetname" "HMI" (at 110.49 107.2384 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "HMI.kicad_sch" (at 110.49 160.6046 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95" (page "6"))
+      )
+    )
+  )
+
+  (sheet (at 38.1 109.22) (size 50.8 50.8) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 7d20d460-b97c-44b2-b496-8b3ce571e49d)
+    (property "Sheetname" "Sensors" (at 38.1 108.5084 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "captors.kicad_sch" (at 38.1 160.6046 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95" (page "5"))
+      )
+    )
+  )
+
+  (sheet (at 110.49 33.02) (size 55.88 48.26) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid ccc6fdc1-3ad9-4338-92f3-ccddfe7d6d29)
+    (property "Sheetname" "Power Supply" (at 110.49 32.3084 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "power_supply.kicad_sch" (at 110.49 81.8646 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (pin "VBAT_READ" output (at 110.49 46.99 180)
+      (effects (font (size 1.27 1.27)) (justify left))
+      (uuid 893d80f7-c670-4a90-9476-9105ba12da4d)
+    )
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95" (page "3"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
