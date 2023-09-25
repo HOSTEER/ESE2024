@@ -24,7 +24,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "ydlidar_x4.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +52,15 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
+	if(huart->Instance == USART1){
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+		uint8_t msg[20];
+		int size = snprintf(msg,20,"val = %x \r\n",RXpacket);
+		HAL_UART_Transmit(&huart2, msg, size, HAL_MAX_DELAY);
+		HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
+	}
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -91,17 +100,19 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+	HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	int cnt = 5;
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
+	Lidar_restart(&huart1);
+	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,cnt);
-		HAL_Delay(10000);
-		cnt = (cnt+10)%100;
+		Lidar_info(&huart1);
+		HAL_Delay(3000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
