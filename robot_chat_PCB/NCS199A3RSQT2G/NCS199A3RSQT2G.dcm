@@ -1,9 +1,0 @@
-EESchema-DOCLIB  Version 2.0
-#
-$CMP NCS199A3RSQT2G
-D CURRENT SENSE AMP G=200
-K
-F http://www.onsemi.com/pub/Collateral/NCS199A1R-D.PDF
-$ENDCMP
-#
-#End Doc Library
