@@ -176,19 +176,19 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     PD6     ------> SPI1_MOSI
     PB3     ------> SPI1_SCK
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
+    GPIO_InitStruct.Pin = IMU_SPI_SDO_Pin|IMU_SPI_SDI_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_SPI1;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_3;
+    GPIO_InitStruct.Pin = IMU_SPI_CLK_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF0_SPI1;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(IMU_SPI_CLK_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN SPI1_MspInit 1 */
 
@@ -218,9 +218,9 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
     PD6     ------> SPI1_MOSI
     PB3     ------> SPI1_SCK
     */
-    HAL_GPIO_DeInit(GPIOD, GPIO_PIN_5|GPIO_PIN_6);
+    HAL_GPIO_DeInit(GPIOD, IMU_SPI_SDO_Pin|IMU_SPI_SDI_Pin);
 
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3);
+    HAL_GPIO_DeInit(IMU_SPI_CLK_GPIO_Port, IMU_SPI_CLK_Pin);
 
   /* USER CODE BEGIN SPI1_MspDeInit 1 */
 
