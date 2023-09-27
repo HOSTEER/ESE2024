@@ -56,10 +56,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART1){
 		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		uint8_t msg[20];
-		int size = snprintf(msg,20,"val = %x \r\n",RXpacket);
-		HAL_UART_Transmit(&huart2, msg, size, HAL_MAX_DELAY);
-		HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
+		//int size = snprintf(msg,20,"val = %x \r\n",RXpacket);
+		//HAL_UART_Transmit(&huart2, msg, size, HAL_MAX_DELAY);
+		//HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
 	}
+}
+
+int lidar_uart_transmit(uint8_t *p_data, uint16_t size)
+{
+	HAL_UART_Transmit(&huart1,p_data, size, HAL_MAX_DELAY);
+	return 0;
 }
 /* USER CODE END PFP */
 
@@ -100,10 +106,12 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
+  h_ylidar_x4_t h_ylidar_x4;
+  h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
+	//HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
-	Lidar_restart(&huart1);
+	ylidar_x4_restart(&h_ylidar_x4);
 	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
@@ -111,7 +119,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		Lidar_info(&huart1);
+		ylidar_x4_info(&h_ylidar_x4);
 		HAL_Delay(3000);
     /* USER CODE END WHILE */
 
