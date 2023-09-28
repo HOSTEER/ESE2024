@@ -2,6 +2,20 @@
 
 #include <stdint.h>
 
+#define LITTLE_ENDIAN
+//#define BIG_ENDIAN
+
+#ifdef LITTLE_ENDIAN
+typedef enum ylidar_x4_command_enum
+{
+	CMD_SCAN   	= 0x60A5,
+	CMD_STOP   	= 0x65A5,
+	CMD_INFO  	= 0x90A5,
+	CMD_RESTART	= 0x91A5
+} ylidar_x4_command_t;
+#endif
+
+#ifdef BIG_ENDIAN
 typedef enum ylidar_x4_command_enum
 {
 	CMD_SCAN   	= 0xA560,
@@ -9,6 +23,7 @@ typedef enum ylidar_x4_command_enum
 	CMD_INFO  	= 0xA590,
 	CMD_RESTART	= 0xA591
 } ylidar_x4_command_t;
+#endif
 
 typedef int (* ylidar_x4_transmit_drv_t)(uint8_t *p_data, uint16_t size);
 typedef int (* ylidar_x4_receive_drv_t)(uint8_t *p_data, uint16_t size);
