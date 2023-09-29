@@ -130,7 +130,7 @@ int main(void)
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
 	ylidar_x4_stop(&h_ylidar_x4);
 	ylidar_x4_scan(&h_ylidar_x4);
-	ylidar_x4_stop(&h_ylidar_x4);
+	//ylidar_x4_stop(&h_ylidar_x4);
 	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
@@ -138,8 +138,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		//ylidar_x4_info(&h_ylidar_x4);
-		//HAL_Delay(3000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
