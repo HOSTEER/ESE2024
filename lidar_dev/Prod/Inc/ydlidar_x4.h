@@ -25,12 +25,6 @@ typedef enum ylidar_x4_command_enum
 } ylidar_x4_command_t;
 #endif
 
-typedef enum ylidar_x4_mode_enum
-{
-	FIRST_FRAME   	= 0,
-	SCAN_FRAMES		= 1
-} ylidar_x4_mode_t;
-
 typedef int (* ylidar_x4_transmit_drv_t)(uint8_t *p_data, uint16_t size);
 typedef int (* ylidar_x4_receive_drv_t)(uint8_t *p_data, uint16_t size);
 
@@ -50,16 +44,12 @@ typedef struct h_ylidar_x4_struct
 	uint16_t rev_complete[740];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[180];
-	// Trame de debut de scan
-	uint8_t first_frame[19];
 	// index ecriture mesure
 	uint16_t idx_360;
 	// index ecriture buffer
-	uint16_t ind_buf;
+	uint16_t idx_buf;
 	// flag 360 complete
 	uint8_t flag_360;
-	// mode to select the recieve DMA or basi recieve
-	ylidar_x4_mode_t mode;
 } h_ylidar_x4_t;
 
 int ylidar_x4_stop(h_ylidar_x4_t * h_ylidar_x4);

@@ -18,12 +18,8 @@ int ylidar_x4_info(h_ylidar_x4_t * h_ylidar_x4){
 
 int ylidar_x4_scan(h_ylidar_x4_t * h_ylidar_x4){
 	h_ylidar_x4->cmd = CMD_SCAN;
-	h_ylidar_x4->serial_drv.receive(h_ylidar_x4->first_frame , 19);
+	h_ylidar_x4->serial_drv.receive(h_ylidar_x4->buf_DMA , 180);
 	h_ylidar_x4->serial_drv.transmit((uint8_t *) &(h_ylidar_x4->cmd), 2);
-	//19 car on ne veut pas la premiere trame de 19 octets
-	h_ylidar_x4->mode = SCAN_FRAMES;
-	//on se prepare pour recupere les trames de donnees
-	h_ylidar_x4->serial_drv.receive(h_ylidar_x4->rev_complete , 180);
 	return 0;
 }
 

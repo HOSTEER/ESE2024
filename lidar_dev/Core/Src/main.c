@@ -63,7 +63,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1){
-		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+		if(h_ylidar_x4.buf_DMA[0]==0xA5){
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+			h_ylidar_x4.idx_buf = 18;
+		}
 		//ydlidar_x4_irq_cb(h_ylidar_x4);
 	}
 }
@@ -76,11 +79,7 @@ int lidar_uart_transmit(uint8_t *p_data, uint16_t size)
 
 int lidar_uart_receive(uint8_t *p_data, uint16_t size)
 {
-	if(h_ylidar_x4.mode == FIRST_FRAME){
-		HAL_UART_Receive_IT(&huart1, p_data, size);
-	}else{
-		HAL_UART_Receive_DMA(&huart1,p_data, size);
-	}
+	HAL_UART_Receive_DMA(&huart1,p_data, size);
 	return 0;
 }
 /* USER CODE END PFP */
@@ -124,13 +123,8 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-
-
-
-	h_ylidar_x4.mode = FIRST_FRAME;
 	h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
 	h_ylidar_x4.serial_drv.receive = lidar_uart_receive;
-	//HAL_UART_Receive_IT(&huart1, &RXpacket, 1);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
 	ylidar_x4_stop(&h_ylidar_x4);
