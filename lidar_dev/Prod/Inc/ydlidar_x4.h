@@ -41,15 +41,15 @@ typedef struct h_ylidar_x4_struct
 	// command available for transmit
 	ylidar_x4_command_t cmd;
 	// 360 valeurs pour les 360 degre
-	uint16_t rev_complete[740];
+	uint16_t rev_cplt[740];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[180];
 	// index ecriture mesure
-	uint16_t idx_360;
+	uint16_t idx_rev_cplt;
 	// index ecriture buffer
 	uint16_t idx_buf;
 	// flag 360 complete
-	uint8_t flag_360;
+	uint8_t flag_cplt;
 } h_ylidar_x4_t;
 
 int ylidar_x4_stop(h_ylidar_x4_t * h_ylidar_x4);

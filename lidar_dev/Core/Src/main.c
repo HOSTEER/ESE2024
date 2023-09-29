@@ -55,7 +55,7 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART1){
-		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
+		//HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		//ydlidar_x4_irq_cb(h_ylidar_x4);
 	}
 }
@@ -125,6 +125,7 @@ int main(void)
 
 	h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
 	h_ylidar_x4.serial_drv.receive = lidar_uart_receive;
+	h_ylidar_x4.serial_drv.receive(h_ylidar_x4.buf_DMA , 180);
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
 	ylidar_x4_stop(&h_ylidar_x4);

@@ -18,7 +18,6 @@ int ylidar_x4_info(h_ylidar_x4_t * h_ylidar_x4){
 
 int ylidar_x4_scan(h_ylidar_x4_t * h_ylidar_x4){
 	h_ylidar_x4->cmd = CMD_SCAN;
-	h_ylidar_x4->serial_drv.receive(h_ylidar_x4->buf_DMA , 180);
 	h_ylidar_x4->serial_drv.transmit((uint8_t *) &(h_ylidar_x4->cmd), 2);
 	return 0;
 }
