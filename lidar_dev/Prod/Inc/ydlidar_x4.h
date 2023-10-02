@@ -44,12 +44,24 @@ typedef struct h_ylidar_x4_struct
 	uint16_t rev_cplt[740];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[180];
+	// temps depuis la derniere mesure
+	uint8_t time_stp[740];
 	// index ecriture mesure
 	uint16_t idx_rev_cplt;
 	// index ecriture buffer
 	uint16_t idx_buf;
 	// flag 360 complete
 	uint8_t flag_cplt;
+	// bien demarre
+	uint8_t flag_scan;
+	// on a un 0xAA
+	uint8_t flag_AA;
+	// on a un 0xAA
+	uint8_t flag_55;
+	uint8_t nb_smpl;
+	uint16_t start_angl;
+	uint16_t end_angl;
+
 } h_ylidar_x4_t;
 
 int ylidar_x4_stop(h_ylidar_x4_t * h_ylidar_x4);

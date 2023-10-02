@@ -45,6 +45,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
 /* USER CODE BEGIN PV */
 h_ylidar_x4_t h_ylidar_x4;
 /* USER CODE END PV */
@@ -55,6 +56,7 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART1){
+		ydlidar_x4_irq_cb(&h_ylidar_x4);
 		//HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		//ydlidar_x4_irq_cb(h_ylidar_x4);
 	}
@@ -63,10 +65,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1){
-		if(h_ylidar_x4.buf_DMA[0]==0xA5){
-			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-			h_ylidar_x4.idx_buf = 18;
-		}
+		ydlidar_x4_irq_cb(&h_ylidar_x4);
 		//ydlidar_x4_irq_cb(h_ylidar_x4);
 	}
 }
@@ -126,11 +125,18 @@ int main(void)
 	h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
 	h_ylidar_x4.serial_drv.receive = lidar_uart_receive;
 	h_ylidar_x4.serial_drv.receive(h_ylidar_x4.buf_DMA , 180);
+	h_ylidar_x4.idx_buf = 0;
+	h_ylidar_x4.flag_scan = 0;
+	h_ylidar_x4.flag_AA = 0;
+	h_ylidar_x4.flag_55 = 0;
+	h_ylidar_x4.nb_smpl = 0;
+	h_ylidar_x4.start_angl = 0;
+	h_ylidar_x4.end_angl = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
-	ylidar_x4_stop(&h_ylidar_x4);
 	ylidar_x4_scan(&h_ylidar_x4);
-	//ylidar_x4_stop(&h_ylidar_x4);
+	HAL_Delay(3000);
+	ylidar_x4_stop(&h_ylidar_x4);
 	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
