@@ -1,16 +1,71 @@
-//1st header
-#define LIDAR_START 0xA5
-//2nd headers opcode
-#define LIDAR_SCAN 0x60
-#define LIDAR_STOP 0x65
-#define LIDAR_INFO 0x90
-#define LIDAR_STATUS 0x91
-#define LIDAR_SOFT_RESTART 0x80
 
-extern uint8_t RXpacket;
 
-int Lidar_start_scan(UART_HandleTypeDef * huart);
-int Lidar_stop(UART_HandleTypeDef * huart);
-int Lidar_info(UART_HandleTypeDef * huart);
-int Lidar_scan(UART_HandleTypeDef * huart);
-int Lidar_restart(UART_HandleTypeDef * huart);
+#include <stdint.h>
+
+#define LITTLE_ENDIAN
+//#define BIG_ENDIAN
+
+#ifdef LITTLE_ENDIAN
+typedef enum ylidar_x4_command_enum
+{
+	CMD_SCAN   	= 0x60A5,
+	CMD_STOP   	= 0x65A5,
+	CMD_INFO  	= 0x90A5,
+	CMD_RESTART	= 0x91A5
+} ylidar_x4_command_t;
+#endif
+
+#ifdef BIG_ENDIAN
+typedef enum ylidar_x4_command_enum
+{
+	CMD_SCAN   	= 0xA560,
+	CMD_STOP   	= 0xA565,
+	CMD_INFO  	= 0xA590,
+	CMD_RESTART	= 0xA591
+} ylidar_x4_command_t;
+#endif
+
+typedef int (* ylidar_x4_transmit_drv_t)(uint8_t *p_data, uint16_t size);
+typedef int (* ylidar_x4_receive_drv_t)(uint8_t *p_data, uint16_t size);
+
+typedef struct ylidar_x4_serial_drv_struct
+{
+	ylidar_x4_transmit_drv_t transmit;
+	ylidar_x4_receive_drv_t receive;
+} ylidar_x4_serial_drv_t;
+
+typedef struct h_ylidar_x4_struct
+{
+	// driver serial
+	ylidar_x4_serial_drv_t serial_drv;
+	// command available for transmit
+	ylidar_x4_command_t cmd;
+	// 360 valeurs pour les 360 degre
+	uint16_t rev_cplt[740];
+	// Buffer pour stocker les valeur brut du DMA
+	uint8_t buf_DMA[180];
+	// temps depuis la derniere mesure
+	uint8_t time_stp[740];
+	// index ecriture mesure
+	uint16_t idx_rev_cplt;
+	// index ecriture buffer
+	uint16_t idx_buf;
+	// flag 360 complete
+	uint8_t flag_cplt;
+	// bien demarre
+	uint8_t flag_scan;
+	// on a un 0xAA
+	uint8_t flag_AA;
+	// on a un 0xAA
+	uint8_t flag_55;
+	uint8_t nb_smpl;
+	uint16_t start_angl;
+	uint16_t end_angl;
+
+} h_ylidar_x4_t;
+
+int ylidar_x4_stop(h_ylidar_x4_t * h_ylidar_x4);
+int ylidar_x4_info(h_ylidar_x4_t * h_ylidar_x4);
+int ylidar_x4_scan(h_ylidar_x4_t * h_ylidar_x4);
+int ylidar_x4_restart(h_ylidar_x4_t * h_ylidar_x4);
+int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4);
