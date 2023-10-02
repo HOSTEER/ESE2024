@@ -717,7 +717,7 @@
           (reference "#PWR0201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0604") (unit 1)
+          (reference "#PWR0605") (unit 1)
         )
       )
     )
@@ -726,7 +726,7 @@
   (symbol (lib_id "Device:R_Small") (at 76.2 151.13 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0e98ba35-eaa6-46c6-a014-049ac48e6ad6)
-    (property "Reference" "R605" (at 76.2 146.05 90)
+    (property "Reference" "R606" (at 76.2 146.05 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 76.2 148.59 90)
@@ -743,7 +743,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R605") (unit 1)
+          (reference "R606") (unit 1)
         )
       )
     )
@@ -772,7 +772,7 @@
           (reference "R201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R601") (unit 1)
+          (reference "R602") (unit 1)
         )
       )
     )
@@ -781,7 +781,7 @@
   (symbol (lib_id "Device:R_Small") (at 76.2 161.29 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 335a994a-8d4b-436b-bbaf-5d7ac6af34bc)
-    (property "Reference" "R606" (at 76.2 156.21 90)
+    (property "Reference" "R607" (at 76.2 156.21 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 76.2 158.75 90)
@@ -798,7 +798,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R606") (unit 1)
+          (reference "R607") (unit 1)
         )
       )
     )
@@ -826,7 +826,7 @@
           (reference "#PWR0501") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0606") (unit 1)
+          (reference "#PWR0602") (unit 1)
         )
       )
     )
@@ -854,7 +854,7 @@
           (reference "#PWR0202") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0605") (unit 1)
+          (reference "#PWR0601") (unit 1)
         )
       )
     )
@@ -909,7 +909,7 @@
           (reference "C201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "C601") (unit 1)
+          (reference "C602") (unit 1)
         )
       )
     )
@@ -937,7 +937,7 @@
           (reference "#PWR0201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0601") (unit 1)
+          (reference "#PWR0606") (unit 1)
         )
       )
     )
@@ -966,7 +966,7 @@
           (reference "SW201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "SW602") (unit 1)
+          (reference "SW601") (unit 1)
         )
       )
     )
@@ -975,7 +975,7 @@
   (symbol (lib_id "Device:R_Small") (at 76.2 129.54 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 74f5e223-671c-42c1-b58c-9e8ada8c1928)
-    (property "Reference" "R603" (at 76.2 124.46 90)
+    (property "Reference" "R604" (at 76.2 124.46 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 76.2 127 90)
@@ -992,7 +992,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R603") (unit 1)
+          (reference "R604") (unit 1)
         )
       )
     )
@@ -1027,7 +1027,7 @@
   (symbol (lib_id "power:GND") (at 97.79 140.97 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7fa84165-a591-47d3-b64d-50b6c9ada7fa)
-    (property "Reference" "#PWR0603" (at 104.14 140.97 0)
+    (property "Reference" "#PWR0607" (at 104.14 140.97 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 101.6 140.97 90)
@@ -1043,7 +1043,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0603") (unit 1)
+          (reference "#PWR0607") (unit 1)
         )
       )
     )
@@ -1071,7 +1071,7 @@
           (reference "#PWR0202") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0602") (unit 1)
+          (reference "#PWR0603") (unit 1)
         )
       )
     )
@@ -1080,7 +1080,7 @@
   (symbol (lib_id "Device:R_Small") (at 76.2 119.38 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8ef3ac0c-f06a-40d2-bf47-8587c8594c45)
-    (property "Reference" "R602" (at 76.2 114.3 90)
+    (property "Reference" "R603" (at 76.2 114.3 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 76.2 116.84 90)
@@ -1097,7 +1097,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R602") (unit 1)
+          (reference "R603") (unit 1)
         )
       )
     )
@@ -1126,7 +1126,7 @@
           (reference "SW201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "SW601") (unit 1)
+          (reference "SW602") (unit 1)
         )
       )
     )
@@ -1135,7 +1135,7 @@
   (symbol (lib_id "Device:R_Small") (at 76.2 140.97 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b2bb4f10-cbaf-4663-9fd7-8ccb8c9edd7c)
-    (property "Reference" "R604" (at 76.2 135.89 90)
+    (property "Reference" "R605" (at 76.2 135.89 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1k" (at 76.2 138.43 90)
@@ -1152,7 +1152,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R604") (unit 1)
+          (reference "R605") (unit 1)
         )
       )
     )
@@ -1181,7 +1181,7 @@
           (reference "R201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "R607") (unit 1)
+          (reference "R601") (unit 1)
         )
       )
     )
@@ -1262,7 +1262,7 @@
           (reference "C201") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "C602") (unit 1)
+          (reference "C601") (unit 1)
         )
       )
     )
@@ -1290,7 +1290,7 @@
           (reference "#PWR0502") (unit 1)
         )
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/441afe0d-0943-424c-9067-85108082b51d"
-          (reference "#PWR0607") (unit 1)
+          (reference "#PWR0604") (unit 1)
         )
       )
     )
