@@ -56,12 +56,7 @@ typedef struct h_ylidar_x4_struct
 	uint8_t buf_DMA[180];
 	// temps depuis la derniere mesure
 	uint8_t time_stp[740];
-	// index ecriture mesure
-	uint16_t idx_rev_cplt;
-	// index ecriture buffer
-	uint16_t idx_buf;
-	// flag 360 complete
-	uint8_t flag_cplt;
+	ylidar_x4_parsing_t decode_state;
 	// bien demarre
 	uint8_t DMA_size;
 	uint8_t nb_smpl;

@@ -125,6 +125,7 @@ int main(void)
 	h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
 	h_ylidar_x4.serial_drv.receive = lidar_uart_receive;
 	h_ylidar_x4.DMA_size = 180;
+	h_ylidar_x4.decode_state = IDLE;
 	h_ylidar_x4.serial_drv.receive(h_ylidar_x4.buf_DMA , h_ylidar_x4.DMA_size);
 	h_ylidar_x4.nb_smpl = 0;
 	h_ylidar_x4.start_angl = 0;
