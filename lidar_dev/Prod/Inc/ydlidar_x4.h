@@ -25,6 +25,16 @@ typedef enum ylidar_x4_command_enum
 } ylidar_x4_command_t;
 #endif
 
+typedef enum ylidar_x4_parsing_enum
+{
+	IDLE  				= 0,
+	SCANNING			= 1,
+	PARSING_SMPL		= 2,
+	PARSING_START_ANGL 	= 3,
+	PARSING_END_ANGL	= 4,
+	PARSING_DIST		= 5
+} ylidar_x4_parsing_t;
+
 typedef int (* ylidar_x4_transmit_drv_t)(uint8_t *p_data, uint16_t size);
 typedef int (* ylidar_x4_receive_drv_t)(uint8_t *p_data, uint16_t size);
 
@@ -53,11 +63,7 @@ typedef struct h_ylidar_x4_struct
 	// flag 360 complete
 	uint8_t flag_cplt;
 	// bien demarre
-	uint8_t flag_scan;
-	// on a un 0xAA
-	uint8_t flag_AA;
-	// on a un 0xAA
-	uint8_t flag_55;
+	uint8_t DMA_size;
 	uint8_t nb_smpl;
 	uint16_t start_angl;
 	uint16_t end_angl;

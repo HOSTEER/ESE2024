@@ -29,66 +29,79 @@ int ylidar_x4_restart(h_ylidar_x4_t * h_ylidar_x4){
 }
 
 int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4){
-	if(h_ylidar_x4->flag_scan == 0){
-		if(h_ylidar_x4->buf_DMA[0] == 0xA5 && h_ylidar_x4->buf_DMA[1] == 0x5A){
-				h_ylidar_x4->flag_scan = 1;
-				h_ylidar_x4->idx_buf = 26;
+	uint8_t * dma_mem = h_ylidar_x4->buf_DMA;
+	uint8_t * frame_smpl = &h_ylidar_x4->nb_smpl;
+	uint8_t * dma_size = &h_ylidar_x4->DMA_size;
+	uint8_t idx_head = 0;
+	static uint8_t last_byte = 0;
+	static ylidar_x4_parsing_t state = IDLE;
+	while(idx_head < (*dma_size >> 2)){
+		if(state == IDLE){
+			if(dma_mem[0] == 0xA5 && dma_mem[1] == 0x5A){
+					state = SCANNING;
+					idx_head = 26;
+			}
+			else{
+				return -1;
+			}
 		}
-		else{
-			return -1;
+		else if(state == SCANNING){
+			if(dma_mem[idx_head] == 0x55 && last_byte == 0xAA){
+				state = PARSING_SMPL;
+			}
 		}
+		else if(state == PARSING_SMPL){
+			static uint8_t idx_limiter = 2;
+			if(idx_limiter == 0){
+				*frame_smpl = dma_mem[idx_head];
+				state 		= PARSING_START_ANGL;
+			}
+			else{
+				idx_limiter --;
+			}
+		}
+		else if(state == PARSING_START_ANGL){
+			static uint8_t idx_limiter = 2;
+			if(idx_limiter == 0){
+				h_ylidar_x4->start_angl 	= (uint16_t) (last_byte>>1);
+				uint16_t start_angle_MSB 	= (uint16_t) dma_mem[idx_head];
+				h_ylidar_x4->start_angl 	= h_ylidar_x4->start_angl + (start_angle_MSB<<7);
+				h_ylidar_x4->start_angl 	= h_ylidar_x4->start_angl>>6;
+				state = PARSING_END_ANGL;
+			}
+			else{
+				idx_limiter --;
+			}
+		}
+		else if(state == PARSING_END_ANGL){
+			static uint8_t idx_limiter = 2;
+			if(idx_limiter == 0){
+				h_ylidar_x4->end_angl 		= (uint16_t) (last_byte>>1);
+				uint16_t end_angle_MSB 		= (uint16_t) dma_mem[idx_head];
+				h_ylidar_x4->end_angl 		= h_ylidar_x4->end_angl + (end_angle_MSB<<7);
+				h_ylidar_x4->end_angl 		= h_ylidar_x4->end_angl>>6;
+				state = PARSING_DIST;
+			}
+		}
+		else if(state == PARSING_DIST){
+			static uint8_t idx_limiter = 0;
+			static uint8_t idx_filler = 0;
+			if(((idx_limiter%2) == 0) && (idx_limiter <= *frame_smpl)){
+				h_ylidar_x4->rev_cplt[idx_filler]	= (uint16_t) last_byte;
+				uint16_t dist_MSB 					= (uint16_t) dma_mem[idx_head];
+				h_ylidar_x4->rev_cplt[idx_filler] 	= h_ylidar_x4->rev_cplt[idx_filler] + (dist_MSB<<8);
+				h_ylidar_x4->rev_cplt[idx_filler] 	= h_ylidar_x4->rev_cplt[idx_filler]>>2;
+				idx_filler++;
+				if(idx_limiter == *frame_smpl){
+					state = SCANNING;
+				}
+			}
+			else{
+				idx_limiter ++;
+			}
+		}
+		last_byte = dma_mem[idx_head];
+		idx_head++;
 	}
-	if(h_ylidar_x4->flag_scan == 1){
-		if(h_ylidar_x4->idx_buf < 90){
-			while((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] != 0xAA) && (h_ylidar_x4->idx_buf < 90) && (h_ylidar_x4->flag_AA == 0)){
-				h_ylidar_x4->idx_buf++;
-				if(h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] == 0xAA){
-					h_ylidar_x4->flag_AA = 1;
-				}
-			}
-			while((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] != 0x55) && (h_ylidar_x4->idx_buf < 90) && (h_ylidar_x4->flag_55 == 0)){
-				h_ylidar_x4->idx_buf++;
-				if((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] == 0x55) && (h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf - 1] == 0xAA)){
-					h_ylidar_x4->flag_55 = 1;
-				}
-			}
-			if(h_ylidar_x4->flag_55){
-				if(((h_ylidar_x4->idx_buf + 2) < 90) && (h_ylidar_x4->nb_smpl == 0)){
-					h_ylidar_x4->nb_smpl = h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf + 2];
-					h_ylidar_x4->idx_buf +=2;
-				}
-				if(((h_ylidar_x4->idx_buf + 2) < 90) && (h_ylidar_x4->start_angl == 0)){
-					h_ylidar_x4->start_angl = h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf + 1]>>1;
-					uint16_t start_angle_MSB = (uint16_t) h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf + 2];
-					h_ylidar_x4->start_angl = h_ylidar_x4->start_angl + (start_angle_MSB<<7);
-					h_ylidar_x4->start_angl = h_ylidar_x4->start_angl>>6;
-					h_ylidar_x4->idx_buf +=2;
-				}
-				if(((h_ylidar_x4->idx_buf + 2) < 90) && (h_ylidar_x4->end_angl == 0)){
-					h_ylidar_x4->end_angl = h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf + 1]>>1;
-					uint16_t end_angle_MSB = (uint16_t) h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf + 2];
-					h_ylidar_x4->end_angl = h_ylidar_x4->end_angl + (end_angle_MSB<<7);
-					h_ylidar_x4->end_angl = h_ylidar_x4->end_angl>>6;
-					h_ylidar_x4->idx_buf +=2;
-				}
-			}
-		}
-		else{
-			while((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] != 0xAA) && (h_ylidar_x4->idx_buf < 90) && (h_ylidar_x4->flag_AA == 0)){
-				h_ylidar_x4->idx_buf++;
-				if(h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] == 0xAA){
-					h_ylidar_x4->flag_AA = 1;
-				}
-			}
-			while((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] != 0x55) && (h_ylidar_x4->idx_buf < 90) && (h_ylidar_x4->flag_55 == 0)){
-				h_ylidar_x4->idx_buf++;
-				if((h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf] == 0x55) && (h_ylidar_x4->buf_DMA[h_ylidar_x4->idx_buf - 1] == 0xAA)){
-					h_ylidar_x4->flag_55 = 1;
-				}
-			}
-			while(h_ylidar_x4->flag_55){
-
-			}
-		}
-	}
+	return 0;
 }
