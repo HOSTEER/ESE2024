@@ -28,6 +28,27 @@ int ylidar_x4_restart(h_ylidar_x4_t * h_ylidar_x4){
 	return 0;
 }
 
+int ylidar_x4_get_angle(h_ylidar_x4_t * h_ylidar_x4, uint16_t angle_LSB, uint16_t angle_MSB, ylidar_x4_parsing_t * state){
+	uint16_t * angle;
+	if(*state == PARSING_START_ANGL){
+		angle = &h_ylidar_x4->start_angl;
+	}
+	else{
+		angle = &h_ylidar_x4->end_angl;
+	}
+	*angle 	= angle_LSB>>1;
+	*angle 	= *angle + (angle_MSB<<7);
+	*angle 	= *angle>>6;
+	return 0;
+}
+
+int ylidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
+	*dist 	= dist_LSB;
+	*dist 	= *dist + (dist_MSB<<8);
+	*dist 	= *dist>>2;
+	return 0;
+}
+
 int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4){
 	uint8_t * dma_mem = h_ylidar_x4->buf_DMA;
 	uint8_t * frame_smpl = &h_ylidar_x4->nb_smpl;
@@ -72,10 +93,7 @@ int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4){
 		else if(*state == PARSING_START_ANGL){
 			static uint8_t idx_limiter = 2;
 			if(idx_limiter == 0){
-				h_ylidar_x4->start_angl 	= (uint16_t) (last_byte>>1);
-				uint16_t start_angle_MSB 	= (uint16_t) dma_mem[idx_head];
-				h_ylidar_x4->start_angl 	= h_ylidar_x4->start_angl + (start_angle_MSB<<7);
-				h_ylidar_x4->start_angl 	= h_ylidar_x4->start_angl>>6;
+				ylidar_x4_get_angle(h_ylidar_x4, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head], state);
 				*state = PARSING_END_ANGL;
 			}
 			else{
@@ -85,28 +103,22 @@ int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4){
 		else if(*state == PARSING_END_ANGL){
 			static uint8_t idx_limiter = 2;
 			if(idx_limiter == 0){
-				h_ylidar_x4->end_angl 		= (uint16_t) (last_byte>>1);
-				uint16_t end_angle_MSB 		= (uint16_t) dma_mem[idx_head];
-				h_ylidar_x4->end_angl 		= h_ylidar_x4->end_angl + (end_angle_MSB<<7);
-				h_ylidar_x4->end_angl 		= h_ylidar_x4->end_angl>>6;
+				ylidar_x4_get_angle(h_ylidar_x4, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head], state);
 				*state = PARSING_DIST;
 			}
 		}
 		else if(*state == PARSING_DIST){
 			static uint8_t idx_limiter = 0;
 			static uint8_t idx_filler = 0;
-			if(((idx_limiter%2) == 0) && (idx_limiter <= *frame_smpl)){
-				h_ylidar_x4->rev_cplt[idx_filler]	= (uint16_t) last_byte;
-				uint16_t dist_MSB 					= (uint16_t) dma_mem[idx_head];
-				h_ylidar_x4->rev_cplt[idx_filler] 	= h_ylidar_x4->rev_cplt[idx_filler] + (dist_MSB<<8);
-				h_ylidar_x4->rev_cplt[idx_filler] 	= h_ylidar_x4->rev_cplt[idx_filler]>>2;
+			if(((idx_limiter%2) != 0) && (idx_limiter < *frame_smpl)){
+				ylidar_x4_get_dist(&h_ylidar_x4->smpl[idx_filler], (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
 				idx_filler++;
-				if(idx_limiter == *frame_smpl){
-					*state = SCANNING;
-				}
 			}
 			else{
 				idx_limiter ++;
+				if(idx_limiter == *frame_smpl){
+					*state = SCANNING;
+				}
 			}
 		}
 		last_byte = dma_mem[idx_head];
