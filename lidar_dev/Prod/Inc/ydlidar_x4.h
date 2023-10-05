@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #define LIDAR2DMA_SIZE 180
-#define LIDAR_DEFAULT_SMPL_NB 180
+#define LIDAR_DEFAULT_SMPL_NB 50
 
 #define LITTLE_ENDIAN
 //#define BIG_ENDIAN
@@ -56,7 +56,7 @@ typedef struct h_ylidar_x4_struct
 	ylidar_x4_command_t cmd;
 	// 360 valeurs pour les 360 degre
 	uint16_t smpl[LIDAR_DEFAULT_SMPL_NB];
-	float rev_smpls[600][2];
+	uint16_t rev_smpls[600][2];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[LIDAR2DMA_SIZE];
 	// temps depuis la derniere mesure

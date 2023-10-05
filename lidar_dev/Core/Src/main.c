@@ -141,6 +141,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		char mystring[50];
+		for(int i=0;i<600;i++){
+			if(h_ylidar_x4.rev_smpls[i][1] != 0){
+				uint16_t size = snprintf(mystring,50,"angle = %d, dist = %d\r\n",h_ylidar_x4.rev_smpls[i][0],h_ylidar_x4.rev_smpls[i][1]);
+				HAL_UART_Transmit(&huart2, mystring, size, HAL_MAX_DELAY);
+			}
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
