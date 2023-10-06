@@ -72,13 +72,13 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 
 int lidar_uart_transmit(uint8_t *p_data, uint16_t size)
 {
-	HAL_UART_Transmit(&huart1,p_data, size, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&h_ylidar_x4.huart,p_data, size, HAL_MAX_DELAY);
 	return 0;
 }
 
-int lidar_uart_receive(uint8_t *p_data, uint16_t size)
+int lidar_uart_receive(uint8_t *p_data)
 {
-	HAL_UART_Receive_DMA(&huart1,p_data, size);
+	HAL_UART_Receive_DMA(&h_ylidar_x4.huart,p_data, LIDAR2DMA_SIZE);
 	return 0;
 }
 /* USER CODE END PFP */
@@ -121,14 +121,11 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  	h_ylidar_x4.huart = huart1;
 	h_ylidar_x4.serial_drv.transmit = lidar_uart_transmit;
 	h_ylidar_x4.serial_drv.receive = lidar_uart_receive;
-	h_ylidar_x4.serial_drv.receive(h_ylidar_x4.buf_DMA , 180);
-	h_ylidar_x4.idx_buf = 0;
-	h_ylidar_x4.flag_scan = 0;
-	h_ylidar_x4.flag_AA = 0;
-	h_ylidar_x4.flag_55 = 0;
+	h_ylidar_x4.decode_state = IDLE;
+	h_ylidar_x4.serial_drv.receive(h_ylidar_x4.buf_DMA);
 	h_ylidar_x4.nb_smpl = 0;
 	h_ylidar_x4.start_angl = 0;
 	h_ylidar_x4.end_angl = 0;
@@ -144,6 +141,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		char mystring[50];
+		for(int i=0;i<600;i++){
+			if(h_ylidar_x4.rev_smpls[i][1] != 0){
+				uint16_t size = snprintf(mystring,50,"angle = %d, dist = %d\r\n",h_ylidar_x4.rev_smpls[i][0],h_ylidar_x4.rev_smpls[i][1]);
+				HAL_UART_Transmit(&huart2, mystring, size, HAL_MAX_DELAY);
+			}
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
