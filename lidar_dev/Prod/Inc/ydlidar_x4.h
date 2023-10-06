@@ -57,6 +57,7 @@ typedef struct h_ylidar_x4_struct
 	// 360 valeurs pour les 360 degre
 	uint16_t smpl[LIDAR_DEFAULT_SMPL_NB];
 	uint16_t rev_smpls[600][2];
+	uint16_t sorted_dist[360];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[LIDAR2DMA_SIZE];
 	// temps depuis la derniere mesure
@@ -76,3 +77,4 @@ int ylidar_x4_restart(h_ylidar_x4_t * h_ylidar_x4);
 int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4);
 int ylidar_x4_get_angle(h_ylidar_x4_t * h_ylidar_x4, uint16_t angle_LSB, uint16_t angle_MSB);
 int ylidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB);
+int ydlidar_x4_sort_smpl(h_ylidar_x4_t *h_ylidar_x4, uint16_t revoltion_idx);

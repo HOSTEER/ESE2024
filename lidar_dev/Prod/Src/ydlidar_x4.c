@@ -60,11 +60,15 @@ int ylidar_x4_store_smpl(h_ylidar_x4_t * h_ylidar_x4){
 			h_ylidar_x4->rev_smpls[revoltion_idx][0]=first_angle + (angle_per_dist*smpl_idx)/10;
 			h_ylidar_x4->rev_smpls[revoltion_idx][1]=h_ylidar_x4->smpl[smpl_idx];
 			revoltion_idx++;
+
 		}
 	}
-	if (revoltion_idx>600) {
+	ydlidar_x4_sort_smpl(h_ylidar_x4, revoltion_idx);
+	if (revoltion_idx> 40) {
 		revoltion_idx = 0;
 	}
+
+
 	return 0;
 }
 
@@ -143,16 +147,49 @@ int ydlidar_x4_irq_cb(h_ylidar_x4_t * h_ylidar_x4){
 				if(idx_limiter > *frame_smpl){
 					idx_filler = 0;
 					ylidar_x4_store_smpl(h_ylidar_x4);
+
 					memset(h_ylidar_x4->smpl,0,(*frame_smpl)*2);
 					h_ylidar_x4->start_angl=0;
 					h_ylidar_x4->end_angl=0;
 					*frame_smpl = 0;
 					*state = SCANNING;
+
 				}
 			}
 		}
 		last_byte = dma_mem[idx_head];
 		idx_head++;
+	}
+	return 0;
+}
+
+
+int ydlidar_x4_sort_smpl(h_ylidar_x4_t *h_ylidar_x4, uint16_t revoltion_idx){
+
+	uint8_t agl_idx, smpl_idx=0;
+	uint16_t agl_inst[40] = {0};
+	uint8_t nb_angle = 0;
+	uint16_t dist;
+	uint16_t agl;
+
+	for(;smpl_idx<revoltion_idx;smpl_idx++){
+
+		if(h_ylidar_x4->rev_smpls[smpl_idx][0] != agl_inst[nb_angle]){
+			agl_inst[nb_angle+1] = h_ylidar_x4->rev_smpls[smpl_idx][0];
+			nb_angle++;
+
+			uint16_t min_dist = 10000;
+
+			for(agl_idx=0;agl_idx<40;agl_idx++){
+				agl =  h_ylidar_x4->rev_smpls[agl_idx][0];
+				dist = h_ylidar_x4->rev_smpls[agl_idx][1];
+				if((agl == agl_inst[nb_angle]) && (dist < min_dist)){
+					min_dist = dist;
+				}
+			}
+			h_ylidar_x4->sorted_dist[agl_inst[nb_angle]] = min_dist;
+		}
+
 	}
 	return 0;
 }
