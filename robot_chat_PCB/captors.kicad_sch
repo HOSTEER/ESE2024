@@ -714,7 +714,7 @@
     (stroke (width 0) (type default))
     (uuid b59e2bea-bea6-4e11-8f6b-224b6b748057)
   )
-  (wire (pts (xy 217.17 48.26) (xy 217.17 50.8))
+  (wire (pts (xy 217.17 40.64) (xy 217.17 43.18))
     (stroke (width 0) (type default))
     (uuid b7aaee6e-6a9d-4c67-83e9-8ec779eb9ec8)
   )
@@ -857,7 +857,7 @@
   (symbol (lib_id "power:GND") (at 62.23 50.8 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 05be3c8d-7c4f-4348-9a62-e2efe2c5eb44)
-    (property "Reference" "#PWR0503" (at 55.88 50.8 0)
+    (property "Reference" "#PWR0502" (at 55.88 50.8 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 58.42 50.8 90)
@@ -873,7 +873,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0503") (unit 1)
+          (reference "#PWR0502") (unit 1)
         )
       )
     )
@@ -882,7 +882,7 @@
   (symbol (lib_id "power:GND") (at 227.33 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0d3ca69f-ec96-4377-b87e-5a6874c65531)
-    (property "Reference" "#PWR0510" (at 227.33 116.84 0)
+    (property "Reference" "#PWR0506" (at 227.33 116.84 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 227.33 114.3 0)
@@ -898,7 +898,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0510") (unit 1)
+          (reference "#PWR0506") (unit 1)
         )
       )
     )
@@ -907,7 +907,7 @@
   (symbol (lib_id "power:GND") (at 106.68 151.13 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0f369fa9-7a6e-476e-84ef-386309e09565)
-    (property "Reference" "#PWR0506" (at 106.68 157.48 0)
+    (property "Reference" "#PWR0511" (at 106.68 157.48 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 106.68 156.21 0)
@@ -923,7 +923,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0506") (unit 1)
+          (reference "#PWR0511") (unit 1)
         )
       )
     )
@@ -973,7 +973,7 @@
   (symbol (lib_id "power:GND") (at 49.53 152.4 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2093a4f1-c6f2-49c2-bc58-16fe6ba19c9c)
-    (property "Reference" "#PWR0502" (at 49.53 158.75 0)
+    (property "Reference" "#PWR0512" (at 49.53 158.75 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 49.53 157.48 0)
@@ -989,7 +989,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0502") (unit 1)
+          (reference "#PWR0512") (unit 1)
         )
       )
     )
@@ -999,9 +999,9 @@
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3bc8a6c2-7a53-4cf5-b124-d640be133f8c)
     (property "Reference" "J503" (at 123.19 144.78 0)
-      (effects (font (size 1.27 1.27)) (justify left))
+      (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "Value" "Conn_01x03" (at 123.19 147.32 0)
+    (property "Value" "B_Detect" (at 123.19 146.05 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal" (at 120.65 146.05 0)
@@ -1025,7 +1025,7 @@
   (symbol (lib_id "power:+3.3V") (at 49.53 146.05 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 474e9a11-2d11-4d18-a5fc-0c852f2a3954)
-    (property "Reference" "#PWR0501" (at 49.53 149.86 0)
+    (property "Reference" "#PWR0510" (at 49.53 149.86 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 49.53 140.97 0)
@@ -1041,7 +1041,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0501") (unit 1)
+          (reference "#PWR0510") (unit 1)
         )
       )
     )
@@ -1056,7 +1056,7 @@
     (property "Value" "0.1u" (at 240.03 107.9563 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 237.49 106.68 0)
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 237.49 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 237.49 106.68 0)
@@ -1076,7 +1076,7 @@
   (symbol (lib_id "power:+3.3V") (at 238.76 101.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5370b6eb-5399-489e-a54b-96d2b64a6c54)
-    (property "Reference" "#PWR0512" (at 238.76 105.41 0)
+    (property "Reference" "#PWR0505" (at 238.76 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 238.76 96.52 0)
@@ -1092,7 +1092,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0512") (unit 1)
+          (reference "#PWR0505") (unit 1)
         )
       )
     )
@@ -1101,7 +1101,7 @@
   (symbol (lib_id "power:GND") (at 205.74 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 63ab9f4a-888a-48e4-9702-21975e485be8)
-    (property "Reference" "#PWR0507" (at 205.74 66.04 0)
+    (property "Reference" "#PWR0504" (at 205.74 66.04 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 205.74 64.77 0)
@@ -1117,7 +1117,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0507") (unit 1)
+          (reference "#PWR0504") (unit 1)
         )
       )
     )
@@ -1126,7 +1126,7 @@
   (symbol (lib_id "power:+5V") (at 72.39 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 73536401-7dc3-48bd-8d85-63acb78110d4)
-    (property "Reference" "#PWR0504" (at 72.39 44.45 0)
+    (property "Reference" "#PWR0501" (at 72.39 44.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 72.39 35.56 0)
@@ -1142,25 +1142,50 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0504") (unit 1)
+          (reference "#PWR0501") (unit 1)
         )
       )
     )
   )
 
-  (symbol (lib_id "Device:R_Small") (at 205.74 55.88 180) (unit 1)
+  (symbol (lib_id "power:+3.3V") (at 217.17 40.64 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid 73cb1a3c-c92c-4857-867b-d01ea4080c59)
-    (property "Reference" "R501" (at 208.28 54.61 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Value" "1k" (at 208.28 57.15 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 205.74 55.88 0)
+    (uuid 735ab318-e9c7-44cd-8062-d339616df99d)
+    (property "Reference" "#PWR0503" (at 217.17 44.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 205.74 55.88 0)
+    (property "Value" "+3.3V" (at 217.17 35.56 0)
+      (effects (font (size 1.27 1.27)))
+    )
+    (property "Footprint" "" (at 217.17 40.64 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "" (at 217.17 40.64 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 0d8564c4-8bea-41bf-8cad-288345a032f3))
+    (instances
+      (project "robot_chat"
+        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
+          (reference "#PWR0503") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Device:R_Small") (at 205.74 49.53 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid 73cb1a3c-c92c-4857-867b-d01ea4080c59)
+    (property "Reference" "R501" (at 208.28 48.26 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Value" "1k" (at 208.28 50.8 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Footprint" "Resistor_SMD:R_0603_1608Metric" (at 205.74 49.53 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 205.74 49.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid e18141ad-dd6f-4582-8d26-fbb5b4b32f36))
@@ -1178,9 +1203,9 @@
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 782c7aba-c976-4e50-8abe-c53c19d99451)
     (property "Reference" "J502" (at 83.82 50.8 0)
-      (effects (font (size 1.27 1.27)) (justify left))
+      (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "Value" "Conn_01x08" (at 83.82 53.34 0)
+    (property "Value" "Lidar" (at 83.82 53.34 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Connector_JST:JST_XH_S8B-XH-A_1x08_P2.50mm_Horizontal" (at 81.28 50.8 0)
@@ -1206,19 +1231,19 @@
     )
   )
 
-  (symbol (lib_id "Connector_Generic:Conn_01x02") (at 222.25 45.72 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+  (symbol (lib_id "Connector_Generic:Conn_01x02") (at 222.25 43.18 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
     (uuid 84a99b54-2981-4058-b4b8-acc651e1d3ac)
-    (property "Reference" "J504" (at 224.79 45.72 0)
+    (property "Reference" "J501" (at 224.79 43.18 0)
+      (effects (font (size 1.27 1.27)) (justify left) hide)
+    )
+    (property "Value" "Bump" (at 224.79 44.45 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "Conn_01x02" (at 224.79 48.26 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Footprint" "Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal" (at 222.25 45.72 0)
+    (property "Footprint" "Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal" (at 222.25 43.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 222.25 45.72 0)
+    (property "Datasheet" "~" (at 222.25 43.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 8fb8229b-26e5-4da3-8fd1-bf5909e4b89b))
@@ -1226,7 +1251,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "J504") (unit 1)
+          (reference "J501") (unit 1)
         )
       )
     )
@@ -1235,7 +1260,7 @@
   (symbol (lib_id "power:GND") (at 217.17 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bbdfbb12-9d08-4a79-a7aa-f017cb7226c6)
-    (property "Reference" "#PWR0509" (at 217.17 149.86 0)
+    (property "Reference" "#PWR0508" (at 217.17 149.86 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 217.17 147.32 0)
@@ -1251,7 +1276,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0509") (unit 1)
+          (reference "#PWR0508") (unit 1)
         )
       )
     )
@@ -1260,7 +1285,7 @@
   (symbol (lib_id "power:GND") (at 237.49 110.49 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c65f13b4-1970-483b-878d-6fe5e3afd77e)
-    (property "Reference" "#PWR0511" (at 237.49 116.84 0)
+    (property "Reference" "#PWR0507" (at 237.49 116.84 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 237.49 114.3 0)
@@ -1276,7 +1301,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0511") (unit 1)
+          (reference "#PWR0507") (unit 1)
         )
       )
     )
@@ -1285,10 +1310,10 @@
   (symbol (lib_id "Connector_Generic:Conn_01x03") (at 63.5 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid dddd7c8f-092e-4567-9be4-52aa0c68447f)
-    (property "Reference" "J501" (at 66.04 146.05 0)
-      (effects (font (size 1.27 1.27)) (justify left))
+    (property "Reference" "J504" (at 66.04 146.05 0)
+      (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "Value" "Conn_01x03" (at 66.04 148.59 0)
+    (property "Value" "F_Detect" (at 66.04 147.32 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal" (at 63.5 147.32 0)
@@ -1303,7 +1328,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "J501") (unit 1)
+          (reference "J504") (unit 1)
         )
       )
     )
@@ -1312,7 +1337,7 @@
   (symbol (lib_id "power:+3.3V") (at 106.68 144.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e16424ce-eb34-413f-b478-33c9c642ad5b)
-    (property "Reference" "#PWR0505" (at 106.68 148.59 0)
+    (property "Reference" "#PWR0509" (at 106.68 148.59 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 106.68 139.7 0)
@@ -1328,7 +1353,7 @@
     (instances
       (project "robot_chat"
         (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0505") (unit 1)
+          (reference "#PWR0509") (unit 1)
         )
       )
     )
@@ -1343,7 +1368,7 @@
     (property "Value" "0.1u" (at 229.87 107.9563 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 227.33 106.68 0)
+    (property "Footprint" "Capacitor_SMD:C_0402_1005Metric" (at 227.33 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 227.33 106.68 0)
@@ -1360,44 +1385,19 @@
     )
   )
 
-  (symbol (lib_id "power:GND") (at 217.17 50.8 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
-    (uuid f471ad80-fec9-46d9-b177-003b5ffc06ec)
-    (property "Reference" "#PWR0508" (at 217.17 57.15 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Value" "GND" (at 217.17 55.88 0)
-      (effects (font (size 1.27 1.27)))
-    )
-    (property "Footprint" "" (at 217.17 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "" (at 217.17 50.8 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid 74309539-99be-49a1-8720-660e85b02b6e))
-    (instances
-      (project "robot_chat"
-        (path "/74bedd9b-ffd1-4d8b-87e0-848eab324d95/7d20d460-b97c-44b2-b496-8b3ce571e49d"
-          (reference "#PWR0508") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "Device:LED_Small") (at 205.74 49.53 270) (mirror x) (unit 1)
+  (symbol (lib_id "Device:LED_Small") (at 205.74 55.88 270) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid fee1d099-b14e-4937-a680-47893f5da459)
-    (property "Reference" "D501" (at 203.2 48.1965 90)
+    (property "Reference" "D501" (at 203.2 54.5465 90)
+      (effects (font (size 1.27 1.27)) (justify right) hide)
+    )
+    (property "Value" "Bump" (at 203.2 55.88 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "LED_Small" (at 203.2 50.7365 90)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "LED_SMD:LED_0603_1608Metric" (at 205.74 49.53 90)
+    (property "Footprint" "LED_SMD:LED_0603_1608Metric" (at 205.74 55.88 90)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "~" (at 205.74 49.53 90)
+    (property "Datasheet" "~" (at 205.74 55.88 90)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 31d5aea0-97bd-49e1-ad68-5706ef138d68))
