@@ -49,7 +49,6 @@ typedef struct ydlidar_x4_serial_drv_struct
 
 typedef struct h_ydlidar_x4_struct
 {
-	UART_HandleTypeDef huart;
 	// driver serial
 	ydlidar_x4_serial_drv_t serial_drv;
 	// command available for transmit
