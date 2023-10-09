@@ -781,10 +781,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LIDAR_EN_Pin|LIDAR_RANGING_EN_Pin|USER_LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(IMU_SPI_CS_GPIO_Port, IMU_SPI_CS_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, IMU_SPI_CS_Pin|USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin
+                          |USER_LED3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SW_GAME_STATUS_Pin PB_GAME_START_Pin BUMP_EXTI_Pin FBD_EXTI_Pin
                            BBD_EXTI_Pin */
@@ -801,21 +799,16 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : IMU_SPI_CS_Pin */
-  GPIO_InitStruct.Pin = IMU_SPI_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(IMU_SPI_CS_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : IMU_INT1_Pin IMU_INT2_Pin */
   GPIO_InitStruct.Pin = IMU_INT1_Pin|IMU_INT2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : USER_LED0_Pin USER_LED1_Pin USER_LED2_Pin USER_LED3_Pin */
-  GPIO_InitStruct.Pin = USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin;
+  /*Configure GPIO pins : IMU_SPI_CS_Pin USER_LED0_Pin USER_LED1_Pin USER_LED2_Pin
+                           USER_LED3_Pin */
+  GPIO_InitStruct.Pin = IMU_SPI_CS_Pin|USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin
+                          |USER_LED3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
