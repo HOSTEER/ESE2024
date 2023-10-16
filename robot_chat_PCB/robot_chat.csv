@@ -1,0 +1,50 @@
+Ref,Qnty,Value,Footprint,ref farnell
+,,,,
+"C302, ",1,470uF,Capacitor_SMD:CP_Elec_10x10.5,
+,,,,
+"D201, D202, D203, D204, D205, D206, ",6,~,Diode_SMD:D_SOD-923,3702487RL
+,,,,
+"D301, ",1,~,Diode_SMD:D_SMB,3373187RL
+,,,,
+"D302, ",1,1N4148,Diode_SMD:D_SOD-323F,
+,,,,
+"D303, D304, D602",3,"3.3V, 5V, Status",LED_SMD:LED_0603_1608Metric,3796304
+,,,,
+"D501, D604, D605",3,"Bump, Debug_1, Debug_2 ",LED_SMD:LED_0603_1608Metric,3796315
+,,,,
+"D601, D603",2,"Border_Detect, Error",LED_SMD:LED_0603_1608Metric,3796316
+,,,,
+"F301, ",1,10A,Fuse:Fuse_1206_3216Metric,3564732
+,,,,
+"IC401, IC402, ",2,NCS199A3RSQT2G,Package_TO_SOT_SMD:SOT-363_SC-70-6,2981170
+,,,,
+"J301, J501",2,"Bat,Bump",Connector_JST:JST_XH_S2B-XH-A_1x02_P2.50mm_Horizontal,1516289
+,,,,
+"J401, J402",2,"L_Mot,R_Mot",Connector_JST:JST_XH_S6B-XH-A_1x06_P2.50mm_Horizontal,1516294
+,,,,
+"J502, ",1,Lidar,Connector_JST:JST_XH_S8B-XH-A_1x08_P2.50mm_Horizontal,1516296
+,,,,
+"J503, J504",2,"B_Detect, F_Detect",Connector_JST:JST_XH_S3B-XH-A_1x03_P2.50mm_Horizontal,1516290
+,,,,
+"J601, ",1,BT,Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Horizontal,2827951
+,,,,
+"L201, ",1,2.2u,Inductor_SMD:L_0603_1608Metric,3666006
+,,,,
+"L301, ",1,4.7uH,Inductor_SMD:L_1008_2520Metric,
+,,,,
+,,,,
+"SW201, SW601, SW602",3,"RST, Start, Status",Button_Switch_SMD:SW_SPST_B3U-1000P,1333652
+,,,,
+"SW301, ",1,SW_SPDT_MSM,472121020421:Toggle_Switch,4244949
+,,,,
+"U201, ",1,STM32G070RBTx,Package_QFP:LQFP-64_10x10mm_P0.5mm,
+,,,,
+"U301, ",1,MP1475DJ-LF-P,Package_TO_SOT_SMD:TSOT-23-8,
+,,,,
+"U302, ",1,MIC5317-3.3xM5,Package_TO_SOT_SMD:SOT-23-5,
+,,,,
+"U401, U402, ",2,ZXBM5210-SP,Package_SO:SOIC-8-1EP_3.9x4.9mm_P1.27mm_EP2.62x3.51mm_ThermalVias,
+,,,,
+"U501, ",1,LSM6DSM,Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y,2664522
+,,,,
+"Y201, ",1,16MHz,Crystal:Crystal_SMD_EuroQuartz_MT-4Pin_3.2x2.5mm,
