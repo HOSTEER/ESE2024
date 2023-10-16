@@ -1,3 +1,4 @@
+sep=,
 Ref,Qnty,Value,Footprint,ref farnell
 ,,,,
 "C302, ",1,470uF,Capacitor_SMD:CP_Elec_10x10.5,
