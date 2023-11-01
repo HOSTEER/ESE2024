@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define FULL
+
 int ydlidar_x4_stop(h_ydlidar_x4_t * h_ydlidar_x4){
 	h_ydlidar_x4->cmd = CMD_STOP;
 	h_ydlidar_x4->serial_drv.transmit((uint8_t *) &(h_ydlidar_x4->cmd), 2);
@@ -164,7 +166,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 	return 0;
 }
 
-
+#ifdef LOW_RES
 int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
 
 	uint16_t agl_idx, smpl_idx=0;
@@ -198,3 +200,40 @@ int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
 	}
 	return 0;
 }
+#endif
+
+#ifdef FULL
+int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
+
+	uint16_t agl_idx, smpl_idx=0;
+	uint16_t agl_inst[40] = {0};
+	uint8_t nb_angle = 0;
+	uint16_t dist;
+	uint16_t agl;
+	uint16_t min_dist;
+
+	if(revoltion_idx < 40)
+		return 1;
+
+	for(smpl_idx = revoltion_idx-40;smpl_idx<revoltion_idx;smpl_idx++){
+
+		if(h_ydlidar_x4->rev_smpls[smpl_idx][0] != agl_inst[nb_angle]){
+			agl_inst[nb_angle+1] = h_ydlidar_x4->rev_smpls[smpl_idx][0];
+			nb_angle++;
+
+			 min_dist = 10000;
+
+			for(agl_idx=revoltion_idx-40;agl_idx<revoltion_idx;agl_idx++){
+				agl =  h_ydlidar_x4->rev_smpls[agl_idx][0];
+				dist = h_ydlidar_x4->rev_smpls[agl_idx][1];
+				if((agl == agl_inst[nb_angle]) && (dist < min_dist)){
+					min_dist = dist;
+				}
+			}
+			h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]] = (min_dist + h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]])/2;
+		}
+
+	}
+	return 0;
+}
+#endif
