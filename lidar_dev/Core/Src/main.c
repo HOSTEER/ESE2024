@@ -138,26 +138,12 @@ int main(void)
 	ydlidar_x4_scan(&lidar);
 	uint8_t rx_pc = 0;
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-	//HAL_Delay(3000);
-	//ydlidar_x4_stop(&lidar);
-	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		/*char mystring[50];
-		if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
-			for(int i=0;i<360;i++){
-				if(lidar.sorted_dist[i] != 0){
-					uint16_t size = snprintf(mystring,50,"angle = %d, dist = %d\r\n",i,lidar.sorted_dist[i]);
-					HAL_UART_Transmit(&huart2, (uint8_t *) mystring, size, HAL_MAX_DELAY);
-				}
-			}
-			HAL_Delay(1000);
-		}*/
-
 		uint8_t string_display[720];
 		  if(rx_pc == 0xAA){
 			  for(int i=0;i<720;i++){

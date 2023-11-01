@@ -7,37 +7,37 @@
 
 #define FULL
 
-int ydlidar_x4_stop(h_ydlidar_x4_t * h_ydlidar_x4){
-	h_ydlidar_x4->cmd = CMD_STOP;
-	h_ydlidar_x4->serial_drv.transmit((uint8_t *) &(h_ydlidar_x4->cmd), 2);
+int ydlidar_x4_stop(h_ydlidar_x4_t * lidar){
+	lidar->cmd = CMD_STOP;
+	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
 	return 0;
 }
 
-int ydlidar_x4_info(h_ydlidar_x4_t * h_ydlidar_x4){
-	h_ydlidar_x4->cmd = CMD_INFO;
-	h_ydlidar_x4->serial_drv.transmit((uint8_t *) &(h_ydlidar_x4->cmd), 2);
+int ydlidar_x4_info(h_ydlidar_x4_t * lidar){
+	lidar->cmd = CMD_INFO;
+	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
 	return 0;
 }
 
-int ydlidar_x4_scan(h_ydlidar_x4_t * h_ydlidar_x4){
-	h_ydlidar_x4->cmd = CMD_SCAN;
-	h_ydlidar_x4->serial_drv.transmit((uint8_t *) &(h_ydlidar_x4->cmd), 2);
+int ydlidar_x4_scan(h_ydlidar_x4_t * lidar){
+	lidar->cmd = CMD_SCAN;
+	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
 	return 0;
 }
 
-int ydlidar_x4_restart(h_ydlidar_x4_t * h_ydlidar_x4){
-	h_ydlidar_x4->cmd = CMD_RESTART;
-	h_ydlidar_x4->serial_drv.transmit((uint8_t *) &(h_ydlidar_x4->cmd), 2);
+int ydlidar_x4_restart(h_ydlidar_x4_t * lidar){
+	lidar->cmd = CMD_RESTART;
+	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
 	return 0;
 }
 
-int ydlidar_x4_get_angle(h_ydlidar_x4_t * h_ydlidar_x4, uint16_t angle_LSB, uint16_t angle_MSB){
+int ydlidar_x4_get_angle(h_ydlidar_x4_t * lidar, uint16_t angle_LSB, uint16_t angle_MSB){
 	uint16_t * angle;
-	if(h_ydlidar_x4->decode_state == PARSING_START_ANGL){
-		angle = &h_ydlidar_x4->start_angl;
+	if(lidar->decode_state == PARSING_START_ANGL){
+		angle = &lidar->start_angl;
 	}
 	else{
-		angle = &h_ydlidar_x4->end_angl;
+		angle = &lidar->end_angl;
 	}
 	*angle 	= angle_LSB>>1;
 	*angle 	= *angle + (angle_MSB<<7);
@@ -52,28 +52,28 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 	return 0;
 }
 
-int ydlidar_x4_store_smpl(h_ydlidar_x4_t * h_ydlidar_x4){
+int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
 	static uint16_t revoltion_idx=0;
-	uint16_t angle_per_dist = (uint16_t) abs(h_ydlidar_x4->end_angl-h_ydlidar_x4->start_angl)/4;
-	uint16_t first_angle=h_ydlidar_x4->start_angl;
+	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/4;
+	uint16_t first_angle=lidar->start_angl;
 	for(;smpl_idx<40;smpl_idx++,revoltion_idx++){
 		if (revoltion_idx>= 600){
 			revoltion_idx = 0;
 		}
-		if(h_ydlidar_x4->smpl[smpl_idx] > 0){
-			h_ydlidar_x4->rev_smpls[revoltion_idx][0]=first_angle + (angle_per_dist*smpl_idx)/10;
-			h_ydlidar_x4->rev_smpls[revoltion_idx][1]=h_ydlidar_x4->smpl[smpl_idx];
+		if(lidar->smpl[smpl_idx] > 0){
+			lidar->rev_smpls[revoltion_idx][0]=first_angle + (angle_per_dist*smpl_idx)/10;
+			lidar->rev_smpls[revoltion_idx][1]=lidar->smpl[smpl_idx];
 		}
 	}
-	ydlidar_x4_sort_smpl(h_ydlidar_x4, revoltion_idx);
+	ydlidar_x4_sort_smpl(lidar, revoltion_idx);
 	return 0;
 }
 
-int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
-	ydlidar_x4_parsing_t * state = &h_ydlidar_x4->decode_state;
-	uint8_t * dma_mem = h_ydlidar_x4->buf_DMA;
-	uint8_t * frame_smpl = &h_ydlidar_x4->nb_smpl;
+int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
+	ydlidar_x4_parsing_t * state = &lidar->decode_state;
+	uint8_t * dma_mem = lidar->buf_DMA;
+	uint8_t * frame_smpl = &lidar->nb_smpl;
 	uint8_t head_limit = 0;
 	static uint8_t idx_head = 0;
 	static uint8_t idx_limiter = 1;
@@ -121,7 +121,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 
 			case PARSING_START_ANGL :
 				if(idx_limiter == 0){
-					ydlidar_x4_get_angle(h_ydlidar_x4, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
+					ydlidar_x4_get_angle(lidar, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
 					*state = PARSING_END_ANGL;
 					idx_limiter = 1;
 				}
@@ -132,7 +132,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 
 			case PARSING_END_ANGL :
 				if(idx_limiter == 0){
-					ydlidar_x4_get_angle(h_ydlidar_x4, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
+					ydlidar_x4_get_angle(lidar, (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
 					*state = PARSING_DIST;
 					idx_limiter = 0;
 				}
@@ -142,7 +142,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 				break;
 			case PARSING_DIST :
 				if(((idx_limiter%2) != 0) && (idx_limiter < *frame_smpl)){
-					ydlidar_x4_get_dist(&h_ydlidar_x4->smpl[idx_filler], (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
+					ydlidar_x4_get_dist(&lidar->smpl[idx_filler], (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
 					idx_filler++;
 					idx_limiter ++;
 				}
@@ -150,11 +150,11 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 					idx_limiter ++;
 					if(idx_limiter > *frame_smpl){
 						idx_filler = 0;
-						ydlidar_x4_store_smpl(h_ydlidar_x4);
+						ydlidar_x4_store_smpl(lidar);
 
-						memset(h_ydlidar_x4->smpl,0,(*frame_smpl)*2);
-						h_ydlidar_x4->start_angl=0;
-						h_ydlidar_x4->end_angl=0;
+						memset(lidar->smpl,0,(*frame_smpl)*2);
+						lidar->start_angl=0;
+						lidar->end_angl=0;
 						*frame_smpl = 0;
 						*state = SCANNING;
 
@@ -167,7 +167,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4){
 }
 
 #ifdef LOW_RES
-int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
+int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *lidar, uint16_t revoltion_idx){
 
 	uint16_t agl_idx, smpl_idx=0;
 	uint16_t agl_inst[40] = {0};
@@ -181,20 +181,20 @@ int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
 
 	for(smpl_idx = revoltion_idx-40;smpl_idx<revoltion_idx;smpl_idx++){
 
-		if(h_ydlidar_x4->rev_smpls[smpl_idx][0]-(h_ydlidar_x4->rev_smpls[smpl_idx][0])%10 != agl_inst[nb_angle]){
-			agl_inst[nb_angle+1] = h_ydlidar_x4->rev_smpls[smpl_idx][0]-(h_ydlidar_x4->rev_smpls[smpl_idx][0])%10;
+		if(lidar->rev_smpls[smpl_idx][0]-(lidar->rev_smpls[smpl_idx][0])%10 != agl_inst[nb_angle]){
+			agl_inst[nb_angle+1] = lidar->rev_smpls[smpl_idx][0]-(lidar->rev_smpls[smpl_idx][0])%10;
 			nb_angle++;
 
 			 min_dist = 10000;
 
 			for(agl_idx=revoltion_idx-40;agl_idx<revoltion_idx;agl_idx++){
-				agl =  h_ydlidar_x4->rev_smpls[agl_idx][0];
-				dist = h_ydlidar_x4->rev_smpls[agl_idx][1];
+				agl =  lidar->rev_smpls[agl_idx][0];
+				dist = lidar->rev_smpls[agl_idx][1];
 				if((agl - agl%10 == agl_inst[nb_angle]) && (dist < min_dist)){
 					min_dist = dist;
 				}
 			}
-			h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]] = (min_dist + h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]])/2;
+			lidar->sorted_dist[agl_inst[nb_angle]] = (min_dist + lidar->sorted_dist[agl_inst[nb_angle]])/2;
 		}
 
 	}
@@ -203,7 +203,7 @@ int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
 #endif
 
 #ifdef FULL
-int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
+int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *lidar, uint16_t revoltion_idx){
 
 	uint16_t agl_idx, smpl_idx=0;
 	uint16_t agl_inst[40] = {0};
@@ -217,20 +217,20 @@ int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx){
 
 	for(smpl_idx = revoltion_idx-40;smpl_idx<revoltion_idx;smpl_idx++){
 
-		if(h_ydlidar_x4->rev_smpls[smpl_idx][0] != agl_inst[nb_angle]){
-			agl_inst[nb_angle+1] = h_ydlidar_x4->rev_smpls[smpl_idx][0];
+		if(lidar->rev_smpls[smpl_idx][0] != agl_inst[nb_angle]){
+			agl_inst[nb_angle+1] = lidar->rev_smpls[smpl_idx][0];
 			nb_angle++;
 
 			 min_dist = 10000;
 
 			for(agl_idx=revoltion_idx-40;agl_idx<revoltion_idx;agl_idx++){
-				agl =  h_ydlidar_x4->rev_smpls[agl_idx][0];
-				dist = h_ydlidar_x4->rev_smpls[agl_idx][1];
+				agl =  lidar->rev_smpls[agl_idx][0];
+				dist = lidar->rev_smpls[agl_idx][1];
 				if((agl == agl_inst[nb_angle]) && (dist < min_dist)){
 					min_dist = dist;
 				}
 			}
-			h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]] = (min_dist + h_ydlidar_x4->sorted_dist[agl_inst[nb_angle]])/2;
+			lidar->sorted_dist[agl_inst[nb_angle]] = (min_dist + lidar->sorted_dist[agl_inst[nb_angle]])/2;
 		}
 
 	}
