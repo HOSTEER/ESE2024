@@ -47,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-h_ydlidar_x4_t h_ydlidar_x4;
+h_ydlidar_x4_t lidar;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,11 +56,11 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART1){
-		ydlidar_x4_irq_cb(&h_ydlidar_x4);
+		ydlidar_x4_irq_cb(&lidar);
 		//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		//ydlidar_x4_sort_smpl(&h_ydlidar_x4);
+		//ydlidar_x4_sort_smpl(&lidar);
 		//HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-		//ydlidar_x4_irq_cb(h_ydlidar_x4);
+		//ydlidar_x4_irq_cb(lidar);
 	}
 	else if(huart->Instance == USART2){
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
@@ -70,8 +70,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1){
-		ydlidar_x4_irq_cb(&h_ydlidar_x4);
-		//ydlidar_x4_irq_cb(h_ydlidar_x4);
+		ydlidar_x4_irq_cb(&lidar);
+		//ydlidar_x4_irq_cb(lidar);
 	}
 }
 
@@ -126,45 +126,31 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-	h_ydlidar_x4.serial_drv.transmit = lidar_uart_transmit;
-	h_ydlidar_x4.serial_drv.receive = lidar_uart_receive;
-	h_ydlidar_x4.decode_state = IDLE;
-	h_ydlidar_x4.serial_drv.receive(h_ydlidar_x4.buf_DMA);
-	h_ydlidar_x4.nb_smpl = 0;
-	h_ydlidar_x4.start_angl = 0;
-	h_ydlidar_x4.end_angl = 0;
+	lidar.serial_drv.transmit = lidar_uart_transmit;
+	lidar.serial_drv.receive = lidar_uart_receive;
+	lidar.decode_state = IDLE;
+	lidar.serial_drv.receive(lidar.buf_DMA);
+	lidar.nb_smpl = 0;
+	lidar.start_angl = 0;
+	lidar.end_angl = 0;
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
-	ydlidar_x4_scan(&h_ydlidar_x4);
+	ydlidar_x4_scan(&lidar);
 	uint8_t rx_pc = 0;
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-	//HAL_Delay(3000);
-	//ydlidar_x4_stop(&h_ydlidar_x4);
-	//HAL_Delay(5000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		/*char mystring[50];
-		if(!HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin)){
-			for(int i=0;i<360;i++){
-				if(h_ydlidar_x4.sorted_dist[i] != 0){
-					uint16_t size = snprintf(mystring,50,"angle = %d, dist = %d\r\n",i,h_ydlidar_x4.sorted_dist[i]);
-					HAL_UART_Transmit(&huart2, (uint8_t *) mystring, size, HAL_MAX_DELAY);
-				}
-			}
-			HAL_Delay(1000);
-		}*/
-
 		uint8_t string_display[720];
 		  if(rx_pc == 0xAA){
 			  for(int i=0;i<720;i++){
 				  if(i%2 == 0){
-					  string_display[i] = (h_ydlidar_x4.sorted_dist[i>>1])>>8;
+					  string_display[i] = (lidar.sorted_dist[i>>1])>>8;
 				  }else{
-					  string_display[i] = (h_ydlidar_x4.sorted_dist[i>>1]) & 0x00FF;
+					  string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
 				  }
 			  }
 			  HAL_UART_Transmit_IT(&huart2,string_display, 720);
@@ -198,9 +184,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 16;
-  RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 100;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -217,7 +203,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }
