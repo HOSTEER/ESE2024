@@ -262,6 +262,15 @@ int main(void)
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
+
+	HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1); // PWM R_Forward
+	HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1); // PWM R_Reverse
+	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1); // PWM L_Forward
+	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); // PWM L_Reverse
+
+	__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 512);	// PWM R_Forward
+	__HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);	// PWM R_Reverse
+
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{

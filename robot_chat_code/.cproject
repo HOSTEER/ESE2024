@@ -71,6 +71,9 @@
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include"/>
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Prod/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.374443095" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
@@ -173,6 +176,9 @@
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include"/>
 									<listOptionValue builtIn="false" value="C:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
+									<listOptionValue builtIn="false" value="C:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Prod}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.951795019" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
