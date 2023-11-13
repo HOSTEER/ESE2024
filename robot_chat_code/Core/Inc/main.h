@@ -89,10 +89,10 @@ void Error_Handler(void);
 #define LIDAR_TX_GPIO_Port GPIOC
 #define LIDAR_RX_Pin GPIO_PIN_5
 #define LIDAR_RX_GPIO_Port GPIOC
-#define I_READ_L_Pin GPIO_PIN_0
-#define I_READ_L_GPIO_Port GPIOB
 #define I_READ_R_Pin GPIO_PIN_1
 #define I_READ_R_GPIO_Port GPIOB
+#define I_READ_L_Pin GPIO_PIN_10
+#define I_READ_L_GPIO_Port GPIOB
 #define L_FORWARD_Pin GPIO_PIN_14
 #define L_FORWARD_GPIO_Port GPIOB
 #define LIDAR_SPEED_Pin GPIO_PIN_15
@@ -109,8 +109,6 @@ void Error_Handler(void);
 #define L_REVERSE_GPIO_Port GPIOD
 #define R_REVERSE_Pin GPIO_PIN_1
 #define R_REVERSE_GPIO_Port GPIOD
-#define IMU_SPI_CS_Pin GPIO_PIN_2
-#define IMU_SPI_CS_GPIO_Port GPIOD
 #define IMU_INT1_Pin GPIO_PIN_3
 #define IMU_INT1_GPIO_Port GPIOD
 #define IMU_INT2_Pin GPIO_PIN_4
@@ -121,9 +119,11 @@ void Error_Handler(void);
 #define IMU_SPI_SDI_GPIO_Port GPIOD
 #define IMU_SPI_CLK_Pin GPIO_PIN_3
 #define IMU_SPI_CLK_GPIO_Port GPIOB
-#define USER_LED0_Pin GPIO_PIN_4
+#define IMU_SPI_CS_Pin GPIO_PIN_4
+#define IMU_SPI_CS_GPIO_Port GPIOB
+#define USER_LED0_Pin GPIO_PIN_6
 #define USER_LED0_GPIO_Port GPIOB
-#define USER_LED1_Pin GPIO_PIN_5
+#define USER_LED1_Pin GPIO_PIN_7
 #define USER_LED1_GPIO_Port GPIOB
 #define USER_LED2_Pin GPIO_PIN_8
 #define USER_LED2_GPIO_Port GPIOB
