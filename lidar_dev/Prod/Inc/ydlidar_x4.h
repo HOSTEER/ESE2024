@@ -2,7 +2,7 @@
 #include "usart.h"
 #include <stdint.h>
 
-#define LIDAR2DMA_SIZE 180
+#define LIDAR2DMA_SIZE 194
 #define LIDAR_DEFAULT_SMPL_NB 50
 
 #define LITTLE_ENDIAN

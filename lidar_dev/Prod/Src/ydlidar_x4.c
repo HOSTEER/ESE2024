@@ -81,11 +81,11 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 	static uint8_t idx_filler = 0;
 
 	if ( (idx_head >= (LIDAR2DMA_SIZE >> 1)) && (idx_head < LIDAR2DMA_SIZE) ) {
-		head_limit = LIDAR2DMA_SIZE;
+		head_limit = (uint8_t) LIDAR2DMA_SIZE;
 	}
 	else {
 		idx_head = 0;
-		head_limit = (LIDAR2DMA_SIZE >> 1);
+		head_limit = (uint8_t) (LIDAR2DMA_SIZE >> 1);
 
 	}
 
