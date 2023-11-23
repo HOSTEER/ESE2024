@@ -21,3 +21,5 @@ Pour vérifier qu'une branch est ok, cloner un 2nd repo de la branch et la teste
 Ensuite il faut résoudre les conflits entre .cproject ( globalement garder le code du main ); .ioc (globalement fusionner les pins ajoutés et faire gaffe au pin, en double) et enfin le main.c ( où il faut fusionner )
 
 ![Schema fonctionnel du robot chat](images/SchemaFonctionnel.png)
+
+conso moyenne 300 mA
