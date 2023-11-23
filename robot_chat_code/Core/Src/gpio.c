@@ -55,8 +55,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LIDAR_EN_Pin|LIDAR_RANGING_EN_Pin|USER_LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, IMU_SPI_CS_Pin|USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin
-                          |USER_LED3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(IMU_SPI_CS_GPIO_Port, IMU_SPI_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PCPin PCPin PCPin PCPin
                            PCPin */
