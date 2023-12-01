@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
+#include "dma.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -29,6 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "ydlidar_x4.h"
 #include "imu.h"
 /* USER CODE END Includes */
 
@@ -39,8 +41,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DEFAULT_STACK_SIZE 260
+#define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
+#define DEFAULT_LIDAR_SPEED 85
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,7 +55,20 @@
 
 /* USER CODE BEGIN PV */
 TaskHandle_t h_task_init = NULL;
+TaskHandle_t h_task_lidar = NULL;
+TaskHandle_t h_task_lidar_ISR = NULL;
+TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
+TaskHandle_t h_task_BTN_ISR = NULL;
+
+SemaphoreHandle_t lidar_RX_semaphore;
+SemaphoreHandle_t Wire_BT_RX_semaphore;
+SemaphoreHandle_t BTN_STATUS_semaphore;
+
 BaseType_t ret;
+h_ydlidar_x4_t lidar;
+uint8_t BT_RX;
+uint8_t rx_pc;
+uint8_t string_display[720];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,20 +82,135 @@ int __io_putchar(int ch)
 	return ch;
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
+	if(huart->Instance == USART1){
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+}
+
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance == USART1){
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+	if(huart->Instance == USART3 || huart->Instance == USART2){
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(Wire_BT_RX_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+}
+
+int lidar_uart_transmit(uint8_t *p_data, uint16_t size)
+{
+	HAL_UART_Transmit(&huart1,p_data, size, HAL_MAX_DELAY);
+	return 0;
+}
+
+int lidar_uart_receive(uint8_t *p_data)
+{
+	HAL_UART_Receive_DMA(&huart1,p_data, LIDAR2DMA_SIZE);
+	return 0;
+	//HAL_GPIO_EXTI_Rising_Callback(GPIO_Pin)
+}
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == GPIO_PIN_13) {
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(BTN_STATUS_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+}
+
 void task_init(void * unused)
 {
 	printf("Task init ok\r\n");
 	for(;;){
-		printf("Task init looping\r\n");
+		//printf("Task init looping\r\n");
 		imu_dev();
 		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
-		HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
-		HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
-		HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+		//HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
+		//HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		//HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 		vTaskDelay(1000);
 	}
 }
+
+void task_lidar(void * unused)
+{
+	printf("Task lidar ok\r\n");
+	lidar.serial_drv.transmit = lidar_uart_transmit;
+	lidar.serial_drv.receive = lidar_uart_receive;
+	lidar.decode_state = IDLE;
+	lidar.serial_drv.receive(lidar.buf_DMA);
+	lidar.nb_smpl = 0;
+	lidar.start_angl = 0;
+	lidar.end_angl = 0;
+	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
+	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
+	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
+	vTaskDelete(0);
+	/*for(;;){
+		if( xSemaphoreTake(lidar_RX_semaphore, 1000) == pdFALSE)
+		{
+			//HAL_NVIC_SystemReset();
+		}
+		ydlidar_x4_irq_cb(&lidar);
+	}*/
+}
+
+void task_lidar_ISR(void * unused)
+{
+	printf("Task lidar ISR ok\r\n");
+	for(;;){
+		if( xSemaphoreTake(lidar_RX_semaphore, 1000) == pdTRUE)
+		{
+			ydlidar_x4_irq_cb(&lidar);
+			HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+		}else{
+			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
+		}
+	}
+}
+
+void task_BT_and_Wire_RX_ISR(void * unused)
+{
+	printf("Task lidar ISR ok\r\n");
+	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+	for(;;){
+		if(rx_pc == 0xAA){
+			for(int i=0;i<720;i++){
+				if(i%2 == 0){
+					string_display[i] = (lidar.sorted_dist[i>>1])>>8;
+				}else{
+					string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
+				}
+			}
+			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
+		}
+	}
+}
+
+void task_BTN_ISR(void * unused)
+{
+	printf("Task BTN ok\r\n");
+	for(;;){
+		if( xSemaphoreTake(BTN_STATUS_semaphore, 1000) == pdTRUE)
+		{
+			ydlidar_x4_scan(&lidar);
+			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		}else{
+			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		}
+	}
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -115,6 +246,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
@@ -127,10 +259,37 @@ int main(void)
   MX_USART3_UART_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+	lidar_RX_semaphore = xSemaphoreCreateBinary();
+	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
+	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task init \r\n");
+		Error_Handler();
+	}
+	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_lidar);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task lidar \r\n");
+		Error_Handler();
+	}
+	ret = xTaskCreate(task_lidar_ISR, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar_ISR);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task lidar ISR \r\n");
+		Error_Handler();
+	}
+	ret = xTaskCreate(task_BT_and_Wire_RX_ISR, "task_BT_and_Wire_RX_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_BT_and_Wire_RX_ISR);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task BT ISR \r\n");
+		Error_Handler();
+	}
+	ret = xTaskCreate(task_BTN_ISR, "task_BTN_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_BTN_ISR);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task BTN ISR \r\n");
 		Error_Handler();
 	}
 

@@ -48,6 +48,7 @@
 
 /* USER CODE BEGIN PV */
 h_ydlidar_x4_t lidar;
+uint8_t flagComputeLidar=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,11 +57,7 @@ void SystemClock_Config(void);
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART1){
-		ydlidar_x4_irq_cb(&lidar);
-		//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		//ydlidar_x4_sort_smpl(&lidar);
-		//HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
-		//ydlidar_x4_irq_cb(lidar);
+		flagComputeLidar = 1;
 	}
 	else if(huart->Instance == USART2){
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
@@ -70,8 +67,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1){
-		ydlidar_x4_irq_cb(&lidar);
-		//ydlidar_x4_irq_cb(lidar);
+		flagComputeLidar = 1;
 	}
 }
 
@@ -86,6 +82,16 @@ int lidar_uart_receive(uint8_t *p_data)
 	HAL_UART_Receive_DMA(&huart1,p_data, LIDAR2DMA_SIZE);
 	return 0;
 }
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(GPIO_Pin);
+	/* NOTE: This function Should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+	 */
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -133,28 +139,30 @@ int main(void)
 	lidar.nb_smpl = 0;
 	lidar.start_angl = 0;
 	lidar.end_angl = 0;
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1, 50-1);
 	ydlidar_x4_scan(&lidar);
 	uint8_t rx_pc = 0;
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+	uint8_t string_display[720];
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		uint8_t string_display[720];
-		  if(rx_pc == 0xAA){
-			  for(int i=0;i<720;i++){
-				  if(i%2 == 0){
-					  string_display[i] = (lidar.sorted_dist[i>>1])>>8;
-				  }else{
-					  string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
-				  }
-			  }
-			  HAL_UART_Transmit_IT(&huart2,string_display, 720);
-		  }
+		if(flagComputeLidar == 1){
+			ydlidar_x4_irq_cb(&lidar);
+			flagComputeLidar = 0;
+		}
+		if(rx_pc == 0xAA){
+			for(int i=0;i<720;i++){
+				if(i%2 == 0){
+					string_display[i] = (lidar.sorted_dist[i>>1])>>8;
+				}else{
+					string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
+				}
+			}
+			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
