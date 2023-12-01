@@ -1,0 +1,21 @@
+/*
+ * imu.h
+ *
+ *  Created on: Nov 13, 2023
+ *      Author: les_victor
+ */
+
+#ifndef INC_IMU_H_
+#define INC_IMU_H_
+
+
+
+typedef struct IMU_t{
+	SPI_HandleTypeDef hspi;
+
+}imu_t;
+
+int imu_dev(void);
+int IMU_init(void);
+
+#endif /* INC_IMU_H_ */

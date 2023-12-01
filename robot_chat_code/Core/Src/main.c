@@ -39,7 +39,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DEFAULT_STACK_SIZE 512
+#define DEFAULT_STACK_SIZE 1024
 #define DEFAULT_TASK_PRIORITY 1
 /* USER CODE END PD */
 
@@ -68,6 +68,7 @@ int __io_putchar(int ch)
 
 void task_init(void * unused)
 {
+	IMU_init();
 	printf("Task init ok\r\n");
 	for(;;){
 		printf("Task init looping\r\n");
