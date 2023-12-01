@@ -16,3 +16,45 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY org.eclipse.cdt.core 1 0 2023-10-09 10:48:30.642
 !MESSAGE Indexed 'lidar_dev' (11 sources, 68 headers) in 1.45 sec: 2,679 declarations; 4,022 references; 11 unresolved inclusions; 1 syntax errors; 312 unresolved names (4.4%)
+!SESSION 2023-11-13 16:03:53.095 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-11-13 16:04:07.471
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-11-13 16:04:07.477
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-11-13 16:04:11.789
+!MESSAGE Indexed 'robot_chat_code' (8 sources, 63 headers) in 0,826 sec: 2 502 declarations; 4 117 references; 16 unresolved inclusions; 1 syntax errors; 1 177 unresolved names (15 %)
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-11-13 16:04:16.367
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-11-13 16:25:02.005
+!MESSAGE Indexed 'robot_chat_code' (42 sources, 114 headers) in 1.46 sec: 9,685 declarations; 66,779 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0026%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-11-13 16:36:54.589
+!MESSAGE Indexed 'lidar_dev' (11 sources, 68 headers) in 0.329 sec: 2,682 declarations; 4,040 references; 11 unresolved inclusions; 1 syntax errors; 318 unresolved names (4.5%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-11-13 16:36:54.802
+!MESSAGE Indexed '431RB_MCC_ENC_DEV' (6 sources, 58 headers) in 0.211 sec: 2,214 declarations; 3,318 references; 11 unresolved inclusions; 1 syntax errors; 359 unresolved names (6.1%)
+!SESSION 2023-11-13 16:45:34.575 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-11-13 16:45:38.119
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-11-13 16:45:38.121
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-11-13 16:45:46.553
+!MESSAGE Started RMI Server, listening on port 41337
