@@ -32,6 +32,7 @@
 #include <string.h>
 #include "ydlidar_x4.h"
 #include "imu.h"
+#include "motor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +60,7 @@ TaskHandle_t h_task_lidar = NULL;
 TaskHandle_t h_task_lidar_ISR = NULL;
 TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
+TaskHandle_t h_task_motor = NULL;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t Wire_BT_RX_semaphore;
@@ -69,6 +71,7 @@ h_ydlidar_x4_t lidar;
 uint8_t BT_RX;
 uint8_t rx_pc;
 uint8_t string_display[720];
+hMotor_t Rmot;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -211,6 +214,18 @@ void task_BTN_ISR(void * unused)
 	}
 }
 
+void task_Motor(void * unused)
+{
+	for(;;)
+	{
+		motorSetSpeed(&Rmot, 512);
+		vTaskDelay(2000);
+		motorSetSpeed(&Rmot, 0);
+		vTaskDelay(2000);
+		motorSetSpeed(&Rmot, -512);
+		vTaskDelay(2000);
+	}
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -271,6 +286,8 @@ int main(void)
 	__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 512);	// PWM R_Forward
 	__HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);	// PWM R_Reverse
 
+	motorInit(&Rmot, &htim14, &htim17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{
@@ -301,6 +318,12 @@ int main(void)
 		printf("Could not create task BTN ISR \r\n");
 		Error_Handler();
 	}
+	ret = xTaskCreate(task_Motor, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+3, &h_task_motor);
+	if(ret != pdPASS)
+		{
+			printf("Could not create task motor \r\n");
+			Error_Handler();
+		}
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
@@ -344,7 +367,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 16;
+  RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
