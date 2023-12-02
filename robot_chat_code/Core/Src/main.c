@@ -60,7 +60,8 @@ TaskHandle_t h_task_lidar = NULL;
 TaskHandle_t h_task_lidar_ISR = NULL;
 TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
-TaskHandle_t h_task_motor = NULL;
+TaskHandle_t h_task_Motor = NULL;
+TaskHandle_t h_task_MotorSpeed = NULL;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t Wire_BT_RX_semaphore;
@@ -129,6 +130,7 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 	}
 }
 
+
 void task_init(void * unused)
 {
 	printf("Task init ok\r\n");
@@ -156,7 +158,7 @@ void task_lidar(void * unused)
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
+	//HAL_TIM_PWM_Start_IT(&htim15, TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	vTaskDelete(0);
 	/*for(;;){
@@ -226,6 +228,18 @@ void task_Motor(void * unused)
 		vTaskDelay(2000);
 	}
 }
+
+void task_MotorSpeed(void * unused)
+{
+	for(;;)
+	{
+		motorGetSpeed(&Rmot);
+		motorGetCurrent(&Rmot);
+		printf("vitesse moteur = %d, courant moteur = %d\r\n", (int)Rmot.speed_measured[Rmot.speed_index], (int)Rmot.current_measured[Rmot.current_index]);
+		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
+		vTaskDelay(100);
+	}
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -278,15 +292,10 @@ int main(void)
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 
-	HAL_TIM_PWM_Start(&htim14, TIM_CHANNEL_1); // PWM R_Forward
-	HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1); // PWM R_Reverse
-	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1); // PWM L_Forward
-	HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); // PWM L_Reverse
 
-	__HAL_TIM_SET_COMPARE(&htim14, TIM_CHANNEL_1, 512);	// PWM R_Forward
-	__HAL_TIM_SET_COMPARE(&htim17, TIM_CHANNEL_1, 0);	// PWM R_Reverse
-
-	motorInit(&Rmot, &htim14, &htim17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	currentSenseStart();
+	motorInit(&Rmot, &htim14, &htim17, &htim3, 1, 0, 0, 0, 0, 0, 0, 0);
 
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
@@ -318,10 +327,16 @@ int main(void)
 		printf("Could not create task BTN ISR \r\n");
 		Error_Handler();
 	}
-	ret = xTaskCreate(task_Motor, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+3, &h_task_motor);
+	ret = xTaskCreate(task_Motor, "task_Motor", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+4, &h_task_Motor);
 	if(ret != pdPASS)
 		{
-			printf("Could not create task motor \r\n");
+			printf("Could not create task Motor \r\n");
+			Error_Handler();
+		}
+	ret = xTaskCreate(task_MotorSpeed, "task_MotorSpeed", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+3, &h_task_MotorSpeed);
+	if(ret != pdPASS)
+		{
+			printf("Could not create task MotorSpeed \r\n");
 			Error_Handler();
 		}
 

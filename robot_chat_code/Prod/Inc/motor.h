@@ -1,9 +1,3 @@
-/*
- * motor.h
- *
- *  Created on: Dec 2, 2023
- *      Author:
- */
 
 #include "main.h"
 
@@ -18,9 +12,9 @@ typedef struct hMotor_t_struct{
 	TIM_HandleTypeDef *tim_REV;
 	TIM_HandleTypeDef *tim_ENC;
 
-	//current sense ADC
-	ADC_HandleTypeDef *adc_current;
-	uint32_t adc_channel;
+	//adc DMA buffer and index
+	uint16_t * adc_dma_buff;
+	uint16_t dma_buff_index;
 
 	//Control parameters and buffers
 	int32_t speed_output[3];
@@ -38,10 +32,14 @@ typedef struct hMotor_t_struct{
 
 }hMotor_t;
 
-
-void motorSetSpeed(hMotor_t *hMotor,int32_t speed);
+void currentSenseStart();
 void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *tim_REV,
-				TIM_HandleTypeDef *tim_ENC, ADC_HandleTypeDef *adc_current, uint32_t adc_channel,
+				TIM_HandleTypeDef *tim_ENC, uint8_t DMA_buff_index,
 				uint32_t speed_kp, uint32_t speed_ki, uint32_t speed_kd, uint32_t sat,
 				uint32_t current_kp, uint32_t current_ki, uint32_t current_kd);
+
+void motorSetSpeed(hMotor_t *hMotor,int32_t speed);
+void motorGetSpeed(hMotor_t *hMotor);
+void motorGetCurrent(hMotor_t *hMotor);
+
 #endif /* INC_MOTOR_H_ */
