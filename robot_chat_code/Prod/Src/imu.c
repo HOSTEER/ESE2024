@@ -13,8 +13,14 @@
 
 #define CTRL1_XL 0x10
 #define CTRL2_G  0x11
-#define SPI_WRITE 0b00000000;
-#define SPI_READ 0b10000000;
+#define SPI_WRITE 0b00000000
+#define SPI_READ 0b10000000
+
+#define GYRO_X 0x22
+#define GYRO_Y 0x24
+#define GYRO_Z 0x26
+
+extern QueueHandle_t q_printf;
 
 uint8_t receive_buffer = 0;
 uint8_t transmit_buffer = 0x80;
@@ -27,15 +33,18 @@ int imu_dev(void){
 	printf("CS sur D3, SDO sur D12, SDA sur D11, SCL sur D13, INT1 sur D4\r\n");
 
 
+	IMU_gyro(&imu);
 
+	printf("Lecture des accelerations :\r\n");
+	printf("- Gyro X :%d\r\n", imu.gyro[0]);
+	printf("- Gyro Y :%d\r\n", imu.gyro[1]);
+	printf("- Gyro Z :%d\r\n", imu.gyro[2]);
 
+	/*uint8_t msg [100];
+	sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n",
+			imu.gyro[0], imu.gyro[1], imu.gyro[2]);
+	xQueueSend(q_printf, (void *)msg, 5);*/
 
-//	uint8_t buffer[6];
-//	int16_t x_int;
-//	int16_t y_int;
-//	int16_t z_int;
-//
-//	float x, y, z;
 	return 0;
 }
 
@@ -64,24 +73,61 @@ int IMU_init(void){
 	//Lit le registre CTRL1_XL et écrit 0 sur les 4 bits de poids fort pour éteindre l'accéléromètre
 	transmit_buffer = CTRL1_XL;
 	IMU_read8(&imu, transmit_buffer, &receive_buffer);
-
 	receive_buffer = (receive_buffer & 0xF) + 0x00;
-
 	IMU_write8(&imu, transmit_buffer, &receive_buffer);
-
 
 	printf("Accelerator successfully turned down\r\n");
 
 	//Lit le registre CTRL1_C et écrit sur les 4 bits de poids fort pour faire fonctionner le gyromètre à 12,5Hz
 	transmit_buffer = CTRL2_G;
 	IMU_read8(&imu, transmit_buffer, &receive_buffer);
-
-
 	transmit_buffer += 0b10000000;
 	IMU_write8(&imu, transmit_buffer, &receive_buffer);
 
-
 	printf("Gyroscope successfully turned down\r\n");
+
+	//Lecture des vitesses angulaires
+	IMU_gyro(&imu);
+	printf("Lecture des accelerations :\r\n");
+	printf("- Gyro X :%d\r\n", imu.gyro[0]);
+	printf("- Gyro Y :%d\r\n", imu.gyro[1]);
+	printf("- Gyro Z :%d\r\n", imu.gyro[2]);
+
+	return 0;
+}
+
+int IMU_gyro(imu_drv_t * imu){
+	uint8_t speed_low;
+	uint8_t speed_high;
+	//Vitesse en X
+	IMU_read8(imu, GYRO_X, &speed_low);
+	IMU_read8(imu, GYRO_X+1, &speed_high);
+	imu->gyro[0] = (uint16_t)speed_low + (((uint16_t)speed_high)<<8);
+	//Vitesse en Y
+	IMU_read8(imu, GYRO_Y, &speed_low);
+	IMU_read8(imu, GYRO_Y+1, &speed_high);
+	imu->gyro[1] = (uint16_t)speed_low + (((uint16_t)speed_high)<<8);
+	//Vitesse en Z
+	IMU_read8(imu, GYRO_Z, &speed_low);
+	IMU_read8(imu, GYRO_Z+1, &speed_high);
+	imu->gyro[0] = (uint16_t)speed_low + (((uint16_t)speed_high)<<8);
+	return 0;
+}
+
+int IMU_gyro2(imu_drv_t * imu){
+	//uint8_t speed_low;
+	//uint8_t speed_high;
+	uint8_t speed[2];
+	//Vitesse en X
+	HAL_StatusTypeDef status;
+	 uint8_t reg = GYRO_X | SPI_READ;
+	HAL_GPIO_WritePin(IMU_SPI_CS_GPIO_Port, IMU_SPI_CS_Pin, GPIO_PIN_RESET);
+	status = imu->spi_drv.transmit(&reg, 1);
+	status += imu->spi_drv.receive(speed, 2);
+	HAL_GPIO_WritePin(IMU_SPI_CS_GPIO_Port, IMU_SPI_CS_Pin, GPIO_PIN_SET);
+	imu->gyro[0] = (uint16_t)speed[0] + (((uint16_t)speed[1])<<8);
+	//Vitesse en Y
+
 	return 0;
 }
 

@@ -27,8 +27,16 @@ typedef struct IMU_drv_struct{
 
 }imu_drv_t;
 
+
+extern imu_drv_t imu;
+
+
+
+
 int imu_dev(void);
 int IMU_init(void);
+int IMU_gyro(imu_drv_t * imu);
+int IMU_gyro2(imu_drv_t * imu);
 
 int IMU_write8(imu_drv_t * imu, uint8_t reg, uint8_t *p_data);
 int IMU_read8(imu_drv_t * imu, uint8_t reg, uint8_t *p_data);

@@ -40,7 +40,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DEFAULT_STACK_SIZE 1024
-#define DEFAULT_TASK_PRIORITY 1
+#define DEFAULT_TASK_PRIORITY 10
+#define QUEUE_PRINTF_SIZE 100
+#define QUEUE_PRINTF_LENGTH 20
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,8 +53,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+QueueHandle_t q_printf = NULL;
+
 TaskHandle_t h_task_init = NULL;
+TaskHandle_t h_IMU_taskRead = NULL;
 BaseType_t ret;
+
+uint8_t odom_overflow = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,12 +80,48 @@ void task_init(void * unused)
 	for(;;){
 		printf("Task init looping\r\n");
 		imu_dev();
-		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
-		HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
 		HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 		vTaskDelay(1000);
+	}
+}
+
+void IMU_taskRead(void * unused)
+{
+	uint8_t msg [QUEUE_PRINTF_SIZE];
+	uint32_t time_lapped;
+
+	for(;;){
+		//printf("Task init looping\r\n");
+		time_lapped = __HAL_TIM_GET_COUNTER(&htim7);
+		__HAL_TIM_SET_COUNTER(&htim7, 0);
+		HAL_TIM_Base_Start(&htim7);
+		IMU_gyro(&imu);
+
+		if(!odom_overflow){
+			sprintf(msg, "Mesures de vitesse de rotation faite en %d us\r\n", time_lapped);
+			xQueueSend(q_printf, (void *)msg, 5);
+		}
+		else{
+			sprintf(msg, "Mesures de vitesse de rotation faite, mais la base de temps est corrompue (%d overflow(s))\r\n", odom_overflow);
+			xQueueSend(q_printf, (void *)msg, 5);
+		}
+
+		//printf("Task init looping\r\n");
+		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+		vTaskDelay(5);
+	}
+}
+
+void printfTask(void * unused)
+{
+	uint8_t msg[QUEUE_PRINTF_SIZE];
+	BaseType_t ret;
+	for(;;){
+		ret = xQueueReceive(q_printf, (void *)msg, portMAX_DELAY);
+		if(ret == pdTRUE){
+			printf(msg);
+		}
 	}
 }
 /* USER CODE END PFP */
@@ -127,6 +170,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_SPI1_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
@@ -134,6 +178,26 @@ int main(void)
 		printf("Could not create task init \r\n");
 		Error_Handler();
 	}
+
+	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY + 1, &h_IMU_taskRead);
+	if(ret != pdPASS)
+	{
+		printf("Could not create IMU taskRead \r\n");
+		Error_Handler();
+	}
+
+	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY - 1, &h_IMU_taskRead);
+	if(ret != pdPASS)
+	{
+		printf("Could not create printf task\r\n");
+		Error_Handler();
+	}
+
+
+
+	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+
+
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
@@ -220,7 +284,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM7) {
+	  odom_overflow++;
+	  HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
+    }
   /* USER CODE END Callback 1 */
 }
 
