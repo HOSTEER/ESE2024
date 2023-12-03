@@ -4,8 +4,6 @@
 #ifndef INC_MOTOR_H_
 #define INC_MOTOR_H_
 
-
-
 typedef struct hMotor_t_struct{
 	//PWM and encoder timers
 	TIM_HandleTypeDef *tim_FWD;
@@ -15,6 +13,7 @@ typedef struct hMotor_t_struct{
 	//adc DMA buffer and index
 	uint16_t * adc_dma_buff;
 	uint16_t dma_buff_index;
+	uint32_t current_offset;
 
 	//Control parameters and buffers
 	int32_t speed_output[3];
@@ -33,6 +32,7 @@ typedef struct hMotor_t_struct{
 }hMotor_t;
 
 void currentSenseStart();
+uint16_t batteryGetVoltage();
 void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *tim_REV,
 				TIM_HandleTypeDef *tim_ENC, uint8_t DMA_buff_index,
 				uint32_t speed_kp, uint32_t speed_ki, uint32_t speed_kd, uint32_t sat,

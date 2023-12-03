@@ -10,6 +10,12 @@ void currentSenseStart()
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_DMA_Buff, 3);
 }
 
+uint16_t batteryGetVoltage()
+{
+	return adc_DMA_Buff[0];
+}
+
+
 void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *tim_REV,
 				TIM_HandleTypeDef *tim_ENC, uint8_t DMA_buff_index,
 				uint32_t speed_kp, uint32_t speed_ki, uint32_t speed_kd, uint32_t sat,
@@ -26,6 +32,7 @@ void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *
 
 	hMotor->adc_dma_buff = adc_DMA_Buff;
 	hMotor->dma_buff_index = DMA_buff_index;
+	hMotor->current_offset = 0;
 
 	for(int i=0; i<3;i++)
 	{
@@ -72,7 +79,7 @@ void motorGetSpeed(hMotor_t *hMotor)
 
 void motorGetCurrent(hMotor_t *hMotor)
 {
-	hMotor->current_measured[hMotor->current_index] = hMotor->adc_dma_buff[hMotor->dma_buff_index];
+	hMotor->current_measured[hMotor->current_index] = hMotor->adc_dma_buff[hMotor->dma_buff_index] - hMotor->current_offset;
 }
 
 

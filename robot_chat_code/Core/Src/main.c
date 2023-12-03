@@ -62,7 +62,7 @@ TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
 TaskHandle_t h_task_Motor = NULL;
 TaskHandle_t h_task_MotorSpeed = NULL;
-
+TaskHandle_t h_task_BattMonitor;
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t Wire_BT_RX_semaphore;
 SemaphoreHandle_t BTN_STATUS_semaphore;
@@ -218,14 +218,18 @@ void task_BTN_ISR(void * unused)
 
 void task_Motor(void * unused)
 {
+	vTaskDelay(10);
+	motorSetSpeed(&Rmot, 0);
+	motorGetCurrent(&Rmot);
+	Rmot.current_offset = Rmot.current_measured[Rmot.current_index];
 	for(;;)
 	{
+		vTaskDelay(2000);
 		motorSetSpeed(&Rmot, 512);
 		vTaskDelay(2000);
 		motorSetSpeed(&Rmot, 0);
 		vTaskDelay(2000);
 		motorSetSpeed(&Rmot, -512);
-		vTaskDelay(2000);
 	}
 }
 
@@ -235,10 +239,22 @@ void task_MotorSpeed(void * unused)
 	{
 		motorGetSpeed(&Rmot);
 		motorGetCurrent(&Rmot);
-		printf("vitesse moteur = %d, courant moteur = %d\r\n", (int)Rmot.speed_measured[Rmot.speed_index], (int)Rmot.current_measured[Rmot.current_index]);
+		printf("vitesse moteur = %d, courant moteur = %d, tension batterie = %d\r\n", (int)Rmot.speed_measured[Rmot.speed_index], (int)Rmot.current_measured[Rmot.current_index], (int)batteryGetVoltage());
 		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
 		vTaskDelay(100);
 	}
+}
+
+void task_BattMonitor(void * unused)
+{
+	int V = 0;
+	for(;;)
+	{
+		V = batteryGetVoltage();
+		printf("Tension batterie : %d", (int) V);
+		vTaskDelay(1000);
+	}
+
 }
 /* USER CODE END PFP */
 
@@ -339,7 +355,12 @@ int main(void)
 			printf("Could not create task MotorSpeed \r\n");
 			Error_Handler();
 		}
-
+	/*ret = xTaskCreate(task_BattMonitor, "task_BattMonitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+3, &h_task_BattMonitor);
+	if(ret != pdPASS)
+		{
+			printf("Could not create task BatteryMonitoring \r\n");
+			Error_Handler();
+		}*/
 	vTaskStartScheduler();
   /* USER CODE END 2 */
 
