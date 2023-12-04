@@ -1,25 +1,26 @@
 
 #include "motor.h"
+#include "fixpoint_math.h"
 
 static volatile uint16_t adc_DMA_Buff[3] = {0};
 extern ADC_HandleTypeDef hadc1;
 
-void currentSenseStart()
+void current_sense_start()
 {
 	HAL_ADCEx_ChannelConfigReadyCallback(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_DMA_Buff, 3);
 }
 
-uint16_t batteryGetVoltage()
+uint32_t battery_get_voltage()
 {
-	return adc_DMA_Buff[0];
+	return fixed_div_16(((uint32_t)adc_DMA_Buff[0])<<15, BATT_VOLTAGE_GAIN);
 }
 
 
-void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *tim_REV,
-				TIM_HandleTypeDef *tim_ENC, uint8_t DMA_buff_index,
-				uint32_t speed_kp, uint32_t speed_ki, uint32_t speed_kd, uint32_t sat,
-				uint32_t current_kp, uint32_t current_ki, uint32_t current_kd)
+void motor_init(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *tim_REV,
+				TIM_HandleTypeDef *tim_ENC, uint8_t DMA_buff_index, uint32_t speed_kp,
+				uint32_t speed_ki, uint32_t speed_kd, uint32_t sat, uint32_t speed_corr_freq,
+				uint32_t current_kp, uint32_t current_ki, uint32_t current_kd, uint32_t current_corr_freq)
 {
 	hMotor->tim_FWD = tim_FWD;
 	hMotor->tim_REV = tim_REV;
@@ -28,11 +29,16 @@ void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *
 	HAL_TIM_PWM_Start(tim_FWD, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(tim_REV, TIM_CHANNEL_1);
 	HAL_TIM_Encoder_Start(tim_ENC, TIM_CHANNEL_1 | TIM_CHANNEL_2);
-	__HAL_TIM_SET_COUNTER(tim_ENC,32768);
+	__HAL_TIM_SET_COUNTER(tim_ENC,ENC_ZERO_VAL);
 
 	hMotor->adc_dma_buff = adc_DMA_Buff;
 	hMotor->dma_buff_index = DMA_buff_index;
 	hMotor->current_offset = 0;
+
+	hMotor->speed_corr_freq = speed_corr_freq;
+	hMotor->current_corr_freq = current_corr_freq;
+	hMotor->speed_integral = 0;
+	hMotor->current_integral = 0;
 
 	for(int i=0; i<3;i++)
 	{
@@ -55,7 +61,7 @@ void motorInit(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef *
 	hMotor->current_corr_params[2] = current_kd;
 }
 
-void motorSetSpeed(hMotor_t *hMotor,int32_t speed)
+void motor_set_PWM(hMotor_t *hMotor,int32_t speed)
 {
 	if(speed > 0)
 	{
@@ -71,15 +77,15 @@ void motorSetSpeed(hMotor_t *hMotor,int32_t speed)
 	}
 }
 
-void motorGetSpeed(hMotor_t *hMotor)
+void motor_get_speed(hMotor_t *hMotor)
 {
-	hMotor->speed_measured[hMotor->speed_index] = __HAL_TIM_GET_COUNTER(hMotor->tim_ENC) - 32768;
-	__HAL_TIM_SET_COUNTER(hMotor->tim_ENC,32768);
+	hMotor->speed_measured[hMotor->speed_index] = fixed_div_16(((int16_t)(__HAL_TIM_GET_COUNTER(hMotor->tim_ENC) - ENC_ZERO_VAL))*(1<<16),ENC_GAIN);
+	__HAL_TIM_SET_COUNTER(hMotor->tim_ENC, ENC_ZERO_VAL);
 }
 
-void motorGetCurrent(hMotor_t *hMotor)
+void motor_get_current(hMotor_t *hMotor)
 {
-	hMotor->current_measured[hMotor->current_index] = hMotor->adc_dma_buff[hMotor->dma_buff_index] - hMotor->current_offset;
+	hMotor->current_measured[hMotor->current_index] = fixed_div_16(((int32_t)(hMotor->adc_dma_buff[hMotor->dma_buff_index] - hMotor->current_offset))*(1<<16),CURRENT_GAIN);
 }
 
 
