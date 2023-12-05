@@ -39,6 +39,7 @@ void motor_init(hMotor_t *hMotor, TIM_HandleTypeDef *tim_FWD, TIM_HandleTypeDef 
 	hMotor->current_corr_freq = current_corr_freq;
 	hMotor->speed_integral = 0;
 	hMotor->current_integral = 0;
+	hMotor->speed_anti_windup = 0;
 
 	for(int i=0; i<3;i++)
 	{

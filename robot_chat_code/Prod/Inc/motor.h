@@ -24,6 +24,7 @@ typedef struct hMotor_t_struct{
 	int32_t speed_output[3];
 	int32_t speed_error[3];
 	int32_t speed_measured[3];
+	int8_t speed_anti_windup;
 	int32_t speed_integral;
 	uint32_t speed_corr_freq;
 	uint32_t speed_corr_params[4]; //kp, ki, kd, sat

@@ -246,7 +246,7 @@ void task_MotorSpeed(void * unused)
 		motor_get_current(&Rmot);
 		speed = Rmot.speed_measured[Rmot.speed_index]*600;
 		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
-		printf("mesure : %d.%u, error : %d.%u, output : %d.%u, integral : %d.%u\r\n", (int)Rmot.speed_measured[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_measured[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP),(int)(100*Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((100*Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
+		printf("mesure : %d.%u, error : %d.%u, output : %d.%u, integral : %d.%u\r\n", (int)(Rmot.speed_measured[Rmot.speed_index]*600)/(1<<16), (unsigned int)conv_frac16_dec((Rmot.speed_measured[Rmot.speed_index]*600) & 0xFFFF, TRUNC_FIXP),(int)(100*Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((100*Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
 		set_speed_PID(&Rmot,1<<14);
 		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
 		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
@@ -309,7 +309,7 @@ int main(void)
 
 	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	current_sense_start();
-	motor_init(&Rmot, &htim14, &htim17, &htim3, 1, 2000<<16, 4000<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
+	motor_init(&Rmot, &htim14, &htim17, &htim3, 1, 400<<16, 400<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
 
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
