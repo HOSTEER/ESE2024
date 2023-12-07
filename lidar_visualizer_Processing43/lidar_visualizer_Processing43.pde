@@ -42,4 +42,5 @@ void serialEvent(Serial myPort){
       lidar_value[i>>1] = lidar_value[i>>1] + rx_buffer[i];
     }
   }
+  myPort.write(0xAA);
 }
