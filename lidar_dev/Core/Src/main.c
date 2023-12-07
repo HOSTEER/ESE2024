@@ -144,7 +144,7 @@ void task_lidar_ISR(void * unused)
 {
 	printf("Task lidar ISR ok\r\n");
 	for(;;){
-		if( xSemaphoreTake(lidar_RX_semaphore, 1000) == pdTRUE)
+		if( xSemaphoreTake(lidar_RX_semaphore, portMAX_DELAY ) == pdTRUE)
 		{
 			ydlidar_x4_irq_cb(&lidar);
 			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
@@ -159,7 +159,7 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 	printf("Task lidar ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
 	for(;;){
-		if( xSemaphoreTake(stm_RX_semaphore, 1000) == pdTRUE)
+		if( xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY ) == pdTRUE)
 		{
 			if(rx_pc == 0xAA){
 				for(int i=0;i<720;i++){
@@ -181,7 +181,7 @@ void task_BTN_ISR(void * unused)
 {
 	printf("Task BTN ok\r\n");
 	for(;;){
-		if( xSemaphoreTake(BTN_STATUS_semaphore, 1000) == pdTRUE)
+		if( xSemaphoreTake(BTN_STATUS_semaphore, portMAX_DELAY) == pdTRUE)
 		{
 			ydlidar_x4_scan(&lidar);
 			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
