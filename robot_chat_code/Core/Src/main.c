@@ -32,6 +32,9 @@
 #include <string.h>
 #include "ydlidar_x4.h"
 #include "imu.h"
+#include "motor.h"
+#include "fixpoint_math.h"
+#include "control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +47,7 @@
 #define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
 #define DEFAULT_LIDAR_SPEED 85
+#define TRUNC_FIXP 1000000000000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -59,6 +63,8 @@ TaskHandle_t h_task_lidar = NULL;
 TaskHandle_t h_task_lidar_ISR = NULL;
 TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
+TaskHandle_t h_task_Motor = NULL;
+TaskHandle_t h_task_MotorSpeed = NULL;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t Wire_BT_RX_semaphore;
@@ -69,6 +75,7 @@ h_ydlidar_x4_t lidar;
 uint8_t BT_RX;
 uint8_t rx_pc;
 uint8_t string_display[720];
+hMotor_t Rmot;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,6 +133,7 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 	}
 }
 
+
 void task_init(void * unused)
 {
 	printf("Task init ok\r\n");
@@ -153,7 +161,7 @@ void task_lidar(void * unused)
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
+	//HAL_TIM_PWM_Start_IT(&htim15, TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	vTaskDelete(0);
 	/*for(;;){
@@ -211,6 +219,41 @@ void task_BTN_ISR(void * unused)
 	}
 }
 
+void task_Motor(void * unused)
+{
+	vTaskDelay(10);
+	motor_set_PWM(&Rmot, 0);
+	Rmot.current_offset = Rmot.adc_dma_buff[Rmot.dma_buff_index];
+	for(;;)
+	{
+		vTaskDelay(2000);
+		/*motor_set_PWM(&Rmot, 512);
+		vTaskDelay(2000);
+		motor_set_PWM(&Rmot, 0);
+		vTaskDelay(2000);
+		motor_set_PWM(&Rmot, -512);*/
+	}
+}
+
+void task_MotorSpeed(void * unused)
+{
+	uint32_t V = 0;
+	int32_t speed = 0;
+	for(;;)
+	{
+		V = battery_get_voltage();
+		motor_get_speed(&Rmot);
+		motor_get_current(&Rmot);
+		speed = Rmot.speed_measured[Rmot.speed_index]*600;
+		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
+		printf("mesure : %d.%u, error : %d.%u, output : %d.%u, integral : %d.%u\r\n", (int)(Rmot.speed_measured[Rmot.speed_index]*600)/(1<<16), (unsigned int)conv_frac16_dec((Rmot.speed_measured[Rmot.speed_index]*600) & 0xFFFF, TRUNC_FIXP),(int)(100*Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((100*Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
+		set_speed_PID(&Rmot,1<<14);
+		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
+		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
+		vTaskDelay(100);
+	}
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -262,6 +305,12 @@ int main(void)
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
+
+
+	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	current_sense_start();
+	motor_init(&Rmot, &htim14, &htim17, &htim3, 1, 400<<16, 400<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
+
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{
@@ -292,6 +341,18 @@ int main(void)
 		printf("Could not create task BTN ISR \r\n");
 		Error_Handler();
 	}
+	ret = xTaskCreate(task_Motor, "task_Motor", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+4, &h_task_Motor);
+	if(ret != pdPASS)
+		{
+			printf("Could not create task Motor \r\n");
+			Error_Handler();
+		}
+	ret = xTaskCreate(task_MotorSpeed, "task_MotorSpeed", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+3, &h_task_MotorSpeed);
+	if(ret != pdPASS)
+		{
+			printf("Could not create task MotorSpeed \r\n");
+			Error_Handler();
+		}
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
@@ -335,7 +396,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 16;
+  RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
