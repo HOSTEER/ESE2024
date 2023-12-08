@@ -58,7 +58,7 @@ int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint16_t first_angle=lidar->start_angl;
 	for(;smpl_idx<40;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
-			lidar->sorted_dist[first_angle + (angle_per_dist*smpl_idx)/10]= lidar->smpl[smpl_idx];
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
 		}
 	}
 	//ydlidar_x4_sort_smpl(lidar, revoltion_idx);
