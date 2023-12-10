@@ -7,8 +7,9 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 	hOdometry->Rmot = Rmot;
 	hOdometry->Lmot = Lmot;
 	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 23),(int32_t)CPR,16); // mm/tick, Q8.24
-	hOdometry->wheel_dist = wheel_dist; //mm, Q8.24
+	hOdometry->wheel_dist = wheel_dist; //mm, Q16.16
 	hOdometry->freq = freq;
+	hOdometry->dr = 0;
 	hOdometry->angle = 0;
 	hOdometry->x = 0;
 	hOdometry->y = 0;
@@ -32,14 +33,24 @@ void odometry_update_pos(hOdometry_t *hOdometry)
 	Rmot->speed_measured[Rmot->speed_index] = fixed_mul(Rdelta, (int32_t)hOdometry->freq, 9) + Rmot->speed_measured[(Rmot->speed_index + 2)%3]/2; //right motor speed, mm/s, Q16.16
 	Lmot->speed_measured[Lmot->speed_index] = fixed_mul(Ldelta, (int32_t)hOdometry->freq, 9) + Lmot->speed_measured[(Lmot->speed_index + 2)%3]/2; //left motor speed, mm/s, Q16.16
 
-	int32_t dr = Rdelta/2 + Ldelta/2; //mm, Q8.24
-	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,24) - fixed_div(Ldelta, hOdometry->wheel_dist, 24); //rad, Q8.24
+	hOdometry->dr = Rdelta/2 - Ldelta/2; //mm, Q8.24
+	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,16) + fixed_div(Ldelta, hOdometry->wheel_dist, 16); //rad, Q8.24
 
-	int32_t dx = fixed_mul(dr, (int32_t)fpcos(fixed_div(hOdometry->angle + dalpha/2, PI, 15)) * (1<<4), 16); //mm, Q16.16
-	int32_t dy = fixed_mul(dr, (int32_t)fpsin(fixed_div(hOdometry->angle + dalpha/2, PI, 15)) * (1<<4), 16); //mm, Q16.16
+	int32_t dx = fixed_mul(hOdometry->dr, (int32_t)fpcos(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
+	int32_t dy = fixed_mul(hOdometry->dr, (int32_t)fpsin(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
 
 	hOdometry->angle += dalpha;
-	hOdometry->angle = hOdometry->angle%PI;
+
+
+	if(hOdometry->angle > PI<<1)
+	{
+		hOdometry->angle = -(PI<<1) + hOdometry->angle%(PI<<1);
+	}
+	else if(hOdometry->angle < -(PI<<1))
+	{
+		hOdometry->angle = (PI<<1) - hOdometry->angle%(PI<<1);
+	}
+
 	hOdometry->x += dx;
 	hOdometry->y += dy;
 

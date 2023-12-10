@@ -4,16 +4,16 @@
 #define INC_ODOMETRY_H_
 #include "motor.h"
 
-#define PI 0x1921FB5 //Pi, Q8.24
+#define PI 0x3243F6A>>1 //Pi, Q8.24
 
 typedef struct hOdometry_t_struct {
 	hMotor_t *Rmot; //right motor
 	hMotor_t *Lmot; //left motor
 
 	uint32_t Cnt_dist_coeff; //encoder tick to mm conversion, 2pi*wheel_radius/ticks_per_rev, mm/tick, Q8.24
-	uint32_t wheel_dist; //distance between wheels, mm, Q8.24
+	uint32_t wheel_dist; //distance between wheels, mm, Q16.16
 	uint32_t freq;	//refresh rate, Hz
-
+	int32_t dr;
 	int32_t x,y; //robot coordinates Q16.16
 
 	int32_t angle; //robot angle Q8.24 [-pi, pi]
