@@ -35,6 +35,7 @@
 #include "motor.h"
 #include "fixpoint_math.h"
 #include "control.h"
+#include "odometry.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +49,11 @@
 #define DEFAULT_TASK_PRIORITY 1
 #define DEFAULT_LIDAR_SPEED 85
 #define TRUNC_FIXP 1000000000000
+
+#define WHEEL_DIAMETER (43UL<<24) 	//43mm diameter, Q8.24
+#define WHEEL_DIST (153UL<<24) 		//153mm distance between wheels, Q8.24
+#define ENC_TICKSPERREV 0x26A2E14	//618.18 encoder ticks per revolution, Q16.16
+#define ODOMETRY_FREQ 50UL 			//10Hz odometry refresh frequency
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -77,6 +83,8 @@ uint8_t rx_pc;
 uint8_t string_display[720];
 hMotor_t Rmot;
 hMotor_t Lmot;
+hOdometry_t hOdometry;
+int32_t mot_speed = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -214,6 +222,7 @@ void task_BTN_ISR(void * unused)
 		{
 			ydlidar_x4_scan(&lidar);
 			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+			mot_speed ^= 1;
 		}else{
 			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 		}
@@ -227,12 +236,15 @@ void task_Motor(void * unused)
 	Rmot.current_offset = Rmot.adc_dma_buff[Rmot.dma_buff_index];
 	for(;;)
 	{
-		vTaskDelay(2000);
+		vTaskDelay(500);
 		/*motor_set_PWM(&Rmot, 512);
+		motor_set_PWM(&Lmot, 512);
 		vTaskDelay(2000);
 		motor_set_PWM(&Rmot, 0);
+		motor_set_PWM(&Lmot, 0);
 		vTaskDelay(2000);
-		motor_set_PWM(&Rmot, -512);*/
+		motor_set_PWM(&Rmot, -512);
+		motor_set_PWM(&Lmot, -512);*/
 	}
 }
 
@@ -240,21 +252,25 @@ void task_MotorSpeed(void * unused)
 {
 	uint32_t V = 0;
 	int32_t speed = 0;
+	int16_t cnt = 0;
 	for(;;)
 	{
 		V = battery_get_voltage();
-		motor_get_speed(&Rmot);
-		motor_get_speed(&Lmot);
+		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
+		odometry_update_pos(&hOdometry);
+		//motor_get_speed(&Rmot);
+		//motor_get_speed(&Lmot);
 		motor_get_current(&Rmot);
 		motor_get_current(&Lmot);
-		speed = Rmot.speed_measured[Rmot.speed_index]*600;
-		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
-		printf("mesure : %d.%u, error : %d.%u, output : %d.%u, integral : %d.%u\r\n", (int)(Rmot.speed_measured[Rmot.speed_index]*600)/(1<<16), (unsigned int)conv_frac16_dec((Rmot.speed_measured[Rmot.speed_index]*600) & 0xFFFF, TRUNC_FIXP),(int)(100*Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((100*Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
-		set_speed_PID(&Rmot,1<<14);	// 1<<14 = 150rpm , 1<<13 = 75rpm
-		set_speed_PID(&Lmot,1<<14);
+		speed = Rmot.speed_measured[Rmot.speed_index];
+		//motor_set_PWM(&Rmot, 1024);
+		//printf("vitesse moteur = %d.%u mm/s, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
+		//printf("counts = %d, mesure : %d.%u mm/s, error : %d.%u mm/s, output : %d.%u, integral : %d.%u\r\n", (int)cnt, (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF, TRUNC_FIXP),(int)(Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
+		set_speed_PID(&Rmot,mot_speed*(150<<16));	// 1<<14 = 150rpm , 1<<13 = 75rpm
+		set_speed_PID(&Lmot,-(mot_speed*(150<<16)));
 		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
 		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
-		vTaskDelay(100);
+		vTaskDelay(20);
 	}
 }
 
@@ -312,9 +328,13 @@ int main(void)
 
 
 	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+
 	current_sense_start();
-	motor_init(&Rmot, &htim14, &htim17, &htim3, 1, 400<<16, 400<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
-	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 400<<16, 400<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
+
+	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<14, 0, 1023<<16, 10, 0, 0, 0, 0);
+	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
+
+	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)

@@ -14,7 +14,7 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 	hMotor->speed_output[hMotor->speed_index] = fixed_mul_16(hMotor->speed_error[hMotor->speed_index], (int32_t)hMotor->speed_corr_params[0]) +
 												fixed_mul_16(hMotor->speed_integral, (int32_t)hMotor->speed_corr_params[1]) +
 												fixed_mul_16(hMotor->speed_measured[(hMotor->speed_index + 2)%3] - hMotor->speed_measured[hMotor->speed_index], (int32_t)hMotor->current_corr_params[2]) +
-												input*2000 /*hMotor->speed_output[(hMotor->speed_index + 2)%3] /*+
+												fixed_mul(input,5<<14,16) /*hMotor->speed_output[(hMotor->speed_index + 2)%3] /*+
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 2)%3], (hMotor->speed_corr_params[1] - hMotor->speed_corr_params[2])*2) +
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 1)%3], hMotor->speed_corr_params[1] + hMotor->speed_corr_params[2] - hMotor->speed_corr_params[0]) +
 												hMotor->speed_output[(hMotor->speed_index - 2)%3]*/;
