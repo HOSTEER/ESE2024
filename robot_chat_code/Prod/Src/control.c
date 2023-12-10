@@ -18,6 +18,23 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 2)%3], (hMotor->speed_corr_params[1] - hMotor->speed_corr_params[2])*2) +
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 1)%3], hMotor->speed_corr_params[1] + hMotor->speed_corr_params[2] - hMotor->speed_corr_params[0]) +
 												hMotor->speed_output[(hMotor->speed_index - 2)%3]*/;
+
+	//Current saturation based on the difference between drive voltage and BEMF,
+	//prevents OCD triggering, which can cause a motor to stall and never ramp up again
+
+	if(fixed_div(hMotor->speed_output[hMotor->speed_index],128<<16,16) - fixed_div(hMotor->speed_measured[hMotor->speed_index],50<<16,16) > 1<<18)
+	{
+		hMotor->speed_output[hMotor->speed_index] = fixed_mul(fixed_div(hMotor->speed_measured[hMotor->speed_index],50<<16,16) + (1<<18), 128<<16, 16);
+		hMotor->speed_anti_windup = 0;
+	}
+	else if(fixed_div(hMotor->speed_output[hMotor->speed_index],128<<16,16) - fixed_div(hMotor->speed_measured[hMotor->speed_index],50<<16,16) < -1<<18)
+	{
+		hMotor->speed_output[hMotor->speed_index] = fixed_mul(fixed_div(hMotor->speed_measured[hMotor->speed_index],50<<16,16) - (1<<18), 128<<16, 16);
+		hMotor->speed_anti_windup = 0;
+	}
+
+	//PWM saturation
+
 	if(hMotor->speed_output[hMotor->speed_index] > (int32_t)hMotor->speed_corr_params[3])
 	{
 		hMotor->speed_output[hMotor->speed_index] = (int32_t)hMotor->speed_corr_params[3];
