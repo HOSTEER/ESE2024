@@ -139,22 +139,6 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 		xSemaphoreGiveFromISR(BTN_STATUS_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
-
-	if(GPIO_Pin == FBD_EXTI1_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-	}
-	if(GPIO_Pin == BBD_EXTI2_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-	}
-}
-
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
-	if(GPIO_Pin == FBD_EXTI1_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
-	}
-	if(GPIO_Pin == BBD_EXTI2_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
-	}
 }
 
 
@@ -328,8 +312,6 @@ void task_MotorSpeed(void * unused)
 	}
 }
 
-
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -438,6 +420,12 @@ int main(void)
 		Error_Handler();
 	}
 
+	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
+	if(ret != pdPASS)
+	{
+		printf("Could not create printf task\r\n");
+		Error_Handler();
+	}
 
 
 

@@ -141,19 +141,10 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 	}
 
 	if(GPIO_Pin == FBD_EXTI1_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-	}
-	if(GPIO_Pin == BBD_EXTI2_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-	}
-}
 
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
-	if(GPIO_Pin == FBD_EXTI1_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 	}
 	if(GPIO_Pin == BBD_EXTI2_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+
 	}
 }
 
