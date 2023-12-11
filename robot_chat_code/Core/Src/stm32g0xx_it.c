@@ -55,6 +55,8 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
@@ -85,7 +87,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	HAL_GPIO_WritePin(USER_LED2_GPIO_Port, USER_LED2_Pin, 1);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -113,6 +115,34 @@ void TIM6_IRQHandler(void)
   /* USER CODE BEGIN TIM6_IRQn 1 */
 
   /* USER CODE END TIM6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 global interrupt / USART2 wake-up interrupt through EXTI line 26.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
