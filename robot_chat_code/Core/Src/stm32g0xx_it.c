@@ -55,7 +55,6 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
 extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim15;
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -182,7 +181,6 @@ void TIM6_IRQHandler(void)
 }
 
 /**
-
   * @brief This function handles TIM15 global interrupt.
   */
 void TIM15_IRQHandler(void)

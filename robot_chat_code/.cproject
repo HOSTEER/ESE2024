@@ -78,7 +78,6 @@
 									<listOptionValue builtIn="false" value="C:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include"/>
 									<listOptionValue builtIn="false" value="C:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
 									<listOptionValue builtIn="false" value="C:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
-
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.374443095" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

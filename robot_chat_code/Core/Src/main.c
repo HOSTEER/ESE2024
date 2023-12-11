@@ -45,7 +45,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define QUEUE_PRINTF_SIZE 100
-#define QUEUE_PRINTF_LENGTH 20
+#define QUEUE_PRINTF_LENGTH 10
 #define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
 #define DEFAULT_LIDAR_SPEED 85
@@ -166,8 +166,8 @@ void IMU_taskRead(void * unused)
 	for(;;){
 		//printf("Task init looping\r\n");
 		time_lapped = __HAL_TIM_GET_COUNTER(&htim7);
-		__HAL_TIM_SET_COUNTER(&htim7, 0);
-		HAL_TIM_Base_Start(&htim7);
+		//__HAL_TIM_SET_COUNTER(&htim7, 0);
+		//HAL_TIM_Base_Start(&htim7);
 		IMU_gyro(&h_imu);
 
 		/*uint8_t gyro_addr = 0x11;
@@ -182,6 +182,10 @@ void IMU_taskRead(void * unused)
 			sprintf(msg, "Mesures de vitesse de rotation faite, mais la base de temps est corrompue (%d overflow(s))\r\n", odom_overflow);
 			xQueueSend(q_printf, (void *)msg, 5);
 		}*/
+
+
+		sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
+		xQueueSend(q_printf, (void *)msg, 5);
 
 		//printf("Task init looping\r\n");
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
@@ -360,13 +364,13 @@ int main(void)
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
-
+	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
 	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	current_sense_start();
 	motor_init(&Rmot, &htim14, &htim17, &htim3, 1, 400<<16, 400<<16, 0, 1024<<16, 10, 0, 0, 0, 0);
 
-	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
+	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE/2, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task init \r\n");
@@ -390,7 +394,7 @@ int main(void)
 		printf("Could not create task BT ISR \r\n");
 		Error_Handler();
 	}
-	ret = xTaskCreate(task_BTN_ISR, "task_BTN_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY, &h_task_BTN_ISR);
+	ret = xTaskCreate(task_BTN_ISR, "task_BTN_ISR", DEFAULT_STACK_SIZE/2, NULL, DEFAULT_TASK_PRIORITY, &h_task_BTN_ISR);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task BTN ISR \r\n");
@@ -409,14 +413,14 @@ int main(void)
 			Error_Handler();
 		}
 
-	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY + 1, &h_IMU_taskRead);
+	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE+50, NULL, DEFAULT_TASK_PRIORITY + 9, &h_IMU_taskRead);
 	if(ret != pdPASS)
 	{
 		printf("Could not create IMU taskRead \r\n");
 		Error_Handler();
 	}
 
-	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY - 1, &h_printf);
+	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
 	if(ret != pdPASS)
 	{
 		printf("Could not create printf task\r\n");
@@ -425,7 +429,7 @@ int main(void)
 
 
 
-	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+
 
 	IMU_init(&h_imu);
 
