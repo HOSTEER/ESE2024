@@ -9,7 +9,7 @@ void setup()
 {
   size(720, 720);
   String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 115200);
+  myPort = new Serial(this, portName, 38400);
   myPort.buffer(720);
   myPort.write(0xAA); //<>//
 }
@@ -28,7 +28,8 @@ void draw()
     float y_A = sin(angle_btwn_line*i)*30;
     float x_B = cos(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + x_A;
     float y_B = sin(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + y_A;
-    line(origine_x + x_A, origine_y + y_A, origine_x + x_B, origine_y + y_B);
+    circle(origine_x + x_B, origine_y + y_B,  5);
+    //line(origine_x + x_A, origine_y + y_A, origine_x + x_B, origine_y + y_B);
   }
 }
 
@@ -42,4 +43,5 @@ void serialEvent(Serial myPort){
       lidar_value[i>>1] = lidar_value[i>>1] + rx_buffer[i];
     }
   }
+  myPort.write(0xAA);
 }
