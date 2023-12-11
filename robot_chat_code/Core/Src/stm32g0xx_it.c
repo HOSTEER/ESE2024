@@ -55,6 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+
 extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim15;
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -92,7 +93,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	HAL_GPIO_WritePin(USER_LED2_GPIO_Port, USER_LED2_Pin, 1);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -181,6 +182,7 @@ void TIM6_IRQHandler(void)
 }
 
 /**
+
   * @brief This function handles TIM15 global interrupt.
   */
 void TIM15_IRQHandler(void)

@@ -44,6 +44,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define QUEUE_PRINTF_SIZE 100
+#define QUEUE_PRINTF_LENGTH 20
 #define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
 #define DEFAULT_LIDAR_SPEED 85
@@ -58,7 +60,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+QueueHandle_t q_printf = NULL;
+
 TaskHandle_t h_task_init = NULL;
+TaskHandle_t h_IMU_taskRead = NULL;
+TaskHandle_t h_printf = NULL;
 TaskHandle_t h_task_lidar = NULL;
 TaskHandle_t h_task_lidar_ISR = NULL;
 TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
@@ -72,10 +78,12 @@ SemaphoreHandle_t BTN_STATUS_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
+h_imu_drv_t h_imu;
 uint8_t BT_RX;
 uint8_t rx_pc;
 uint8_t string_display[720];
 hMotor_t Rmot;
+uint8_t odom_overflow = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,16 +144,62 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 
 void task_init(void * unused)
 {
+
 	printf("Task init ok\r\n");
 	for(;;){
+		imu_dev(&h_imu);
 		//printf("Task init looping\r\n");
-		imu_dev();
 		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 		//HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		//HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
 		//HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 		vTaskDelay(1000);
+	}
+}
+
+void IMU_taskRead(void * unused)
+{
+	uint8_t msg [QUEUE_PRINTF_SIZE];
+	uint32_t time_lapped;
+
+	for(;;){
+		//printf("Task init looping\r\n");
+		time_lapped = __HAL_TIM_GET_COUNTER(&htim7);
+		__HAL_TIM_SET_COUNTER(&htim7, 0);
+		HAL_TIM_Base_Start(&htim7);
+		IMU_gyro(&h_imu);
+
+		/*uint8_t gyro_addr = 0x11;
+		uint8_t value[3];
+		IMU_read8(&h_imu, gyro_addr, value);*/
+
+		/*if(!odom_overflow){
+			sprintf(msg, "Mesures de vitesse de rotation faite en %d us\r\n", time_lapped);
+			xQueueSend(q_printf, (void *)msg, 5);
+		}
+		else{
+			sprintf(msg, "Mesures de vitesse de rotation faite, mais la base de temps est corrompue (%d overflow(s))\r\n", odom_overflow);
+			xQueueSend(q_printf, (void *)msg, 5);
+		}*/
+
+		//printf("Task init looping\r\n");
+		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+		vTaskDelay(5);
+	}
+}
+
+void printfTask(void * unused)
+{
+	uint8_t msg[QUEUE_PRINTF_SIZE];
+	BaseType_t ret;
+	for(;;){
+		ret = xQueueReceive(q_printf, (void *)msg, portMAX_DELAY);
+		uint16_t msg_len = strlen(msg);
+		if(ret == pdTRUE){
+			//printf(msg);
+			HAL_UART_Transmit_IT(&huart2, msg, msg_len);
+		}
 	}
 }
 
@@ -301,6 +355,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   MX_SPI1_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
@@ -353,6 +408,26 @@ int main(void)
 			printf("Could not create task MotorSpeed \r\n");
 			Error_Handler();
 		}
+
+	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY + 1, &h_IMU_taskRead);
+	if(ret != pdPASS)
+	{
+		printf("Could not create IMU taskRead \r\n");
+		Error_Handler();
+	}
+
+	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY - 1, &h_printf);
+	if(ret != pdPASS)
+	{
+		printf("Could not create printf task\r\n");
+		Error_Handler();
+	}
+
+
+
+	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+
+	IMU_init(&h_imu);
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
@@ -439,7 +514,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM7) {
+	  odom_overflow++;
+	  HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
+    }
   /* USER CODE END Callback 1 */
 }
 
@@ -450,6 +528,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+	HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1)
