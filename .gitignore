@@ -5,8 +5,10 @@
 */Debug
 */.settings/*
 !*/.settings/org.eclipse.core.resources.prefs
-*/Core/*
+*/Core/Src/*
 !*/Core/Src/main.c
+*/Core/Inc/*
+!*/Core/Src/main.h
 
 # For C code
 # Prerequisites
