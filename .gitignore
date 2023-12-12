@@ -8,7 +8,7 @@
 */Core/Src/*
 !*/Core/Src/main.c
 */Core/Inc/*
-!*/Core/Src/main.h
+!*/Core/Inc/main.h
 
 # For C code
 # Prerequisites
