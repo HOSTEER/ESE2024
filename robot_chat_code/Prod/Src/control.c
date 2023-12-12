@@ -55,16 +55,16 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 {
 	int32_t output = 0; //Q8.24
 	int32_t error = input - hOdometry->angle; //Q8.24
-	if(error > PI<<1)
-		{
-			error = -(PI<<1) + error%(PI<<1);
-		}
-	else if(error < -(PI<<1))
-		{
-			error = (PI<<1) - error%(PI<<1);
-		}
+	if(error > PI)
+	{
+		error = -PI + error%PI;
+	}
+	else if(error < -PI)
+	{
+		error = PI - error%PI;
+	}
 
-	output = error;
+	output = 2*error;
 	if(output > 1<<24)
 	{
 		output = 1<<24;

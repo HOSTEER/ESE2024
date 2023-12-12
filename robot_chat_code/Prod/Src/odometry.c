@@ -6,7 +6,7 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 {
 	hOdometry->Rmot = Rmot;
 	hOdometry->Lmot = Lmot;
-	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 23),(int32_t)CPR,16); // mm/tick, Q8.24
+	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 24),(int32_t)CPR,16); // mm/tick, Q8.24
 	hOdometry->wheel_dist = wheel_dist; //mm, Q16.16
 	hOdometry->freq = freq;
 	hOdometry->dr = 0;
@@ -36,19 +36,19 @@ void odometry_update_pos(hOdometry_t *hOdometry)
 	hOdometry->dr = Rdelta/2 - Ldelta/2; //mm, Q8.24
 	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,16) + fixed_div(Ldelta, hOdometry->wheel_dist, 16); //rad, Q8.24
 
-	int32_t dx = fixed_mul(hOdometry->dr, (int32_t)fpcos(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
-	int32_t dy = fixed_mul(hOdometry->dr, (int32_t)fpsin(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
+	int32_t dx = fixed_mul(hOdometry->dr, (int32_t)fpcos(fixed_div(hOdometry->angle + dalpha/2, PI<<1, 15)) * (1<<4), 24); //mm, Q16.16
+	int32_t dy = fixed_mul(hOdometry->dr, (int32_t)fpsin(fixed_div(hOdometry->angle + dalpha/2, PI<<1, 15)) * (1<<4), 24); //mm, Q16.16
 
 	hOdometry->angle += dalpha;
 
 
-	if(hOdometry->angle > PI<<1)
+	if(hOdometry->angle > PI)
 	{
-		hOdometry->angle = -(PI<<1) + hOdometry->angle%(PI<<1);
+		hOdometry->angle = -PI + hOdometry->angle%PI;
 	}
-	else if(hOdometry->angle < -(PI<<1))
+	else if(hOdometry->angle < -PI)
 	{
-		hOdometry->angle = (PI<<1) - hOdometry->angle%(PI<<1);
+		hOdometry->angle = PI - hOdometry->angle%PI;
 	}
 
 	hOdometry->x += dx;

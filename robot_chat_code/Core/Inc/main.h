@@ -135,7 +135,8 @@ void Error_Handler(void);
 #define USER_LED4_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
-
+#define PI 0x3243F6A //Pi, Q8.24
+#define HALF_PI (0x3243F6A>>1) //Pi/2, Q8.24
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
