@@ -39,7 +39,16 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef enum{
+	HUNTER			= 0x10,
+	PREY			= 0x20,
+	FALL_FORWARD 	= 0x00,
+	FALL_BACKWARD 	= 0x01,
+	COLL_FRONT 		= 0x02,
+	COLL_BACK 		= 0x03,
+	COLL_LEFT 		= 0x04,
+	COLL_RIGHT 		= 0x05
+}strat_mode_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -84,6 +93,7 @@ uint8_t rx_pc;
 uint8_t string_display[720];
 hMotor_t Rmot;
 uint8_t odom_overflow = 0;
+strat_mode_t strat_mode = PREY;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -328,7 +338,9 @@ void task_MotorSpeed(void * unused)
 	}
 }
 
+void fall_detection(void * unused){
 
+}
 
 /* USER CODE END PFP */
 
