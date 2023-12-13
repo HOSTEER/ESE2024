@@ -310,7 +310,7 @@ void task_BTN_ISR(void * unused)
 		xSemaphoreTake(BTN_STATUS_semaphore, portMAX_DELAY);
 		ydlidar_x4_scan(&lidar);
 		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
-    mot_speed ^= 1;
+		//mot_speed ^= 1;
 	}
 }
 
@@ -516,12 +516,12 @@ int main(void)
 		Error_Handler();
 	}
 
-	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE+50, NULL, DEFAULT_TASK_PRIORITY + 9, &h_IMU_taskRead);
+	/*ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE+50, NULL, DEFAULT_TASK_PRIORITY + 9, &h_IMU_taskRead);
 	if(ret != pdPASS)
 	{
 		printf("Could not create IMU taskRead \r\n");
 		Error_Handler();
-	}
+	}*/
 
 
 
@@ -615,10 +615,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim->Instance == TIM7) {
-	  odom_overflow++;
-	  HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
-    }
+	if (htim->Instance == TIM7) {
+		odom_overflow++;
+		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
+	}
   /* USER CODE END Callback 1 */
 }
 
