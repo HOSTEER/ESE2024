@@ -30,7 +30,6 @@ typedef enum ydlidar_x4_command_enum
 
 typedef enum ydlidar_x4_parsing_enum
 {
-	IDLE  				= 0,
 	SCANNING			= 1,
 	PARSING_SMPL		= 2,
 	PARSING_START_ANGL 	= 3,
@@ -55,12 +54,9 @@ typedef struct h_ydlidar_x4_struct
 	ydlidar_x4_command_t cmd;
 	// 360 valeurs pour les 360 degre
 	uint16_t smpl[LIDAR_DEFAULT_SMPL_NB];
-	uint16_t rev_smpls[600][2];
 	uint16_t sorted_dist[360];
 	// Buffer pour stocker les valeur brut du DMA
 	uint8_t buf_DMA[LIDAR2DMA_SIZE];
-	// temps depuis la derniere mesure
-	uint8_t time_stmp[600];
 	ydlidar_x4_parsing_t decode_state;
 	// bien demarre
 	uint8_t nb_smpl;
