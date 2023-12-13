@@ -40,7 +40,16 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef enum{
+	HUNTER			= 0x10,
+	PREY			= 0x20,
+	FALL_FORWARD 	= 0x00,
+	FALL_BACKWARD 	= 0x01,
+	COLL_FRONT 		= 0x02,
+	COLL_BACK 		= 0x03,
+	COLL_LEFT 		= 0x04,
+	COLL_RIGHT 		= 0x05
+}strat_mode_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -96,6 +105,7 @@ int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
 uint8_t odom_overflow = 0;
+strat_mode_t strat_mode = PREY;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -150,6 +160,22 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(BTN_STATUS_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+	}
+}
+
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 	}
 }
 
@@ -382,6 +408,10 @@ void task_MotorSpeed(void * unused)
 	}
 }
 
+void fall_detection(void * unused){
+
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -495,12 +525,6 @@ int main(void)
 		Error_Handler();
 	}
 
-	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
-	if(ret != pdPASS)
-	{
-		printf("Could not create printf task\r\n");
-		Error_Handler();
-	}
 
 
 
