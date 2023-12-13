@@ -93,7 +93,7 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	HAL_GPIO_WritePin(USER_LED2_GPIO_Port, USER_LED2_Pin, 1);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -110,6 +110,20 @@ void HardFault_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line 0 and line 1 interrupts.
+  */
+void EXTI0_1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_1_IRQn 0 */
+
+  /* USER CODE END EXTI0_1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(FBD_EXTI1_Pin);
+  /* USER CODE BEGIN EXTI0_1_IRQn 1 */
+
+  /* USER CODE END EXTI0_1_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line 2 and line 3 interrupts.
   */
 void EXTI2_3_IRQHandler(void)
@@ -117,6 +131,7 @@ void EXTI2_3_IRQHandler(void)
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
 
   /* USER CODE END EXTI2_3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(BBD_EXTI2_Pin);
   HAL_GPIO_EXTI_IRQHandler(IMU_INT1_Pin);
   /* USER CODE BEGIN EXTI2_3_IRQn 1 */
 

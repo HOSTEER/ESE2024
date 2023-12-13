@@ -69,10 +69,12 @@ void Error_Handler(void);
 #define BTN_GAME_START_EXTI_IRQn EXTI4_15_IRQn
 #define BUMP_EXTI_Pin GPIO_PIN_0
 #define BUMP_EXTI_GPIO_Port GPIOC
-#define FBD_EXTI_Pin GPIO_PIN_1
-#define FBD_EXTI_GPIO_Port GPIOC
-#define BBD_EXTI_Pin GPIO_PIN_2
-#define BBD_EXTI_GPIO_Port GPIOC
+#define FBD_EXTI1_Pin GPIO_PIN_1
+#define FBD_EXTI1_GPIO_Port GPIOC
+#define FBD_EXTI1_EXTI_IRQn EXTI0_1_IRQn
+#define BBD_EXTI2_Pin GPIO_PIN_2
+#define BBD_EXTI2_GPIO_Port GPIOC
+#define BBD_EXTI2_EXTI_IRQn EXTI2_3_IRQn
 #define BAT_ADC_Pin GPIO_PIN_0
 #define BAT_ADC_GPIO_Port GPIOA
 #define ST_LINK_TX_Pin GPIO_PIN_2
@@ -135,7 +137,8 @@ void Error_Handler(void);
 #define USER_LED4_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
-
+#define PI 0x3243F6A //Pi, Q8.24
+#define HALF_PI (0x3243F6A>>1) //Pi/2, Q8.24
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

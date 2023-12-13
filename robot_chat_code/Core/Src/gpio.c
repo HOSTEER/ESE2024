@@ -55,8 +55,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LIDAR_EN_Pin|LIDAR_RANGING_EN_Pin|USER_LED4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, IMU_SPI_CS_Pin|USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin
-                          |USER_LED3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(IMU_SPI_CS_GPIO_Port, IMU_SPI_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, USER_LED0_Pin|USER_LED1_Pin|USER_LED2_Pin|USER_LED3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PCPin PCPin */
   GPIO_InitStruct.Pin = BTN_GAME_STATUS_Pin|BTN_GAME_START_Pin;
@@ -64,10 +66,16 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PCPin PCPin PCPin */
-  GPIO_InitStruct.Pin = BUMP_EXTI_Pin|FBD_EXTI_Pin|BBD_EXTI_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = BUMP_EXTI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BUMP_EXTI_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PCPin PCPin */
+  GPIO_InitStruct.Pin = FBD_EXTI1_Pin|BBD_EXTI2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PCPin PCPin PCPin */
@@ -93,6 +101,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
 
