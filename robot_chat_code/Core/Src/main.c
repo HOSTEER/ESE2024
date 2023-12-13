@@ -52,10 +52,11 @@
 #define DEFAULT_LIDAR_SPEED 85
 #define TRUNC_FIXP 1000000000000
 
-#define WHEEL_DIAMETER (43UL<<24) 	//43mm diameter, Q8.24
-#define WHEEL_DIST (153UL<<16) 		//153mm distance between wheels, Q16.16
-#define ENC_TICKSPERREV 400<<16	//618.18 encoder ticks per revolution, Q16.16
-#define ODOMETRY_FREQ 50UL 			//50Hz odometry refresh frequency
+#define WHEEL_DIAMETER (43<<24) 	//43mm diameter, Q8.24
+#define WHEEL_DIST (153<<16) 		//153mm distance between wheels, Q16.16
+#define ENC_TICKSPERREV (400<<16)		//400 encoder ticks per revolution, Q16.16
+#define ODOMETRY_FREQ 50 			//50Hz odometry refresh frequency
+#define ROBOT_SPEED (500<<16) 		//robot speed, mm/s Q16.16
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -306,7 +307,7 @@ void task_Motor(void * unused)
 		//printf("L Vdiff %d\r\n", (int)(fixed_div(Lmot.speed_output[Lmot.speed_index],128<<16,16) - fixed_div(Lmot.speed_measured[Lmot.speed_index],80<<16,16))/(1<<16));
 		//printf("angle %d\r\n", (int)(hOdometry.angle*10/(1<<24)));
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
-		printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		//printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
 
 		/*motor_set_PWM(&Rmot, 512);
@@ -336,17 +337,39 @@ void task_MotorSpeed(void * unused)
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
 		//motor_get_current(&Lmot);
-		if(hOdometry.x > 1000<<16)
+		if(hOdometry.x > 1000<<15)
 		{
-			angle = PI;
+			angle += PI;
+			hOdometry.x = 0;
 		}
-		if(hOdometry.y > 1000<<16)
+		if(hOdometry.y > 1000<<15)
 		{
-			mot_speed = 0;
+			angle += PI;
+			hOdometry.y = 0;
+			//mot_speed = 0;
+		}
+		if(hOdometry.x < -1000<<15)
+		{
+			angle += PI;
+			hOdometry.x = 0;
+		}
+		if(hOdometry.y < -1000<<15)
+		{
+			angle += PI;
+			hOdometry.y = 0;
+			//mot_speed = 0;
+		}
+		if(angle > PI)
+		{
+			angle = -PI + angle%PI;
+		}
+		else if(angle < -PI)
+		{
+			angle = PI - angle%PI;
 		}
 		angle_corr = set_angle_corr(&hOdometry, angle);
-		Rspeed = (250<<16) + fixed_mul(250<<16, angle_corr, 24);
-		Lspeed = (250<<16) - fixed_mul(250<<16, angle_corr, 24);
+		Rspeed = (int32_t)ROBOT_SPEED + fixed_mul((int32_t)ROBOT_SPEED, angle_corr, 24);
+		Lspeed = (int32_t)ROBOT_SPEED - fixed_mul((int32_t)ROBOT_SPEED, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
 		//motor_set_PWM(&Rmot, 1024);
 		//printf("vitesse moteur = %d.%u mm/s, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
@@ -417,8 +440,8 @@ int main(void)
 
 	current_sense_start();
 
-	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
-	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
+	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<14, 0, 1023<<16, 10, 0, 0, 0, 0);
+	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<14, 0, 1023<<16, 10, 0, 0, 0, 0);
 
 	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 
