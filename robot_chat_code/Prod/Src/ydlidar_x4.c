@@ -5,8 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define FULL
-
 int ydlidar_x4_stop(h_ydlidar_x4_t * lidar){
 	lidar->cmd = CMD_STOP;
 	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
@@ -54,19 +52,13 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
-	static uint16_t revoltion_idx=0;
 	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/4;
 	uint16_t first_angle=lidar->start_angl;
-	for(;smpl_idx<40;smpl_idx++,revoltion_idx++){
-		if (revoltion_idx>= 600){
-			revoltion_idx = 0;
-		}
+	for(;smpl_idx<40;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
-			lidar->rev_smpls[revoltion_idx][0]=first_angle + (angle_per_dist*smpl_idx)/10;
-			lidar->rev_smpls[revoltion_idx][1]=lidar->smpl[smpl_idx];
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
 		}
 	}
-	ydlidar_x4_sort_smpl(lidar, revoltion_idx);
 	return 0;
 }
 
@@ -91,16 +83,6 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 
 	for(;idx_head < head_limit; last_byte = dma_mem[idx_head], idx_head++){
 		switch(*state){
-			case IDLE :
-				if(last_byte == 0xA5 && dma_mem[idx_head] == 0x5A){
-						*state = SCANNING;
-						idx_head = 26;
-				}
-				else if(idx_head>26){
-					*state = SCANNING;
-				}
-				break;
-
 			case SCANNING :
 				if(dma_mem[idx_head] == 0x55 && last_byte == 0xAA){
 					*state = PARSING_SMPL;
@@ -166,74 +148,3 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 	return 0;
 }
 
-#ifdef LOW_RES
-int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *lidar, uint16_t revoltion_idx){
-
-	uint16_t agl_idx, smpl_idx=0;
-	uint16_t agl_inst[40] = {0};
-	uint8_t nb_angle = 0;
-	uint16_t dist;
-	uint16_t agl;
-	uint16_t min_dist;
-
-	if(revoltion_idx < 40)
-		return 1;
-
-	for(smpl_idx = revoltion_idx-40;smpl_idx<revoltion_idx;smpl_idx++){
-
-		if(lidar->rev_smpls[smpl_idx][0]-(lidar->rev_smpls[smpl_idx][0])%10 != agl_inst[nb_angle]){
-			agl_inst[nb_angle+1] = lidar->rev_smpls[smpl_idx][0]-(lidar->rev_smpls[smpl_idx][0])%10;
-			nb_angle++;
-
-			 min_dist = 10000;
-
-			for(agl_idx=revoltion_idx-40;agl_idx<revoltion_idx;agl_idx++){
-				agl =  lidar->rev_smpls[agl_idx][0];
-				dist = lidar->rev_smpls[agl_idx][1];
-				if((agl - agl%10 == agl_inst[nb_angle]) && (dist < min_dist)){
-					min_dist = dist;
-				}
-			}
-			lidar->sorted_dist[agl_inst[nb_angle]] = (min_dist + lidar->sorted_dist[agl_inst[nb_angle]])/2;
-		}
-
-	}
-	return 0;
-}
-#endif
-
-#ifdef FULL
-int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *lidar, uint16_t revoltion_idx){
-
-	uint16_t agl_idx, smpl_idx=0;
-	uint16_t agl_inst[40] = {0};
-	uint8_t nb_angle = 0;
-	uint16_t dist;
-	uint16_t agl;
-	uint16_t min_dist;
-
-	if(revoltion_idx < 40)
-		return 1;
-
-	for(smpl_idx = revoltion_idx-40;smpl_idx<revoltion_idx;smpl_idx++){
-
-		if(lidar->rev_smpls[smpl_idx][0] != agl_inst[nb_angle]){
-			agl_inst[nb_angle+1] = lidar->rev_smpls[smpl_idx][0];
-			nb_angle++;
-
-			 min_dist = 10000;
-
-			for(agl_idx=revoltion_idx-40;agl_idx<revoltion_idx;agl_idx++){
-				agl =  lidar->rev_smpls[agl_idx][0];
-				dist = lidar->rev_smpls[agl_idx][1];
-				if((agl == agl_inst[nb_angle]) && (dist < min_dist)){
-					min_dist = dist;
-				}
-			}
-			lidar->sorted_dist[agl_inst[nb_angle]] = (min_dist + lidar->sorted_dist[agl_inst[nb_angle]])/2;
-		}
-
-	}
-	return 0;
-}
-#endif
