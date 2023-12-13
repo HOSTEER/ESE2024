@@ -1,10 +1,24 @@
-08:41:45 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+11:16:50 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
+arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
+../Prod/Src/strategy.c: In function 'zone_sorting':
+../Prod/Src/strategy.c:63:16: warning: variable 'zone_h' set but not used [-Wunused-but-set-variable]
+   63 |         int8_t zone_h; //Zone horizontale dans laquelle est le robot
+      |                ^~~~~~
+../Prod/Src/strategy.c:62:16: warning: unused variable 'zone_v' [-Wunused-variable]
+   62 |         int8_t zone_v; //Zone verticale dans laquelle est le robot
+      |                ^~~~~~
+arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: robot_chat_soft.elf
+ 
 arm-none-eabi-size   robot_chat_soft.elf 
+arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  58764	    120	  27064	  85948	  14fbc	robot_chat_soft.elf
+  59120	    124	  27060	  86304	  15120	robot_chat_soft.elf
 Finished building: default.size.stdout
  
+Finished building: robot_chat_soft.list
+ 
 
-08:41:46 Build Finished. 0 errors, 0 warnings. (took 310ms)
+11:16:51 Build Finished. 0 errors, 2 warnings. (took 983ms)
 

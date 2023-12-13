@@ -36,6 +36,7 @@
 #include "fixpoint_math.h"
 #include "control.h"
 #include "odometry.h"
+#include "strategy.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,6 +97,7 @@ int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
 uint8_t odom_overflow = 0;
+strat_mode_t strat_mode = PREY | TURN_TRIGO;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -156,7 +158,39 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 		xSemaphoreGiveFromISR(BTN_START_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
+
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
+	}
+
+	if(GPIO_Pin == BUMP_EXTI_Pin) {
+		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+	}
 }
+
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
+		//Le masque | NO_OBSTACLE est optionnel mais permet une meilleure lecture du code
+		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+	}
+	if(GPIO_Pin == BUMP_EXTI_Pin) {
+		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+	}
+}
+
 
 
 void task_init(void * unused)
@@ -171,6 +205,7 @@ void task_init(void * unused)
 		//HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		//HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
 		//HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		printf("Strat mode : 0x%x\n\r", strat_mode);
 		vTaskDelay(1000);
 	}
 }

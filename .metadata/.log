@@ -5437,3 +5437,6 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-13 09:05:17.971
 !MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-13 09:12:14.682
+!MESSAGE Indexed 'robot_chat_soft' (54 sources, 199 headers) in 3.23 sec: 19,144 declarations; 99,404 references; 3 unresolved inclusions; 136 syntax errors; 172 unresolved names (0.14%)

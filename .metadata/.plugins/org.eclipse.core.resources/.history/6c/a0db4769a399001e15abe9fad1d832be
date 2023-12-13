@@ -1,0 +1,101 @@
+#include "strategy.h"
+
+
+
+#define ZONE_MILIEU 2
+#define ZONE_DROITE 3
+#define ZONE_GAUCHE 1
+#define ZONE_HAUTE 1
+#define ZONE_BASSE 3
+
+/* 			|					|
+ * 		1	|		2			|	3
+ * --------------------------------------
+ * 			|					|
+ * 		4	|		5			|	6
+ * 			|					|
+ * --------------------------------------
+ * 		7	|		8			|	9
+ * 			|					|
+ */
+
+
+champ_vect_t champ_vect;
+
+
+void init_champ_vect(void){
+	champ_vect.vitesse = 10;
+	champ_vect.pt_lim_haut = (500<<16);
+	champ_vect.pt_lim_droite = (1000<<16);
+	champ_vect.pt_lim_gauche = -1*(1000<<16);
+	champ_vect.pt_lim_bas = -1*(500<<16);
+	champ_vect.offset_gauche = -1*(10<<16);
+	champ_vect.offset_droite = -1*champ_vect.offset_gauche;
+	champ_vect.offset_haut = (10<<16);
+	champ_vect.offset_bas = -1*champ_vect.offset_haut;
+}
+
+
+int strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
+
+	if((*strat_mode & 0xF000) == HUNTER){
+		//Le robot est chasseur
+		if((*strat_mode & 0xFF) != NO_OBSTACLE){
+			//Obstacle détecté
+
+		}
+		else{
+			//Aucun obstacle
+
+		}
+	}
+	else{
+		//Le robot est la proie
+		if((*strat_mode & 0xFF) != NO_OBSTACLE){
+			//Obstacle détecté
+
+		}
+		else{
+			//Aucun obstacle
+
+
+		}
+	}
+	return 0;
+}
+
+int champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
+
+	return 0;
+}
+
+int zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
+	int8_t zone_v; //Zone verticale dans laquelle est le robot
+	int8_t zone_h; //Zone horizontale dans laquelle est le robot
+	if (hOdometry->x >= champ_vect->pt_lim_droite){
+		zone_h = ZONE_DROITE;
+	}
+	else if (hOdometry->x < champ_vect->pt_lim_gauche){
+		zone_h = ZONE_GAUCHE;
+	}
+	else{
+		zone_h = ZONE_MILIEU;
+	}
+
+	if (hOdometry->y >= champ_vect->pt_lim_haut){
+		zone_v = ZONE_HAUTE;
+	}
+	else if (hOdometry->y < champ_vect->pt_lim_bas){
+		zone_v = ZONE_BASSE;
+	}
+	else{
+		zone_v = ZONE_MILIEU;
+	}
+
+	switch(zone_v + zone_h)
+
+
+
+	return 0;
+}
+

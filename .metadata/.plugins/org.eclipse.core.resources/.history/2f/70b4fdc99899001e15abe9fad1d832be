@@ -1,0 +1,22 @@
+/*
+ * strategy.h
+ *
+ *  Created on: Dec 13, 2023
+ *      Author: les_victor
+ */
+
+#ifndef INC_STRATEGY_H_
+#define INC_STRATEGY_H_
+
+typedef enum{
+	HUNTER			= 0x1000,
+	PREY			= 0x2000,
+	NO_OBSTACLE		= 0x0000,
+	FALL_FORWARD 	= 0x0001,
+	FALL_BACKWARD 	= 0x0002,
+	COLLIDE 		= 0x0010,
+	TURN_TRIGO		= 0x0100,
+	TURN_CLOCK		= 0x0200
+}strat_mode_t;
+
+#endif /* INC_STRATEGY_H_ */
