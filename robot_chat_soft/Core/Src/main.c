@@ -66,7 +66,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-QueueHandle_t q_printf = NULL;
+//QueueHandle_t q_printf = NULL;
 
 TaskHandle_t h_task_init = NULL;
 TaskHandle_t h_IMU_taskRead = NULL;
@@ -115,7 +115,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
 		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
-	if(huart->Instance == USART3 || huart->Instance == USART2){
+	if(huart->Instance == USART2){
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(stm_RX_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+	if(huart->Instance == USART3){
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(stm_RX_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
@@ -202,25 +207,11 @@ void IMU_taskRead(void * unused)
 
 
 		sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
-		xQueueSend(q_printf, (void *)msg, 5);
+		//xQueueSend(q_printf, (void *)msg, 5);
 
 		//printf("Task init looping\r\n");
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 		vTaskDelay(5);
-	}
-}
-
-void printfTask(void * unused)
-{
-	uint8_t msg[QUEUE_PRINTF_SIZE];
-	BaseType_t ret;
-	for(;;){
-		ret = xQueueReceive(q_printf, (void *)msg, portMAX_DELAY);
-		uint16_t msg_len = strlen(msg);
-		if(ret == pdTRUE){
-			//printf(msg);
-			HAL_UART_Transmit_IT(&huart2, msg, msg_len);
-		}
 	}
 }
 
@@ -236,7 +227,7 @@ void task_lidar(void * unused)
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	vTaskDelete(0);
 }
@@ -282,7 +273,7 @@ void task_BTN_ISR(void * unused)
 		xSemaphoreTake(BTN_STATUS_semaphore, portMAX_DELAY);
 		ydlidar_x4_scan(&lidar);
 		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
-		mot_speed ^= 1;
+		//mot_speed ^= 1;
 	}
 }
 
@@ -303,7 +294,7 @@ void task_Motor(void * unused)
 		//printf("L Vdiff %d\r\n", (int)(fixed_div(Lmot.speed_output[Lmot.speed_index],128<<16,16) - fixed_div(Lmot.speed_measured[Lmot.speed_index],80<<16,16))/(1<<16));
 		//printf("angle %d\r\n", (int)(hOdometry.angle*10/(1<<24)));
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
-		printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		//TODO printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
 
 		/*motor_set_PWM(&Rmot, 512);
@@ -408,9 +399,9 @@ int main(void)
 	stm_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 	BTN_START_semaphore = xSemaphoreCreateBinary();
-	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+	//q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
-	//HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1);
 
 	current_sense_start();
 

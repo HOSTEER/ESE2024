@@ -23,26 +23,28 @@
 #define GYRO_EN
 #define ACCEL_EN
 
+//#define PRINT_IMU
+
 extern QueueHandle_t q_printf;
 
 uint8_t receive_buffer = 0;
 uint8_t transmit_buffer = 0x80;
 
 //imu_drv_t imu;
-
 int imu_dev(h_imu_drv_t * h_imu){
+#ifdef PRINT_IMU
 	printf("\r\n===== ADXL345 =====\r\n");
 	printf("Connecter VCC sur le 5V et GND sur GND\r\n");
 	printf("CS sur D3, SDO sur D12, SDA sur D11, SCL sur D13, INT1 sur D4\r\n");
-
+#endif
 
 	IMU_gyro(h_imu);
-
+#ifdef PRINT_IMU
 	printf("Lecture des accelerations :\r\n");
 	printf("- Gyro X :%d\r\n", h_imu->gyro[0]);
 	printf("- Gyro Y :%d\r\n", h_imu->gyro[1]);
 	printf("- Gyro Z :%d\r\n", h_imu->gyro[2]);
-
+#endif
 	/*uint8_t msg [100];
 	sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n",
 			imu.gyro[0], imu.gyro[1], imu.gyro[2]);
