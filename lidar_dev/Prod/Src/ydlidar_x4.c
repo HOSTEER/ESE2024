@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define FULL
+//#define FULL
 
 int ydlidar_x4_stop(h_ydlidar_x4_t * lidar){
 	lidar->cmd = CMD_STOP;
@@ -54,19 +54,14 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
-	static uint16_t revoltion_idx=0;
 	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/4;
 	uint16_t first_angle=lidar->start_angl;
-	for(;smpl_idx<40;smpl_idx++,revoltion_idx++){
-		if (revoltion_idx>= 600){
-			revoltion_idx = 0;
-		}
+	for(;smpl_idx<40;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
-			lidar->rev_smpls[revoltion_idx][0]=first_angle + (angle_per_dist*smpl_idx)/10;
-			lidar->rev_smpls[revoltion_idx][1]=lidar->smpl[smpl_idx];
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
 		}
 	}
-	ydlidar_x4_sort_smpl(lidar, revoltion_idx);
+	//ydlidar_x4_sort_smpl(lidar, revoltion_idx);
 	return 0;
 }
 
@@ -91,7 +86,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 
 	for(;idx_head < head_limit; last_byte = dma_mem[idx_head], idx_head++){
 		switch(*state){
-			case IDLE :
+			/*case IDLE :
 				if(last_byte == 0xA5 && dma_mem[idx_head] == 0x5A){
 						*state = SCANNING;
 						idx_head = 26;
@@ -100,7 +95,7 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 					*state = SCANNING;
 				}
 				break;
-
+*/
 			case SCANNING :
 				if(dma_mem[idx_head] == 0x55 && last_byte == 0xAA){
 					*state = PARSING_SMPL;
