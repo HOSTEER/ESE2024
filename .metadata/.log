@@ -5440,3 +5440,18 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY org.eclipse.cdt.core 1 0 2023-12-13 09:12:14.682
 !MESSAGE Indexed 'robot_chat_soft' (54 sources, 199 headers) in 3.23 sec: 19,144 declarations; 99,404 references; 3 unresolved inclusions; 136 syntax errors; 172 unresolved names (0.14%)
+!SESSION 2023-12-14 09:50:35.572 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-14 09:50:59.423
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-14 09:50:59.435
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-14 09:51:32.059
+!MESSAGE Started RMI Server, listening on port 41337

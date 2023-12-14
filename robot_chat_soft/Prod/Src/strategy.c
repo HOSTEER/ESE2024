@@ -8,6 +8,8 @@
 #define ZONE_HAUTE 1
 #define ZONE_BASSE 3
 
+#define ERR_ZONE_404 1
+
 /* 			|				|
  * 		1	|		2		|	3
  * ----------------------------------
@@ -37,8 +39,8 @@ void init_champ_vect(void){
 }
 
 
-int strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-
+int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
+	int32_t dir_vect[2];
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) != NO_OBSTACLE){
@@ -65,30 +67,17 @@ int strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	return 0;
 }
 
-int champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
+int8_t champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect){
 	uint8_t zone = zone_sorting(&champ_vect, hOdometry);
+	int8_t status;
 
-	switch(zone){
-	case 1:
-		break;
-	case 2:
-		break;
-	case 3:
-		break;
-	case 4:
-		break;
-	case 5:
-		break;
-	case 6:
-		break;
-	case 7:
-		break;
-	case 8:
-		break;
-	case 9:
-		break;
+	if(zone%2 == 0){
+		status = zone_lineaire(&champ_vect, hOdometry, zone, dir_vect);
 	}
-	return 0;
+	else{
+		status += zone_circulaire(&champ_vect, hOdometry, zone, dir_vect);
+	}
+	return status;
 }
 
 int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
@@ -148,29 +137,74 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 
 }
 
-int32_t zone_lineaire(uint8_t zone){
+int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
 	int8_t axe, sens;
-	int32_t dir_vect[2];
-	if(zone == 2 || zone == 8){
-		axe = 1; //Axe horizontal
-		if(zone == 2)
-			sens = 1;
-		else
-			sens = -1;
+	//int32_t dir_vect[2];
+	switch(zone){
+	case 2: //Zone haute
+		sens = +1;
+		dir_vect[1] = ((champ_vect->pt_lim_haut + champ_vect->offset_haut) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = sens*champ_vect->vitesse_avance;
+		break;
+	case 4: //Zone Gauche
+		sens = +1;
+		dir_vect[0] = ((champ_vect->pt_lim_gauche + champ_vect->offset_gauche) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = sens*champ_vect->vitesse_avance;
+		break;
+	case 6: //Zone droite
+		sens = -1;
+		dir_vect[0] = ((champ_vect->pt_lim_droite + champ_vect->offset_droite) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = sens*champ_vect->vitesse_avance;
+		break;
+	case 8: //Zone basse
+		sens = -1;
+		dir_vect[1] = ((champ_vect->pt_lim_bas + champ_vect->offset_bas) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = sens*champ_vect->vitesse_avance;
+		break;
+	default:
+		return ERR_ZONE_404;
 	}
-	else{
-		axe = 2; //Axe vertical
-		if(zone == 4)
-			sens = 1;
-		else
-			sens = -1;
-	}
-
-	if(axe == 1){
-		dir_vect[0] = hOdometry.y-(champ_vect.)
-	}
+	return 0;
 }
 
-int32_t zone_circulaire(uint8_t zone){
+int8_t zone_circulaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
+	//int32_t dir_vect[2] = {0};
+	int32_t xb, yb;
+	int32_t Dx, Dy;
+	int32_t d, norm;
 
+	switch(zone){
+	case 1:
+		xb = champ_vect->pt_lim_gauche;
+		yb = champ_vect->pt_lim_haut;
+		break;
+	case 3:
+		xb = champ_vect->pt_lim_droite;
+		yb = champ_vect->pt_lim_haut;
+		break;
+	case 7:
+		xb = champ_vect->pt_lim_gauche;
+		yb = champ_vect->pt_lim_bas;
+		break;
+	case 9:
+		xb = champ_vect->pt_lim_droite;
+		yb = champ_vect->pt_lim_bas;
+		break;
+	default:
+		return ERR_ZONE_404;
+	}
+
+	Dx = (hOdometry->x - xb);
+	Dy = (hOdometry->y - yb);
+	//TODO norm = sqrt(Dx*Dx + Dy*Dy);
+	//TODO d = l - norm
+
+	//Calcul consigne de direction
+	//vect colinéaire = {-Dx/norm, -Dy/norm}
+	//vect tangentiel = {Dy/norm, -Dx/norm}
+	//consigne = d*vect_colin + sens*vitesse*vect_tang
+	dir_vect[0] = (-d*Dx)/norm + (champ_vect->vitesse_avance*Dy)/norm;
+	dir_vect[1] = (-d*Dy)/norm + (-champ_vect->vitesse_avance*Dx)/norm;
+
+	return 0;
 }

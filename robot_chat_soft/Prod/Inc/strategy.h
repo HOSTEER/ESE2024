@@ -23,7 +23,7 @@ typedef enum{
 }strat_mode_t;
 
 typedef struct CHAMP_VECT_STRUCT_T{
-	int16_t vitesse;
+	int16_t vitesse_avance, vitesse_correctrice;
 	int32_t pt_lim_gauche, pt_lim_droite;
 	int32_t pt_lim_haut,  pt_lim_bas;
 	int32_t offset_gauche, offset_droite, offset_haut, offset_bas;
@@ -31,5 +31,12 @@ typedef struct CHAMP_VECT_STRUCT_T{
 
 
 int strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry);
+
+void init_champ_vect(void);
+int8_t champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect);
+int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry);
+int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect);
+int8_t zone_circulaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect);
+
 
 #endif /* INC_STRATEGY_H_ */
