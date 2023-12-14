@@ -1,5 +1,5 @@
 #include "strategy.h"
-#include "fixpoint_math.h"
+
 
 
 #define ZONE_MILIEU 2
@@ -105,8 +105,8 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 
 	if((zone_h + 3*(zone_h - 1)) == 5){
 		//Cas de la zone milieu, il faut calculer la position le long des droites
-		int32_t fAB = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
-		int32_t fCD = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
+		int32_t fAB = hOdometry->x*(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut)/(champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche);
+		int32_t fCD = hOdometry->x*(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas)/(champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche);
 
 		if(hOdometry->y >= fAB){
 			if(hOdometry->y >= fCD){
@@ -136,28 +136,28 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 }
 
 int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
-	//int8_t sens;
+	int8_t sens;
 	//int32_t dir_vect[2];
 	switch(zone){
 	case 2: //Zone haute
-		//sens = +1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = +1*champ_vect->vitesse_avance;
+		sens = +1;
+		dir_vect[1] = ((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = sens*champ_vect->vitesse_avance;
 		break;
 	case 4: //Zone Gauche
-		//sens = +1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = +1*champ_vect->vitesse_avance;
+		sens = +1;
+		dir_vect[0] = ((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = sens*champ_vect->vitesse_avance;
 		break;
 	case 6: //Zone droite
-		//sens = -1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = -1*champ_vect->vitesse_avance;
+		sens = -1;
+		dir_vect[0] = ((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = sens*champ_vect->vitesse_avance;
 		break;
 	case 8: //Zone basse
-		//sens = -1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = -1*champ_vect->vitesse_avance;
+		sens = -1;
+		dir_vect[1] = ((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = sens*champ_vect->vitesse_avance;
 		break;
 	default:
 		return ERR_ZONE_404;
@@ -201,8 +201,8 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm);
-	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm);
+	dir_vect[0] = (-d*Dx)/norm + (champ_vect->vitesse_avance*Dy)/norm;
+	dir_vect[1] = (-d*Dy)/norm + (-champ_vect->vitesse_avance*Dx)/norm;
 
 	return 0;
 }

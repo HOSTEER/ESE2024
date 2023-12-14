@@ -201,8 +201,8 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm);
-	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm);
+	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + (champ_vect->vitesse_avance*Dy)/norm;
+	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + (-champ_vect->vitesse_avance*Dx)/norm;
 
 	return 0;
 }
