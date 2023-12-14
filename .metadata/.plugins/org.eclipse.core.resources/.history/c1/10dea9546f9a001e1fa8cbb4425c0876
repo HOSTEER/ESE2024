@@ -30,7 +30,7 @@ typedef struct CHAMP_VECT_STRUCT_T{
 }champ_vect_t;
 
 
-int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry);
+int strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry);
 
 void init_champ_vect(void);
 int8_t champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect);

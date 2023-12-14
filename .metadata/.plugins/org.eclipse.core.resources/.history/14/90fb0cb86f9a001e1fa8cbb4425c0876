@@ -41,7 +41,7 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	//int32_t dir_vect[2];
+	int32_t dir_vect[2];
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) != NO_OBSTACLE){
@@ -76,7 +76,7 @@ int8_t champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32
 		status = zone_lineaire(&champ_vect, hOdometry, zone, dir_vect);
 	}
 	else{
-		status = zone_circulaire(&champ_vect, hOdometry, zone, dir_vect);
+		status += zone_circulaire(&champ_vect, hOdometry, zone, dir_vect);
 	}
 	return status;
 }
@@ -139,7 +139,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 }
 
 int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
-	int8_t sens;
+	int8_t axe, sens;
 	//int32_t dir_vect[2];
 	switch(zone){
 	case 2: //Zone haute

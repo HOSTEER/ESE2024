@@ -26,8 +26,7 @@ champ_vect_t champ_vect;
 
 
 void init_champ_vect(void){
-	champ_vect.vitesse_avance = 10;
-	champ_vect.vitesse_correctrice = 10;
+	champ_vect.vitesse = 10;
 	champ_vect.pt_lim_haut = (500<<16);
 	champ_vect.pt_lim_bas = -1*champ_vect.pt_lim_haut;
 	champ_vect.pt_lim_droite = (1000<<16);
@@ -41,7 +40,7 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	//int32_t dir_vect[2];
+	int32_t dir_vect[2];
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) != NO_OBSTACLE){
@@ -76,7 +75,7 @@ int8_t champ_vectoriel(strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32
 		status = zone_lineaire(&champ_vect, hOdometry, zone, dir_vect);
 	}
 	else{
-		status = zone_circulaire(&champ_vect, hOdometry, zone, dir_vect);
+		status += zone_circulaire(&champ_vect, hOdometry, zone, dir_vect);
 	}
 	return status;
 }
@@ -109,7 +108,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 	if((zone_h + 3*(zone_h - 1)) == 5){
 		//Cas de la zone milieu, il faut calculer la position le long des droites
 		int32_t fAB = hOdometry->x*(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut)/(champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche);
-		int32_t fCD = hOdometry->x*(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas)/(champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche);
+		int32_t fCD = hOdometry->x*(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas)/(champ_vect->pt_lim_droie - champ_vect->pt_lim_gauche);
 
 		if(hOdometry->y >= fAB){
 			if(hOdometry->y >= fCD){
@@ -139,7 +138,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 }
 
 int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
-	int8_t sens;
+	int8_t axe, sens;
 	//int32_t dir_vect[2];
 	switch(zone){
 	case 2: //Zone haute

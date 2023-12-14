@@ -1,13 +1,17 @@
-11:16:50 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+11:58:31 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
 ../Prod/Src/strategy.c: In function 'zone_sorting':
-../Prod/Src/strategy.c:63:16: warning: variable 'zone_h' set but not used [-Wunused-but-set-variable]
-   63 |         int8_t zone_h; //Zone horizontale dans laquelle est le robot
+../Prod/Src/strategy.c:85:16: warning: variable 'zone_v' set but not used [-Wunused-but-set-variable]
+   85 |         int8_t zone_v; //Zone verticale dans laquelle est le robot
       |                ^~~~~~
-../Prod/Src/strategy.c:62:16: warning: unused variable 'zone_v' [-Wunused-variable]
-   62 |         int8_t zone_v; //Zone verticale dans laquelle est le robot
-      |                ^~~~~~
+../Prod/Src/strategy.c: In function 'zone_circulaire':
+../Prod/Src/strategy.c:207:24: warning: 'd' may be used uninitialized [-Wmaybe-uninitialized]
+  207 |         dir_vect[0] = (-d*Dx)/norm + (champ_vect->vitesse_avance*Dy)/norm;
+      |                        ^~
+../Prod/Src/strategy.c:207:30: warning: 'norm' may be used uninitialized [-Wmaybe-uninitialized]
+  207 |         dir_vect[0] = (-d*Dx)/norm + (champ_vect->vitesse_avance*Dy)/norm;
+      |                       ~~~~~~~^~~~~
 arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: robot_chat_soft.elf
  
@@ -20,5 +24,5 @@ Finished building: default.size.stdout
 Finished building: robot_chat_soft.list
  
 
-11:16:51 Build Finished. 0 errors, 2 warnings. (took 983ms)
+11:58:33 Build Finished. 0 errors, 3 warnings. (took 1s.740ms)
 
