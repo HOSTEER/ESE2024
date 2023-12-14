@@ -33,7 +33,10 @@ void init_champ_vect(void){
 	champ_vect.pt_lim_droite = (1000<<16);
 	champ_vect.pt_lim_gauche = -1*champ_vect.pt_lim_droite;
 
-	champ_vect.offset = (10<<16);
+	champ_vect.offset_gauche = -1*(10<<16);
+	champ_vect.offset_droite = -1*champ_vect.offset_gauche;
+	champ_vect.offset_haut = (10<<16);
+	champ_vect.offset_bas = -1*champ_vect.offset_haut;
 }
 
 
@@ -141,22 +144,22 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8_t
 	switch(zone){
 	case 2: //Zone haute
 		sens = +1;
-		dir_vect[1] = ((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = ((champ_vect->pt_lim_haut + champ_vect->offset_haut) - hOdometry->y)*champ_vect->vitesse_correctrice;
 		dir_vect[0] = sens*champ_vect->vitesse_avance;
 		break;
 	case 4: //Zone Gauche
 		sens = +1;
-		dir_vect[0] = ((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = ((champ_vect->pt_lim_gauche + champ_vect->offset_gauche) - hOdometry->x)*champ_vect->vitesse_correctrice;
 		dir_vect[1] = sens*champ_vect->vitesse_avance;
 		break;
 	case 6: //Zone droite
 		sens = -1;
-		dir_vect[0] = ((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x)*champ_vect->vitesse_correctrice;
+		dir_vect[0] = ((champ_vect->pt_lim_droite + champ_vect->offset_droite) - hOdometry->x)*champ_vect->vitesse_correctrice;
 		dir_vect[1] = sens*champ_vect->vitesse_avance;
 		break;
 	case 8: //Zone basse
 		sens = -1;
-		dir_vect[1] = ((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y)*champ_vect->vitesse_correctrice;
+		dir_vect[1] = ((champ_vect->pt_lim_bas + champ_vect->offset_bas) - hOdometry->y)*champ_vect->vitesse_correctrice;
 		dir_vect[0] = sens*champ_vect->vitesse_avance;
 		break;
 	default:
@@ -195,7 +198,7 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, hOdometry_t * hOdometry, uint8
 	Dx = (hOdometry->x - xb);
 	Dy = (hOdometry->y - yb);
 	//TODO norm = sqrt(Dx*Dx + Dy*Dy);
-	//TODO d = champ_vect->offset - norm
+	//TODO d = l - norm
 
 	//Calcul consigne de direction
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
