@@ -169,7 +169,7 @@ void task_init(void * unused)
 
 	printf("Task init ok\r\n");
 	for(;;){
-		imu_dev(&h_imu);
+		//imu_dev(&h_imu);
 		//printf("Task init looping\r\n");
 		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
@@ -238,6 +238,11 @@ void task_lidar_ISR(void * unused)
 	for(;;){
 		xSemaphoreTake(lidar_RX_semaphore, portMAX_DELAY );
 		ydlidar_x4_irq_cb(&lidar);
+		for(int i=0;i<360;i++){
+			if (lidar.sorted_dist[i] < 100) {
+				lidar.sorted_dist[i] = 10000;
+			}
+		}
 	}
 }
 
@@ -245,7 +250,7 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 {
 	printf("Task lidar ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-	HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
+	//HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 	for(;;){
 		xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY);
 		if(rx_pc == 0xAA){
@@ -258,9 +263,9 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 				}
 			}
 			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
-			HAL_UART_Transmit_DMA(&huart3,string_display, 720);
+			//HAL_UART_Transmit_DMA(&huart3,string_display, 720);
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
+			//HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 		}
 		HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 	}
@@ -453,12 +458,12 @@ int main(void)
 		Error_Handler();
 	}
 
-	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE+50, NULL, DEFAULT_TASK_PRIORITY + 9, &h_IMU_taskRead);
+/*	ret = xTaskCreate(IMU_taskRead, "IMU_taskRead", DEFAULT_STACK_SIZE+50, NULL, DEFAULT_TASK_PRIORITY + 9, &h_IMU_taskRead);
 	if(ret != pdPASS)
 	{
 		printf("Could not create IMU taskRead \r\n");
 		Error_Handler();
-	}
+	}*/
 
 	/*ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
 	if(ret != pdPASS)
@@ -471,7 +476,7 @@ int main(void)
 
 
 
-	IMU_init(&h_imu);
+	//IMU_init(&h_imu);
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */

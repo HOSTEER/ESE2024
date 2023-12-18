@@ -22,7 +22,7 @@ void draw()
   circle(360,360,60);
   float origine_x = 360;
   float origine_y = 360;
-  float angle_btwn_line = PI/160;
+  float angle_btwn_line = PI/180;
   for(int i=0; i<360 ; i++){
     float x_A = cos(angle_btwn_line*i)*30;
     float y_A = sin(angle_btwn_line*i)*30;

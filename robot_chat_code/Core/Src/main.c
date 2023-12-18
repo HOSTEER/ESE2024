@@ -184,7 +184,7 @@ void task_init(void * unused)
 
 	printf("Task init ok\r\n");
 	for(;;){
-		imu_dev(&h_imu);
+		//imu_dev(&h_imu);
 		//printf("Task init looping\r\n");
 		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
@@ -462,7 +462,7 @@ int main(void)
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	Wire_BT_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
-	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+	//q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
 	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 
@@ -528,7 +528,7 @@ int main(void)
 
 
 
-	IMU_init(&h_imu);
+	//IMU_init(&h_imu);
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
