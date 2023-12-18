@@ -111,7 +111,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			}
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+	printf("x: %d, y: %d\n\r",dir_vect[0]>>16, dir_vect[1]>>16);
 	return 0;
 }
 

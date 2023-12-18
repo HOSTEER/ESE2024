@@ -61,15 +61,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			case FALL_BACKWARD:
 				//TODO commande avance rectiligne
 				break;
-			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
-				//TODO commande recul rectiligne
-				break;
-			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
-				//TODO commande avance rectiligne
-				break;
-			default: //COLLIDE sans FALL_x
+			default: //COLLIDE et ou FALL_x
 				*strat_mode = *strat_mode&0xFFF | PREY;
 				//TODO consigne vitesse nulle
 				break;
@@ -89,21 +81,20 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		else{
 			//Obstacle détecté
 			printf("Comportement obstacle \n\r");
-			switch(*strat_mode&0xFF){
+			switch(*strat_mode&0xF){
 			case FALL_FORWARD:
 				//TODO commande recul rectiligne
 				break;
+			case FALL_FORWARD | COLLIDE:
+			//TODO commande recul rectiligne
+			break;
 			case FALL_BACKWARD:
 				//TODO commande avance rectiligne
 				break;
-			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
-				//TODO commande recul rectiligne
-				break;
 			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
-				//TODO commande avance rectiligne
-				break;
+			*strat_mode = *strat_mode&0xFFF | HUNTER;
+			//TODO commande recul rectiligne
+			break;
 			default: //COLLIDE sans FALL_x
 				*strat_mode = *strat_mode&0xFFF | HUNTER;
 				//TODO consigne vitesse nulle
@@ -111,7 +102,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			}
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+	printf("x: %d, y: %d\n\r",dir_vect[0]>>16, dir_vect[1]>>16);
 	return 0;
 }
 

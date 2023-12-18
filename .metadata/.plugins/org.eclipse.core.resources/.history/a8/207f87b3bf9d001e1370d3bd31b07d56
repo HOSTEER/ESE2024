@@ -145,8 +145,6 @@ void task_Strategy(void * unused){
 		strategy(&strat_mode, &hOdometry);
 		strat_mode = strat_mode & 0xFFF0 | FALL_FORWARD;
 		strategy(&strat_mode, &hOdometry);
-		strat_mode = strat_mode & 0xFF0F | COLLIDE;
-		strategy(&strat_mode, &hOdometry);
 		printf("Strat executed\r\n");
 		strat_mode = DEFAULT_STRAT_MODE;
 		//Fonctionne à 100Hz
