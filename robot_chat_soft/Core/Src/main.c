@@ -51,7 +51,7 @@
 #define QUEUE_PRINTF_LENGTH 10
 #define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
-#define DEFAULT_LIDAR_SPEED 85
+#define DEFAULT_LIDAR_SPEED 950
 #define TRUNC_FIXP 1000000000000
 
 #define WHEEL_DIAMETER (43UL<<24) 	//43mm diameter, Q8.24
@@ -253,23 +253,16 @@ void task_lidar(void * unused)
 	printf("Task lidar ok\r\n");
 	lidar.serial_drv.transmit = lidar_uart_transmit;
 	lidar.serial_drv.receive = lidar_uart_receive;
-	lidar.decode_state = IDLE;
+	lidar.decode_state = SCANNING;
 	lidar.serial_drv.receive(lidar.buf_DMA);
 	lidar.nb_smpl = 0;
 	lidar.start_angl = 0;
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	//HAL_TIM_PWM_Start_IT(&htim15, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	vTaskDelete(0);
-	/*for(;;){
-		if( xSemaphoreTake(lidar_RX_semaphore, 1000) == pdFALSE)
-		{
-			//HAL_NVIC_SystemReset();
-		}
-		ydlidar_x4_irq_cb(&lidar);
-	}*/
 }
 
 void task_lidar_ISR(void * unused)
@@ -285,8 +278,9 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 {
 	printf("Task lidar ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+	HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 	for(;;){
-		xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY );
+		xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY);
 		if(rx_pc == 0xAA){
 			rx_pc = 0xFF;
 			for(int i=0;i<720;i++){
@@ -297,8 +291,11 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 				}
 			}
 			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
+			HAL_UART_Transmit_DMA(&huart3,string_display, 720);
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 		}
+		HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 	}
 }
 
@@ -448,7 +445,7 @@ int main(void)
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
-	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	//HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 
 	current_sense_start();
 
@@ -457,18 +454,26 @@ int main(void)
 
 	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 
+
 	IMU_init(&h_imu);
 
 	init_champ_vect();
 
 #ifndef DEV_MODE
-	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_lidar);
+	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE/2, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task init \r\n");
+		Error_Handler();
+	}
+	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar);
+
 	if(ret != pdPASS)
 	{
 		printf("Could not create task lidar \r\n");
 		Error_Handler();
 	}
-	ret = xTaskCreate(task_lidar_ISR, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar_ISR);
+	ret = xTaskCreate(task_lidar_ISR, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_lidar_ISR);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task lidar ISR \r\n");
