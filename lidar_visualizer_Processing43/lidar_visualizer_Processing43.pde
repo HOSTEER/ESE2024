@@ -8,8 +8,8 @@ int[]  lidar_value = new int[360];
 void setup() 
 {
   size(720, 720);
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 38400);
+  //String portName = Serial.list()[0];
+  myPort = new Serial(this, "COM13", 38400);
   myPort.buffer(720);
   myPort.write(0xAA); //<>//
 }
