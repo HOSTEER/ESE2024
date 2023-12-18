@@ -32,7 +32,7 @@ typedef enum{
 
 typedef struct CHAMP_VECT_STRUCT_T{
 	// Vitesses d'avance et de rapprochement à la ligne
-	int32_t vitesse_avance, vitesse_correctrice;
+	int16_t vitesse_avance, vitesse_correctrice;
 
 	// Coordonnées délimitant les zones du champ			Q16.16
 	int32_t pt_lim_gauche, pt_lim_droite;

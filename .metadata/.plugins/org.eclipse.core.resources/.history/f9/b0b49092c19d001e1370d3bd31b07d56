@@ -24,30 +24,12 @@ uint64_t conv_frac16_dec(int16_t x, uint64_t scale)
 
 int32_t fixed_div_16(int32_t x, int32_t y)
 {
-	int64_t quot;
-	if(x >= 0){
-		return (((int64_t)x) * (1 << 16)) / y;
-	}
-	else{
-		x = -x;
-		quot = (((int64_t)x) * (1 << 16)) / y;
-		return (int64_t)(-quot);
-	}
+	return (((int64_t)x) * (1 << 16)) / y;
 }
 
 int32_t fixed_mul_16(int32_t x, int32_t y)
 {
-	int64_t prod;
-	prod = (int64_t)x * (int64_t)y;
-	if(prod >= 0){
-		return (int32_t)(prod / (1 << 16));
-	}
-	else{
-		prod = -prod;
-		prod = prod / (1 << 16);
-		return (int32_t)(-prod);
-	}
-    //return ((int64_t)x * (int64_t)y) / (1 << 16);
+    return ((int64_t)x * (int64_t)y) / (1 << 16);
 }
 
 int32_t fixed_mul(int32_t x, int32_t y, uint8_t qout)

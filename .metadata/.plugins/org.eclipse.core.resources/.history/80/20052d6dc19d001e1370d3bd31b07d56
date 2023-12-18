@@ -30,8 +30,8 @@ static champ_vect_t champ_vect;
 
 
 void init_champ_vect(void){
-	champ_vect.vitesse_avance = (VITESSE_CIRCUIT<<16);
-	champ_vect.vitesse_correctrice = (VITESSE_CORRECTION<<16);
+	champ_vect.vitesse_avance = VITESSE_CIRCUIT;
+	champ_vect.vitesse_correctrice = VITESSE_CORRECTION;
 	champ_vect.pt_lim_haut = (HAUTEUR_CHAMP<<16);
 	champ_vect.pt_lim_bas = -1*champ_vect.pt_lim_haut;
 	champ_vect.pt_lim_droite = (LARGEUR_CHAMP<<16);
@@ -53,27 +53,8 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		}
 		else{
 			//Obstacle détecté
-			printf("Comportement obstacle \n\r");
-			switch(*strat_mode&0xFF){
-			case FALL_FORWARD:
-				//TODO commande recul rectiligne
-				break;
-			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
-				break;
-			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
-				//TODO commande recul rectiligne
-				break;
-			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
-				//TODO commande avance rectiligne
-				break;
-			default: //COLLIDE sans FALL_x
-				*strat_mode = *strat_mode&0xFFF | PREY;
-				//TODO consigne vitesse nulle
-				break;
-			}
+			//TODO cas collision -> changement de rôle
+			//TODO cas chute -> consigne de marche arrière sur 5 ou 10 cm
 		}
 	}
 	else{
@@ -84,40 +65,18 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//TODO appel fonction detection obstacle le + proche
 			//TODO somme 2 consignes
 			//TODO màj consigne commande
-			printf("Comportement fuite \n\r");
 		}
 		else{
 			//Obstacle détecté
-			printf("Comportement obstacle \n\r");
-			switch(*strat_mode&0xFF){
-			case FALL_FORWARD:
-				//TODO commande recul rectiligne
-				break;
-			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
-				break;
-			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
-				//TODO commande recul rectiligne
-				break;
-			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
-				//TODO commande avance rectiligne
-				break;
-			default: //COLLIDE sans FALL_x
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
-				//TODO consigne vitesse nulle
-				break;
-			}
+			//TODO cas collision -> changement de rôle
+			//TODO cas chute -> consigne de marche arrière sur 5 ou 10 cm
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
 	return 0;
 }
 
 int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect){
 	uint8_t zone = zone_sorting(champ_vect, hOdometry);
-	printf("La zone du robot est %d\n\r", zone);
 	int8_t status;
 
 	if(zone%2 == 0){
@@ -201,23 +160,23 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 	switch(zone){
 	case 2: //Zone haute
 		//sens = +1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = +sens*champ_vect->vitesse_avance;
+		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), (int32_t)champ_vect->vitesse_correctrice);
+		dir_vect[0] = fixed_mul_16(+sens, champ_vect->vitesse_avance);
 		break;
 	case 4: //Zone Gauche
 		//sens = +1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = +sens*champ_vect->vitesse_avance;
+		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), (int32_t)champ_vect->vitesse_correctrice);
+		dir_vect[1] = fixed_mul_16(+sens, champ_vect->vitesse_avance);
 		break;
 	case 6: //Zone droite
 		//sens = -1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = -sens*champ_vect->vitesse_avance;
+		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), (int32_t)champ_vect->vitesse_correctrice);
+		dir_vect[1] = fixed_mul_16(-sens, champ_vect->vitesse_avance);
 		break;
 	case 8: //Zone basse
 		//sens = -1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = -sens*champ_vect->vitesse_avance;
+		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), (int32_t)champ_vect->vitesse_correctrice);
+		dir_vect[0] = fixed_mul_16(-sens, champ_vect->vitesse_avance);
 		break;
 	default:
 		return ERR_ZONE_404;
@@ -270,8 +229,8 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm));
-	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm));
+	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16((int32_t)champ_vect->vitesse_avance, Dy), norm));
+	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16((int32_t)-champ_vect->vitesse_avance, Dx), norm));
 
 	return 0;
 }

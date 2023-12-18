@@ -79,7 +79,6 @@ TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
 TaskHandle_t h_task_Motor = NULL;
 TaskHandle_t h_task_MotorSpeed = NULL;
-TaskHandle_t h_task_strategy = NULL;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t stm_RX_semaphore;
@@ -503,13 +502,6 @@ int main(void)
 	if(ret != pdPASS)
 	{
 		printf("Could not create IMU taskRead \r\n");
-		Error_Handler();
-	}
-
-	ret = xTaskCreate(task_Strategy, "task_strat", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_strategy);
-	if(ret != pdPASS)
-	{
-		printf("Could not create task strategy \r\n");
 		Error_Handler();
 	}
 
