@@ -125,9 +125,6 @@ void task_Strategy(void * unused){
 		hOdometry.x = 1100<<16;
 		hOdometry.y = 0<<16;
 		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 1050<<16;
-		hOdometry.y = 0<<16;
-		strategy(&strat_mode, &hOdometry);
 		hOdometry.x = 1100<<16;
 		hOdometry.y = 600<<16;
 		strategy(&strat_mode, &hOdometry);
