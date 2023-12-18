@@ -1,4 +1,0 @@
-#include "strategy.h"
-
-extern strat_mode_t strat_mode;
-

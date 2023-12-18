@@ -1,0 +1,10 @@
+16:05:14 **** Incremental Build of configuration Debug for project strat_dev ****
+make -j12 all 
+arm-none-eabi-size   strat_dev.elf 
+   text	   data	    bss	    dec	    hex	filename
+  20948	    120	  22984	  44052	   ac14	strat_dev.elf
+Finished building: default.size.stdout
+ 
+
+16:05:15 Build Finished. 0 errors, 0 warnings. (took 370ms)
+
