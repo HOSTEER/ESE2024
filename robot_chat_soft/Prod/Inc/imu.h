@@ -31,6 +31,8 @@ typedef struct h_imu_drv_struct
 	// Données brutes
 	int16_t accel[3];
 	int16_t gyro[3];
+
+	// Calibration de l'IMU (non utilisé)
 	int16_t calib_gyro[3];
 
 } h_imu_drv_t;

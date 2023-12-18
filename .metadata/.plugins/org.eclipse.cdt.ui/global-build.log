@@ -1,22 +1,9 @@
-17:31:29 **** Incremental Build of configuration Debug for project robot_chat_code ****
+17:24:50 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -IC:/Users/louis/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc -IC:/Users/louis/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -IC:/Users/louis/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include -IC:/Users/louis/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -IC:/Users/pl/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Device/ST/STM32G0xx/Include -IC:/Users/les_victor/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS/Include -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -IC:/Users/mimib/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_code/Prod/Inc" -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/include -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -IC:/Users/teoma/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
-../Core/Src/main.c: In function 'IMU_taskRead':
-../Core/Src/main.c:203:25: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-  203 |                 sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
-      |                         ^~~
-      |                         |
-      |                         uint8_t * {aka unsigned char *}
-In file included from ../Core/Src/main.c:31:
-C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/stdio.h:254:18: note: expected 'char * restrict' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
-  254 | int     sprintf (char *__restrict, const char *__restrict, ...)
-      |                  ^
-../Core/Src/main.c:180:18: warning: variable 'time_lapped' set but not used [-Wunused-but-set-variable]
-  180 |         uint32_t time_lapped;
-      |                  ^~~~~~~~~~~
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'printfTask':
-../Core/Src/main.c:218:43: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
-  218 |                 uint16_t msg_len = strlen(msg);
+../Core/Src/main.c:243:43: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
+  243 |                 uint16_t msg_len = strlen(msg);
       |                                           ^~~
       |                                           |
       |                                           uint8_t * {aka unsigned char *}
@@ -24,28 +11,25 @@ In file included from ../Core/Src/main.c:32:
 C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/string.h:41:18: note: expected 'const char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
    41 | size_t   strlen (const char *);
       |                  ^~~~~~~~~~~~
-../Core/Src/main.c: In function 'task_MotorSpeed':
-../Core/Src/main.c:315:17: warning: variable 'speed' set but not used [-Wunused-but-set-variable]
-  315 |         int32_t speed = 0;
+../Core/Src/main.c: In function 'task_Motor':
+../Core/Src/main.c:323:17: warning: variable 'speed' set but not used [-Wunused-but-set-variable]
+  323 |         int32_t speed = 0;
       |                 ^~~~~
-../Core/Src/main.c:314:18: warning: variable 'V' set but not used [-Wunused-but-set-variable]
-  314 |         uint32_t V = 0;
+../Core/Src/main.c: In function 'task_MotorSpeed':
+../Core/Src/main.c:350:17: warning: unused variable 'speed' [-Wunused-variable]
+  350 |         int32_t speed = 0;
+      |                 ^~~~~
+../Core/Src/main.c:349:18: warning: unused variable 'V' [-Wunused-variable]
+  349 |         uint32_t V = 0;
       |                  ^
-arm-none-eabi-gcc -o "robot_chat_code.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_code\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_code.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: robot_chat_code.elf
+arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: robot_chat_soft.elf
  
-arm-none-eabi-size   robot_chat_code.elf 
-arm-none-eabi-objdump -h -S  robot_chat_code.elf  > "robot_chat_code.list"
+arm-none-eabi-size   robot_chat_soft.elf 
+arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  58472	    248	  31168	  89888	  15f20	robot_chat_code.elf
+  58884	    124	  27092	  86100	  15054	robot_chat_soft.elf
 Finished building: default.size.stdout
  
-Finished building: robot_chat_code.list
- 
-17:31:32 **** Incremental Build of configuration Debug for project robot_chat_code ****
-make -j12 all 
-arm-none-eabi-size   robot_chat_code.elf 
-   text	   data	    bss	    dec	    hex	filename
-  58472	    248	  31168	  89888	  15f20	robot_chat_code.elf
-Finished building: default.size.stdout
+Finished building: robot_chat_soft.list
  
