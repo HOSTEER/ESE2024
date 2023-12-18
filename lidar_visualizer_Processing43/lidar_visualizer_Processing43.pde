@@ -29,6 +29,8 @@ void draw()
     float x_B = cos(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + x_A;
     float y_B = sin(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + y_A;
     circle(origine_x + x_B, origine_y + y_B,  5);
+    println("angle :",i); 
+    println("dist :",lidar_value[i]); 
     //line(origine_x + x_A, origine_y + y_A, origine_x + x_B, origine_y + y_B);
   }
 }
