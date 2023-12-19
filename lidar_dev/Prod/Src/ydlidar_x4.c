@@ -54,11 +54,13 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
-	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/4;
+	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/((lidar->LSN)/10);
 	uint16_t first_angle=lidar->start_angl;
-	for(;smpl_idx<40;smpl_idx++){
+	for(;smpl_idx<lidar->LSN;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
 			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
+		}else{
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= 10000;
 		}
 	}
 	//ydlidar_x4_sort_smpl(lidar, revoltion_idx);
@@ -68,7 +70,7 @@ int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 	ydlidar_x4_parsing_t * state = &lidar->decode_state;
 	uint8_t * dma_mem = lidar->buf_DMA;
-	uint8_t * frame_smpl = &lidar->nb_smpl;
+	uint8_t * LSN = &lidar->LSN;
 	uint8_t head_limit = 0;
 	static uint8_t idx_head = 0;
 	static uint8_t idx_limiter = 1;
@@ -98,14 +100,14 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 */
 			case SCANNING :
 				if(dma_mem[idx_head] == 0x55 && last_byte == 0xAA){
-					*state = PARSING_SMPL;
+					*state = PARSING_LSN;
 					idx_limiter = 1;
 				}
 				break;
 
-			case PARSING_SMPL :
+			case PARSING_LSN :
 				if(idx_limiter == 0){
-					*frame_smpl = dma_mem[idx_head];
+					*LSN = dma_mem[idx_head];
 					*state 		= PARSING_START_ANGL;
 					idx_limiter = 1;
 				}
@@ -136,21 +138,21 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 				}
 				break;
 			case PARSING_DIST :
-				if(((idx_limiter%2) != 0) && (idx_limiter < *frame_smpl)){
+				if(((idx_limiter%2) != 0) && (idx_limiter < *LSN)){
 					ydlidar_x4_get_dist(&lidar->smpl[idx_filler], (uint16_t) last_byte, (uint16_t) dma_mem[idx_head]);
 					idx_filler++;
 					idx_limiter ++;
 				}
 				else{
 					idx_limiter ++;
-					if(idx_limiter > *frame_smpl){
+					if(idx_limiter > *LSN){
 						idx_filler = 0;
 						ydlidar_x4_store_smpl(lidar);
 
-						memset(lidar->smpl,0,(*frame_smpl)*2);
+						memset(lidar->smpl,0,(*LSN)*2);
 						lidar->start_angl=0;
 						lidar->end_angl=0;
-						*frame_smpl = 0;
+						*LSN = 0;
 						*state = SCANNING;
 
 					}

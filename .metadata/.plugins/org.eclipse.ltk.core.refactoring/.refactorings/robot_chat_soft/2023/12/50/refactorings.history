@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;robot_chat_soft/Core/Src/strategy&apos; to &apos;strategy.c&apos;" description="Rename resource &apos;strategy&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Core/Src/strategy" name="strategy.c" stamp="1702458976929" updateReferences="true"/>
-</session>
