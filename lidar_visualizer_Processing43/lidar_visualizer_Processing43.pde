@@ -11,6 +11,7 @@ void setup()
   //String portName = Serial.list()[0];
   myPort = new Serial(this, "COM13", 38400);
   myPort.buffer(720);
+  myPort.write(0xBB);
   myPort.write(0xAA); //<>//
 }
 
