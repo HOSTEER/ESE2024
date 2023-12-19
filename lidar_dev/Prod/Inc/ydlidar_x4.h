@@ -30,7 +30,6 @@ typedef enum ydlidar_x4_command_enum
 
 typedef enum ydlidar_x4_parsing_enum
 {
-	IDLE  				= 0,
 	SCANNING			= 1,
 	PARSING_SMPL		= 2,
 	PARSING_START_ANGL 	= 3,

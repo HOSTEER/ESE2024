@@ -5401,3 +5401,147 @@ Command-line arguments:  -os win32 -ws win32 -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-11 17:04:39.797
 !MESSAGE Existing sessions are:
+!SESSION 2023-12-13 08:17:37.560 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-13 08:17:56.135
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-13 08:17:56.153
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-13 08:18:07.860
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2023-12-13 09:04:46.911 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY org.eclipse.core.resources 2 10035 2023-12-13 09:04:49.646
+!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-13 09:04:52.291
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-13 09:04:52.299
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-13 09:05:16.213
+!MESSAGE Indexed 'robot_chat_code' (53 sources, 127 headers) in 2.48 sec: 10,428 declarations; 69,774 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0025%)
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-13 09:05:17.971
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-13 09:12:14.682
+!MESSAGE Indexed 'robot_chat_soft' (54 sources, 199 headers) in 3.23 sec: 19,144 declarations; 99,404 references; 3 unresolved inclusions; 136 syntax errors; 172 unresolved names (0.14%)
+!SESSION 2023-12-14 09:50:35.572 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-14 09:50:59.423
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-14 09:50:59.435
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-14 09:51:32.059
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2023-12-14 14:25:06.381 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-14 14:25:20.281
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-14 14:25:20.287
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-14 14:25:26.058
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2023-12-17 19:16:48.584 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-17 19:17:07.683
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-17 19:17:07.690
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-17 19:17:19.865
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-17 19:19:48.034
+!MESSAGE Indexed 'strat_dev' (22 sources, 82 headers) in 2.38 sec: 4,674 declarations; 23,720 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.007%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2023-12-17 19:48:51.841
+!MESSAGE Indexed 'strat_dev' (36 sources, 107 headers) in 0.963 sec: 7,052 declarations; 33,932 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0049%)
+!SESSION 2023-12-17 19:57:03.393 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-17 19:57:20.225
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-17 19:57:20.231
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-17 19:57:30.993
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2023-12-18 13:58:08.171 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-18 13:58:25.609
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-18 13:58:25.617
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-18 13:58:36.855
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 14:46:34.570
+!MESSAGE Error - No active DSF-Session. tmpSessionId = 14 (contextManager row 121)
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 14:46:34.571
+!MESSAGE Existing sessions are:
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 14:46:34.572
+!MESSAGE Error - No active DSF-Session. tmpSessionId = 14 (contextManager row 121)
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 14:46:34.573
+!MESSAGE Existing sessions are:
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 16:05:23.091
+!MESSAGE Error - No active DSF-Session. tmpSessionId = 26 (contextManager row 121)
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 16:05:23.092
+!MESSAGE Existing sessions are:
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 16:05:23.092
+!MESSAGE Error - No active DSF-Session. tmpSessionId = 26 (contextManager row 121)
+
+!ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-18 16:05:23.093
+!MESSAGE Existing sessions are:
