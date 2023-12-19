@@ -13,7 +13,7 @@ static uint64_t frac16[16] = {152587890625, 305175781250, 610351562500, 12207031
 							  625000000000000, 1250000000000000, 2500000000000000, 5000000000000000};
 
 static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7FF55, 0x3FFEA, 0x1FFFD,
-							 0xFFFF,0x7FFF,0x3FFF,0x1FFF,0xFFF,0x7FF, 0x3FF, 0x1FF}; // arctan(2^-i) Q7.24
+							 0xFFFF,0x7FFF,0x3FFF,0x1FFF,0xFFF,0x7FF, 0x3FF, 0x1FF}; // arctan(2^-i) lookup table, Q7.24
 
 
 
@@ -47,16 +47,22 @@ int32_t fixed_div(int32_t x, int32_t y, uint8_t qout)
 	return (((int64_t)x) * (1 << qout)) / y;
 }
 
-int16_t fpsin(int16_t i)
+
+/**
+  * @brief returns the sinus of angle
+  * @param angle: angle from -2pi (-32768 to 32767) to 2pi, angle = rad/2pi
+  *	@retval sinus(angle) value in Q3.12 int format
+  */
+int16_t fpsin(int16_t angle)
 {
     /* Convert (signed) input to a value between 0 and 8192. (8192 is pi/2, which is the region of the curve fit). */
     /* ------------------------------------------------------------------- */
-    i <<= 1;
-    uint8_t c = i<0; //set carry for output pos/neg
+    angle <<= 1;
+    uint8_t c = angle<0; //set carry for output pos/neg
 
-    if(i == (i|0x4000)) // flip input value to corresponding value in range [0..8192)
-        i = (1<<15) - i;
-    i = (i & 0x7FFF) >> 1;
+    if(angle == (angle|0x4000)) // flip input value to corresponding value in range [0..8192)
+        angle = (1<<15) - angle;
+    angle = (angle & 0x7FFF) >> 1;
     /* ------------------------------------------------------------------- */
 
     /* The following section implements the formula:
@@ -66,18 +72,22 @@ int16_t fpsin(int16_t i)
     enum {A1=3370945099UL, B1=2746362156UL, C1=292421UL};
     enum {n=13, p=32, q=31, r=3, a=12};
 
-    uint32_t y = (C1*((uint32_t)i))>>n;
-    y = B1 - (((uint32_t)i*y)>>r);
-    y = (uint32_t)i * (y>>n);
-    y = (uint32_t)i * (y>>n);
+    uint32_t y = (C1*((uint32_t)angle))>>n;
+    y = B1 - (((uint32_t)angle*y)>>r);
+    y = (uint32_t)angle * (y>>n);
+    y = (uint32_t)angle * (y>>n);
     y = A1 - (y>>(p-q));
-    y = (uint32_t)i * (y>>n);
+    y = (uint32_t)angle * (y>>n);
     y = (y+(1UL<<(q-a-1)))>>(q-a); // Rounding
 
     return c ? -y : y;
 }
 
-//Vector mode CORDIC, compute sqrt(x^2 + y^2) and Arctan(y/x)
+/**
+  * @brief vector mode CORDIC, computes sqrt(x^2 + y^2) and Arctan(y/x)
+  * @param *vector : address of vector structure containing x and y coordinates in Q15.16 format
+  * 				 and fills the norm and angle inside vector structure
+  */
 void CORDIC_vector(vector_t *vector)
 {
 	uint8_t quadrant;
@@ -163,4 +173,6 @@ void CORDIC_vector(vector_t *vector)
 
 
 }
+
+
 

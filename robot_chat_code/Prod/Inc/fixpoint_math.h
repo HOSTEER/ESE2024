@@ -7,6 +7,8 @@
 #define CORDIC_ITER 8 //number of iterations of the CORDIC algorithm, max = 16 (limited by atan2i table), ~50c/iter
 #define CORDIC_CONSTANT 0x136E9 //multiplicative constant to get accurate norm, Q.16.16
 
+
+//vector structure, containing coordinates in x,y Q16.16 format or in norm,angle
 typedef struct vector_t_struct {
 	int32_t x, y, angle, norm;
 } vector_t;
