@@ -20,4 +20,7 @@
 
 #define DEFAULT_STRAT_MODE PREY | TURN_TRIGO
 
+//Asserv
+#define DEFAULT_SPEED 250
+
 #endif /* INC_CONFIG_H_ */

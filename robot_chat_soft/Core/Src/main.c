@@ -98,6 +98,7 @@ hOdometry_t hOdometry;
 int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
+int32_t avg_speed = DEFAULT_SPEED;
 uint8_t odom_overflow = 0;
 strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
 /* USER CODE END PV */
@@ -366,8 +367,8 @@ void task_MotorSpeed(void * unused)
 			mot_speed = 0;
 		}
 		angle_corr = set_angle_corr(&hOdometry, angle);
-		Rspeed = (250<<16) + fixed_mul(250<<16, angle_corr, 24);
-		Lspeed = (250<<16) - fixed_mul(250<<16, angle_corr, 24);
+		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
+		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
 		//motor_set_PWM(&Rmot, 1024);
 		//printf("vitesse moteur = %d.%u mm/s, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));

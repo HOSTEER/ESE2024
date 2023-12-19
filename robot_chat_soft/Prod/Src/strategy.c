@@ -25,7 +25,8 @@
  */
 
 
-
+extern int32_t angle;
+extern int32_t avg_speed;
 static champ_vect_t champ_vect;
 
 
@@ -43,6 +44,7 @@ void init_champ_vect(void){
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	vector_t dir_vect;
+	int32_t test_angle, test_avg_speed;
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
@@ -81,9 +83,19 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
 			//Aucun obstacle
 			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
+
+			dir_vect.x = 10<<16;
+			dir_vect.y = 10<<16;
+			hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
+			CORDIC_vector(&dir_vect);
 			//TODO appel fonction detection obstacle le + proche
 			//TODO somme 2 consignes
 			//TODO màj consigne commande
+
+			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
+			test_avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15)) * (1<<4));
+
+			test_angle = dir_vect.angle;
 			printf("Comportement fuite \n\r");
 		}
 		else{
