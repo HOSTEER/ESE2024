@@ -525,7 +525,7 @@ int main(void)
 
 
 
-	printf("Init des fonctions finie\r\n");
+
 
 
 	vTaskStartScheduler();
@@ -625,7 +625,6 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	HAL_GPIO_WritePin(USER_LED2_GPIO_Port, USER_LED2_Pin, 1);
 	__disable_irq();
 	while (1)
 	{

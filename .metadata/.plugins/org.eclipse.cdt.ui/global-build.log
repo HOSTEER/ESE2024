@@ -1,4 +1,4 @@
-17:24:50 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+08:25:55 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
 ../Core/Src/main.c: In function 'printfTask':
@@ -28,8 +28,22 @@ Finished building target: robot_chat_soft.elf
 arm-none-eabi-size   robot_chat_soft.elf 
 arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  58884	    124	  27092	  86100	  15054	robot_chat_soft.elf
+  58960	    124	  34092	  93176	  16bf8	robot_chat_soft.elf
 Finished building: default.size.stdout
  
 Finished building: robot_chat_soft.list
+ 
+08:25:57 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+make -j12 all 
+arm-none-eabi-size   robot_chat_soft.elf 
+   text	   data	    bss	    dec	    hex	filename
+  58960	    124	  34092	  93176	  16bf8	robot_chat_soft.elf
+Finished building: default.size.stdout
+ 
+08:26:15 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+make -j12 all 
+arm-none-eabi-size   robot_chat_soft.elf 
+   text	   data	    bss	    dec	    hex	filename
+  58960	    124	  34092	  93176	  16bf8	robot_chat_soft.elf
+Finished building: default.size.stdout
  

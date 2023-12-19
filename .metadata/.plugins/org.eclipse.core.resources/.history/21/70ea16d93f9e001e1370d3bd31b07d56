@@ -525,7 +525,7 @@ int main(void)
 
 
 
-	printf("Init des fonctions finie\r\n");
+
 
 
 	vTaskStartScheduler();
