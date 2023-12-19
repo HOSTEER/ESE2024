@@ -54,11 +54,13 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
-	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/4;
+	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)>>2;
 	uint16_t first_angle=lidar->start_angl;
 	for(;smpl_idx<40;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
 			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
+		}else{
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= 10000;
 		}
 	}
 	return 0;
@@ -95,7 +97,11 @@ int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
 		case PARSING_SMPL :
 			if(idx_limiter == 0){
 				*frame_smpl = dma_mem[idx_head];
-				*state 		= PARSING_START_ANGL;
+				if(*frame_smpl == 1){
+					*state 		= SCANNING;
+				}else{
+					*state 		= PARSING_START_ANGL;
+				}
 				idx_limiter = 1;
 			}
 			else{

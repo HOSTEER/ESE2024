@@ -123,7 +123,7 @@ void task_lidar(void * unused)
 	lidar.serial_drv.receive = lidar_uart_receive;
 	lidar.decode_state = SCANNING;
 	lidar.serial_drv.receive(lidar.buf_DMA);
-	lidar.nb_smpl = 0;
+	lidar.LSN = 0;
 	lidar.start_angl = 0;
 	lidar.end_angl = 0;
 	//HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET); no need for lidar dev
