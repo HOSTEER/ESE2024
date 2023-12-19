@@ -1,0 +1,84 @@
+17:18:22 **** Incremental Build of configuration Debug for project strat_dev ****
+make -j12 all 
+arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F410Rx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/strat_dev/Prod" -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/strat_dev/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Prod/Src/strategy.o"
+../Prod/Src/strategy.c: In function 'strategy':
+../Prod/Src/strategy.c:56:25: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+   56 |                         printf("Comportement obstacle \n\r");
+      |                         ^~~~~~
+../Prod/Src/strategy.c:4:1: note: include '<stdio.h>' or provide a declaration of 'printf'
+    3 | #include "config.h"
+  +++ |+#include <stdio.h>
+    4 | 
+../Prod/Src/strategy.c:56:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
+   56 |                         printf("Comportement obstacle \n\r");
+      |                         ^~~~~~
+../Prod/Src/strategy.c:56:25: note: include '<stdio.h>' or provide a declaration of 'printf'
+../Prod/Src/strategy.c:65:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+   65 |                                 *strat_mode = *strat_mode&0xFFF | PREY;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:69:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+   69 |                                 *strat_mode = *strat_mode&0xFFF | PREY;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:73:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+   73 |                                 *strat_mode = *strat_mode&0xFFF | PREY;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:87:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
+   87 |                         printf("Comportement fuite \n\r");
+      |                         ^~~~~~
+../Prod/Src/strategy.c:87:25: note: include '<stdio.h>' or provide a declaration of 'printf'
+../Prod/Src/strategy.c:91:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
+   91 |                         printf("Comportement obstacle \n\r");
+      |                         ^~~~~~
+../Prod/Src/strategy.c:91:25: note: include '<stdio.h>' or provide a declaration of 'printf'
+../Prod/Src/strategy.c:100:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+  100 |                                 *strat_mode = *strat_mode&0xFFF | HUNTER;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:104:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+  104 |                                 *strat_mode = *strat_mode&0xFFF | HUNTER;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:108:58: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
+  108 |                                 *strat_mode = *strat_mode&0xFFF | HUNTER;
+      |                                               ~~~~~~~~~~~^~~~~~
+../Prod/Src/strategy.c:114:9: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
+  114 |         printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+      |         ^~~~~~
+../Prod/Src/strategy.c:114:9: note: include '<stdio.h>' or provide a declaration of 'printf'
+../Prod/Src/strategy.c:114:21: warning: format '%d' expects argument of type 'int', but argument 2 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  114 |         printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+      |                    ~^              ~~~~~~~~~~~~~~~
+      |                     |                         |
+      |                     int                       int32_t {aka long int}
+      |                    %ld
+../Prod/Src/strategy.c:114:28: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  114 |         printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+      |                           ~^                        ~~~~~~~~~~~~~~~
+      |                            |                                   |
+      |                            int                                 int32_t {aka long int}
+      |                           %ld
+../Prod/Src/strategy.c: In function 'champ_vectoriel':
+../Prod/Src/strategy.c:120:9: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
+  120 |         printf("La zone du robot est %d\n\r", zone);
+      |         ^~~~~~
+../Prod/Src/strategy.c:120:9: note: include '<stdio.h>' or provide a declaration of 'printf'
+../Prod/Src/strategy.c: In function 'zone_circulaire':
+../Prod/Src/strategy.c:273:23: warning: 'd' may be used uninitialized [-Wmaybe-uninitialized]
+  273 |         dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm));
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Prod/Src/strategy.c:273:23: warning: 'norm' may be used uninitialized [-Wmaybe-uninitialized]
+arm-none-eabi-gcc -o "strat_dev.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\strat_dev\STM32F410RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="strat_dev.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: strat_dev.elf
+ 
+arm-none-eabi-size   strat_dev.elf 
+arm-none-eabi-objdump -h -S  strat_dev.elf  > "strat_dev.list"
+arm-none-eabi-objcopy  -O binary  strat_dev.elf  "strat_dev.bin"
+   text	   data	    bss	    dec	    hex	filename
+  21452	    120	  22984	  44556	   ae0c	strat_dev.elf
+Finished building: default.size.stdout
+ 
+Finished building: strat_dev.bin
+ 
+Finished building: strat_dev.list
+ 
+
+17:18:23 Build Finished. 0 errors, 16 warnings. (took 767ms)
+

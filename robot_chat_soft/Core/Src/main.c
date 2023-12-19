@@ -36,6 +36,8 @@
 #include "fixpoint_math.h"
 #include "control.h"
 #include "odometry.h"
+#include "strategy.h"
+#include "config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +51,7 @@
 #define QUEUE_PRINTF_LENGTH 10
 #define DEFAULT_STACK_SIZE 512
 #define DEFAULT_TASK_PRIORITY 1
-#define DEFAULT_LIDAR_SPEED 85
+#define DEFAULT_LIDAR_SPEED 950
 #define TRUNC_FIXP 1000000000000
 
 #define WHEEL_DIAMETER (43UL<<24) 	//43mm diameter, Q8.24
@@ -77,6 +79,7 @@ TaskHandle_t h_task_BT_and_Wire_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
 TaskHandle_t h_task_Motor = NULL;
 TaskHandle_t h_task_MotorSpeed = NULL;
+TaskHandle_t h_task_strategy = NULL;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t stm_RX_semaphore;
@@ -96,6 +99,7 @@ int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
 uint8_t odom_overflow = 0;
+strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -156,10 +160,42 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 		xSemaphoreGiveFromISR(BTN_START_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
+
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
+	}
+
+	if(GPIO_Pin == BUMP_EXTI_Pin) {
+		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+	}
+}
+
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == FBD_EXTI1_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
+		//Le masque | NO_OBSTACLE est optionnel mais permet une meilleure lecture du code
+		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+	}
+	if(GPIO_Pin == BBD_EXTI2_Pin) {
+		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+	}
+	if(GPIO_Pin == BUMP_EXTI_Pin) {
+		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+	}
 }
 
 
-void task_init(void * unused)
+
+void task_dev(void * unused)
 {
 
 	printf("Task init ok\r\n");
@@ -171,40 +207,28 @@ void task_init(void * unused)
 		//HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		//HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
 		//HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		printf("Strat mode : 0x%x\n\r", strat_mode);
 		vTaskDelay(1000);
 	}
 }
 
 void IMU_taskRead(void * unused)
 {
-	uint8_t msg [QUEUE_PRINTF_SIZE];
-	uint32_t time_lapped;
+	//uint8_t msg [QUEUE_PRINTF_SIZE];
 
 	for(;;){
-		//printf("Task init looping\r\n");
-		time_lapped = __HAL_TIM_GET_COUNTER(&htim7);
-		//__HAL_TIM_SET_COUNTER(&htim7, 0);
-		//HAL_TIM_Base_Start(&htim7);
 		IMU_gyro(&h_imu);
 
-		/*uint8_t gyro_addr = 0x11;
-		uint8_t value[3];
-		IMU_read8(&h_imu, gyro_addr, value);*/
-
-		/*if(!odom_overflow){
-			sprintf(msg, "Mesures de vitesse de rotation faite en %d us\r\n", time_lapped);
-			xQueueSend(q_printf, (void *)msg, 5);
-		}
-		else{
-			sprintf(msg, "Mesures de vitesse de rotation faite, mais la base de temps est corrompue (%d overflow(s))\r\n", odom_overflow);
-			xQueueSend(q_printf, (void *)msg, 5);
-		}*/
-
-
+		/*
 		sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
-		xQueueSend(q_printf, (void *)msg, 5);
+		xQueueSend(q_printf, (void *)msg, 5);*/
 
-		//printf("Task init looping\r\n");
+		/*
+		printf("Lecture des accelerations :\r\n");
+		printf("- Gyro X :%d\r\n", h_imu->gyro[0]);
+		printf("- Gyro Y :%d\r\n", h_imu->gyro[1]);
+		printf("- Gyro Z :%d\r\n", h_imu->gyro[2]);*/
+
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 		vTaskDelay(5);
 	}
@@ -229,23 +253,16 @@ void task_lidar(void * unused)
 	printf("Task lidar ok\r\n");
 	lidar.serial_drv.transmit = lidar_uart_transmit;
 	lidar.serial_drv.receive = lidar_uart_receive;
-	lidar.decode_state = IDLE;
+	lidar.decode_state = SCANNING;
 	lidar.serial_drv.receive(lidar.buf_DMA);
 	lidar.nb_smpl = 0;
 	lidar.start_angl = 0;
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	//HAL_TIM_PWM_Start_IT(&htim15, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	vTaskDelete(0);
-	/*for(;;){
-		if( xSemaphoreTake(lidar_RX_semaphore, 1000) == pdFALSE)
-		{
-			//HAL_NVIC_SystemReset();
-		}
-		ydlidar_x4_irq_cb(&lidar);
-	}*/
 }
 
 void task_lidar_ISR(void * unused)
@@ -261,8 +278,9 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 {
 	printf("Task lidar ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+	HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 	for(;;){
-		xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY );
+		xSemaphoreTake(stm_RX_semaphore, portMAX_DELAY);
 		if(rx_pc == 0xAA){
 			rx_pc = 0xFF;
 			for(int i=0;i<720;i++){
@@ -273,8 +291,11 @@ void task_BT_and_Wire_RX_ISR(void * unused)
 				}
 			}
 			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
+			HAL_UART_Transmit_DMA(&huart3,string_display, 720);
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 		}
+		HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 	}
 }
 
@@ -358,6 +379,17 @@ void task_MotorSpeed(void * unused)
 		vTaskDelay(20);
 	}
 }
+
+void task_Strategy(void * unused){
+
+	for(;;){
+		strategy(&strat_mode, &hOdometry);
+
+		//Fonctionne à 100Hz
+		vTaskDelay(100);
+	}
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -413,7 +445,7 @@ int main(void)
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
-	HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	//HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 
 	current_sense_start();
 
@@ -422,19 +454,26 @@ int main(void)
 
 	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 
+
+	IMU_init(&h_imu);
+
+	init_champ_vect();
+
+#ifndef DEV_MODE
 	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE/2, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task init \r\n");
 		Error_Handler();
 	}
-	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_lidar);
+	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar);
+
 	if(ret != pdPASS)
 	{
 		printf("Could not create task lidar \r\n");
 		Error_Handler();
 	}
-	ret = xTaskCreate(task_lidar_ISR, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar_ISR);
+	ret = xTaskCreate(task_lidar_ISR, "task_lidar_ISR", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_lidar_ISR);
 	if(ret != pdPASS)
 	{
 		printf("Could not create task lidar ISR \r\n");
@@ -472,6 +511,13 @@ int main(void)
 		Error_Handler();
 	}
 
+	ret = xTaskCreate(task_Strategy, "task_strat", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+1, &h_task_strategy);
+	if(ret != pdPASS)
+	{
+		printf("Could not create task strategy \r\n");
+		Error_Handler();
+	}
+
 	/*ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
 	if(ret != pdPASS)
 	{
@@ -479,11 +525,13 @@ int main(void)
 		Error_Handler();
 	}*/
 
+#endif
 
 
 
 
-	IMU_init(&h_imu);
+
+
 
 	vTaskStartScheduler();
   /* USER CODE END 2 */
