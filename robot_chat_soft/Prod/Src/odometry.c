@@ -2,11 +2,22 @@
 #include "odometry.h"
 #include "fixpoint_math.h"
 
+
+/**
+  * @brief configures the hOdometry structure with input parameters.
+  * @param *hOdometry : address of odometry structure to configure.
+  * @param *Rmot, *Lmot : addresses of right and left motor.
+  * @param diameter : diameter of odometry wheels in Q8.24 format, rev angle to mm conversion.
+  * @param CPR : encoder resolution, ticks to turns rev angle conversion. Q16.16
+  * @param wheel_dist : distance between wheels in Q16.16 format, angle conversion.
+  * @param freq : odometry refresh rate
+  *	@retval None
+  */
 void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint32_t diameter, uint32_t CPR, uint32_t wheel_dist, uint32_t freq)
 {
 	hOdometry->Rmot = Rmot;
 	hOdometry->Lmot = Lmot;
-	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 23),(int32_t)CPR,16); // mm/tick, Q8.24
+	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 24),(int32_t)CPR,16); // mm/tick, Q8.24
 	hOdometry->wheel_dist = wheel_dist; //mm, Q16.16
 	hOdometry->freq = freq;
 	hOdometry->dr = 0;
@@ -15,6 +26,12 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 	hOdometry->y = 0;
 }
 
+/**
+  * @brief get encoder values, convert them to x,y and angle, store them in odometry structure.
+  * 	   This function should be called regularly at the frequency specified by odometry refresh rate.
+  * @param *hOdometry : address of odometry structure.
+  *	@retval None
+  */
 void odometry_update_pos(hOdometry_t *hOdometry)
 {
 	hMotor_t *Rmot = hOdometry->Rmot;
@@ -36,20 +53,11 @@ void odometry_update_pos(hOdometry_t *hOdometry)
 	hOdometry->dr = Rdelta/2 - Ldelta/2; //mm, Q8.24
 	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,16) + fixed_div(Ldelta, hOdometry->wheel_dist, 16); //rad, Q8.24
 
-	int32_t dx = fixed_mul(hOdometry->dr, (int32_t)fpcos(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
-	int32_t dy = fixed_mul(hOdometry->dr, (int32_t)fpsin(fixed_div(hOdometry->angle + dalpha/2, PI<<2, 15)) * (1<<4), 24); //mm, Q16.16
+	int32_t dx = fixed_mul(hOdometry->dr, fpcos(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
+	int32_t dy = fixed_mul(hOdometry->dr, fpsin(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
 
-	hOdometry->angle += dalpha;
+	hOdometry->angle = modulo_2pi(hOdometry->angle + dalpha);
 
-
-	if(hOdometry->angle > PI<<1)
-	{
-		hOdometry->angle = -(PI<<1) + hOdometry->angle%(PI<<1);
-	}
-	else if(hOdometry->angle < -(PI<<1))
-	{
-		hOdometry->angle = (PI<<1) - hOdometry->angle%(PI<<1);
-	}
 
 	hOdometry->x += dx;
 	hOdometry->y += dy;

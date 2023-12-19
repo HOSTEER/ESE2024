@@ -35,7 +35,6 @@ uint8_t receive_buffer = 0;
 uint8_t transmit_buffer = 0x80;
 
 //imu_drv_t imu;
-<<<<<<< HEAD
 
 //Fonction pour les tests
 int imu_dev(h_imu_drv_t * h_imu){

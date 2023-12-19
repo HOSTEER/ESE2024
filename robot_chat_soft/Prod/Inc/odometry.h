@@ -4,7 +4,6 @@
 #define INC_ODOMETRY_H_
 #include "motor.h"
 
-#define PI 0x3243F6A>>1 //Pi, Q8.24
 
 typedef struct hOdometry_t_struct {
 	hMotor_t *Rmot; //right motor
