@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "odometry.h"
 
+#include "fixpoint_math.h"
+
 typedef enum{
 	//Modes de jeu
 	HUNTER			= 0x1000,
@@ -47,9 +49,9 @@ typedef struct CHAMP_VECT_STRUCT_T{
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry);
 
 void init_champ_vect(void);
-int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect);
+int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, vector_t * dir_vect);
 int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry);
-int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect);
-int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect);
+int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
+int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
 
 #endif /* INC_STRATEGY_H_ */

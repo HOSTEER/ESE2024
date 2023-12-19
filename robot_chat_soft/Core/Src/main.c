@@ -384,7 +384,36 @@ void task_Strategy(void * unused){
 
 	for(;;){
 		strategy(&strat_mode, &hOdometry);
-
+		/*hOdometry.x = 100<<16;
+		hOdometry.y = 100<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = 1100<<16;
+		hOdometry.y = 0<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = 1050<<16;
+		hOdometry.y = 0<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = 1100<<16;
+		hOdometry.y = 600<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = 450<<16;
+		hOdometry.y = 200<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = -100<<16;
+		hOdometry.y = 30<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = 0<<16;
+		hOdometry.y = 600<<16;
+		strat_mode = (strat_mode & 0xF0FF) | TURN_CLOCK;
+		hOdometry.x = 1100<<16;
+		hOdometry.y = 0<<16;
+		strategy(&strat_mode, &hOdometry);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
+		strategy(&strat_mode, &hOdometry);
+		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+		strategy(&strat_mode, &hOdometry);
+		printf("Strat executed\r\n");
+		strat_mode = DEFAULT_STRAT_MODE;*/
 		//Fonctionne à 100Hz
 		vTaskDelay(100);
 	}
@@ -460,12 +489,7 @@ int main(void)
 	init_champ_vect();
 
 #ifndef DEV_MODE
-	ret = xTaskCreate(task_init, "task_init", DEFAULT_STACK_SIZE/2, NULL, DEFAULT_TASK_PRIORITY, &h_task_init);
-	if(ret != pdPASS)
-	{
-		printf("Could not create task init \r\n");
-		Error_Handler();
-	}
+
 	ret = xTaskCreate(task_lidar, "task_lidar", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY+2, &h_task_lidar);
 
 	if(ret != pdPASS)

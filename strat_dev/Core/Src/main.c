@@ -141,7 +141,13 @@ void task_Strategy(void * unused){
 		hOdometry.y = 600<<16;
 		strat_mode = strat_mode & 0xF0FF | TURN_CLOCK;
 		hOdometry.x = 1100<<16;
-		hOdometry.y = 0<<16;
+		hOdometry.y = -600<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = -1100<<16;
+		hOdometry.y = -600<<16;
+		strategy(&strat_mode, &hOdometry);
+		hOdometry.x = -1100<<16;
+		hOdometry.y = 600<<16;
 		strategy(&strat_mode, &hOdometry);
 		strat_mode = strat_mode & 0xFFF0 | FALL_FORWARD;
 		strategy(&strat_mode, &hOdometry);

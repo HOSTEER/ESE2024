@@ -1,10 +1,10 @@
-08:26:15 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+10:31:39 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-size   robot_chat_soft.elf 
    text	   data	    bss	    dec	    hex	filename
-  58960	    124	  34092	  93176	  16bf8	robot_chat_soft.elf
+  58144	    188	  31108	  89440	  15d60	robot_chat_soft.elf
 Finished building: default.size.stdout
  
 
-08:26:15 Build Finished. 0 errors, 0 warnings. (took 243ms)
+10:31:39 Build Finished. 0 errors, 0 warnings. (took 245ms)
 

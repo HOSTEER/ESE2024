@@ -1,5 +1,5 @@
 
-#include <stdint.h>
+#include "fixpoint_math.h"
 
 /*static uint64_t frac16[16] = {5000000000000000, 2500000000000000, 1250000000000000, 625000000000000,
 							  312500000000000, 156250000000000, 78125000000000, 39062500000000,
@@ -12,7 +12,12 @@ static uint64_t frac16[16] = {152587890625, 305175781250, 610351562500, 12207031
 							  39062500000000, 78125000000000, 156250000000000, 312500000000000,
 							  625000000000000, 1250000000000000, 2500000000000000, 5000000000000000};
 
-uint64_t conv_frac16_dec(int16_t x, uint64_t scale)
+static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7FF55, 0x3FFEA, 0x1FFFD,
+							 0xFFFF,0x7FFF,0x3FFF,0x1FFF,0xFFF,0x7FF, 0x3FF, 0x1FF}; // arctan(2^-i) Q7.24
+
+
+
+/*uint64_t conv_frac16_dec(int16_t x, uint64_t scale)
 {
 	uint64_t out = 0;
 	for(int i=0;i<16;i++)
@@ -20,34 +25,16 @@ uint64_t conv_frac16_dec(int16_t x, uint64_t scale)
 		out += ((x>>i)&1)*frac16[i];
 	}
 	return out/scale;
-}
+}*/
 
 int32_t fixed_div_16(int32_t x, int32_t y)
 {
-	int64_t quot;
-	if(x >= 0){
-		return (((int64_t)x) * (1 << 16)) / y;
-	}
-	else{
-		x = -x;
-		quot = (((int64_t)x) * (1 << 16)) / y;
-		return (int64_t)(-quot);
-	}
+	return (((int64_t)x) * (1 << 16)) / y;
 }
 
 int32_t fixed_mul_16(int32_t x, int32_t y)
 {
-	int64_t prod;
-	prod = (int64_t)x * (int64_t)y;
-	if(prod >= 0){
-		return (int32_t)(prod / (1 << 16));
-	}
-	else{
-		prod = -prod;
-		prod = prod / (1 << 16);
-		return (int32_t)(-prod);
-	}
-    //return ((int64_t)x * (int64_t)y) / (1 << 16);
+    return ((int64_t)x * (int64_t)y) / (1 << 16);
 }
 
 int32_t fixed_mul(int32_t x, int32_t y, uint8_t qout)
@@ -89,3 +76,91 @@ int16_t fpsin(int16_t i)
 
     return c ? -y : y;
 }
+
+//Vector mode CORDIC, compute sqrt(x^2 + y^2) and Arctan(y/x)
+void CORDIC_vector(vector_t *vector)
+{
+	uint8_t quadrant;
+	uint32_t x_curr,x_next; //Q16.16
+	int32_t y_curr; 	//Q15.16
+	int32_t z_curr = 0; 	//Q15.16
+
+	//shifts all coordinates in quadrant 1, x0 = |x|/2, y0 = |y|/2, z0 = 0
+	if(vector->x >= 0)
+	{
+		x_curr = vector->x >> 1;
+		if(vector->y >= 0)
+		{
+			quadrant = 1;
+			y_curr = vector->y >> 1;
+		}
+		else
+		{
+			quadrant = 4;
+			y_curr = -1*vector->y >> 1;
+		}
+	}
+	else
+	{
+		x_curr = -1*vector->x >> 1;
+		if(vector->y >= 0)
+		{
+			quadrant = 2;
+			y_curr = vector->y >> 1;
+		}
+		else
+		{
+			quadrant = 3;
+			y_curr = -1*vector->y >> 1;
+		}
+	}
+	z_curr = 0;
+	//printf("x_curr = %d, y_curr = %d, z_curr = %d\r\n", (int)x_curr,(int)y_curr,(int)z_curr);
+
+	for(uint8_t i = 0; i < CORDIC_ITER; i++)
+	{
+		//xk+1 = xk + sign(yk)*yk/2
+		//yk+1 = yk - sign(yk)*xk/2
+		//zk+1 = z0 - sign(yk)*Arctan(2^-i)
+		//
+		//xn = K*sqrt(x0^2 + y0^2)
+		//yn = 0
+		//zn = z0 - Arctan(y0/x0)
+
+		if(y_curr < 0) //3c
+		{
+			x_next = x_curr + (-1*y_curr >> i); //10c
+			y_curr += x_curr >> i; //10c
+			z_curr += atan2i[i]; //10c
+		}
+		else
+		{
+			x_next = x_curr + (y_curr >> i); //10c
+			y_curr -= x_curr >> i; //10c
+			z_curr -= atan2i[i]; //10c
+		}
+		x_curr = x_next;
+		//printf("i = %d, x_curr = %d, y_curr = %d, z_curr = %d\r\n",(int)i, (int)x_curr, (int)y_curr, (int)z_curr);
+	}
+
+	vector->norm = (uint64_t)x_curr*CORDIC_CONSTANT >> 16; //Q16.16 30c
+
+	switch(quadrant)
+	{
+		case 1:
+			vector->angle = -1*z_curr;
+			break;
+		case 2:
+			vector->angle = PI + z_curr;
+			break;
+		case 3:
+			vector->angle = -1*(PI + z_curr);
+			break;
+		default: //case 4:
+			vector->angle = z_curr;
+			break;
+	}
+
+
+}
+

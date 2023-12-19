@@ -1,5 +1,5 @@
 #include "strategy.h"
-#include "fixpoint_math.h"
+
 #include "config.h"
 
 
@@ -42,7 +42,7 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	int32_t dir_vect[2];
+	vector_t dir_vect;
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
@@ -62,15 +62,15 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				//TODO commande avance rectiligne
 				break;
 			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
+				*strat_mode = (*strat_mode&0xFFF) | PREY;
 				//TODO commande recul rectiligne
 				break;
 			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | PREY;
+				*strat_mode = (*strat_mode&0xFFF) | PREY;
 				//TODO commande avance rectiligne
 				break;
 			default: //COLLIDE sans FALL_x
-				*strat_mode = *strat_mode&0xFFF | PREY;
+				*strat_mode = (*strat_mode&0xFFF) | PREY;
 				//TODO consigne vitesse nulle
 				break;
 			}
@@ -80,7 +80,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		//Le robot est la proie
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
 			//Aucun obstacle
-			champ_vectoriel(&champ_vect, strat_mode, hOdometry, dir_vect);
+			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 			//TODO appel fonction detection obstacle le + proche
 			//TODO somme 2 consignes
 			//TODO màj consigne commande
@@ -97,27 +97,27 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				//TODO commande avance rectiligne
 				break;
 			case FALL_FORWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
+				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
 				//TODO commande recul rectiligne
 				break;
 			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
+				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
 				//TODO commande avance rectiligne
 				break;
 			default: //COLLIDE sans FALL_x
-				*strat_mode = *strat_mode&0xFFF | HUNTER;
+				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
 				//TODO consigne vitesse nulle
 				break;
 			}
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect[0]>>16, dir_vect[1]>>16);
+	printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
 }
 
-int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, int32_t * dir_vect){
+int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, vector_t * dir_vect){
 	uint8_t zone = zone_sorting(champ_vect, hOdometry);
-	printf("La zone du robot est %d\n\r", zone);
+	//printf("La zone du robot est %d\n\r", zone);
 	int8_t status;
 
 	if(zone%2 == 0){
@@ -187,7 +187,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 
 }
 
-int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
+int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect){
 	int32_t sens;
 
 	if((*strat_mode & 0x0F00)  == TURN_TRIGO){
@@ -201,23 +201,23 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 	switch(zone){
 	case 2: //Zone haute
 		//sens = +1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = +sens*champ_vect->vitesse_avance;
+		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->x = +sens*champ_vect->vitesse_avance;
 		break;
 	case 4: //Zone Gauche
 		//sens = +1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = +sens*champ_vect->vitesse_avance;
+		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->y = +sens*champ_vect->vitesse_avance;
 		break;
 	case 6: //Zone droite
 		//sens = -1;
-		dir_vect[0] = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
-		dir_vect[1] = -sens*champ_vect->vitesse_avance;
+		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->y = -sens*champ_vect->vitesse_avance;
 		break;
 	case 8: //Zone basse
 		//sens = -1;
-		dir_vect[1] = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
-		dir_vect[0] = -sens*champ_vect->vitesse_avance;
+		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->x = -sens*champ_vect->vitesse_avance;
 		break;
 	default:
 		return ERR_ZONE_404;
@@ -225,7 +225,7 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 	return 0;
 }
 
-int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, int32_t * dir_vect){
+int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect){
 	//int32_t dir_vect[2] = {0};
 	int32_t xb, yb;
 	int32_t Dx, Dy;
@@ -263,15 +263,17 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 
 	Dx = (hOdometry->x - xb);
 	Dy = (hOdometry->y - yb);
-	//TODO norm = sqrt(Dx*Dx + Dy*Dy);
-	//TODO d = champ_vect->offset - norm
+	vector_t Dvect = {Dx, Dy};
+	CORDIC_vector(&Dvect);
+	norm = Dvect.norm;
 
+	d = champ_vect->offset - norm;
 	//Calcul consigne de direction
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect[0] = fixed_div_16(fixed_mul_16(-d, Dx), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm));
-	dir_vect[1] = fixed_div_16(fixed_mul_16(-d, Dy), norm) + fixed_mul_16(sens, fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm));
+	dir_vect->x = fixed_div_16(fixed_mul_16(-d, Dx), norm) + sens*fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm);
+	dir_vect->y = fixed_div_16(fixed_mul_16(-d, Dy), norm) + sens*fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm);
 
 	return 0;
 }
