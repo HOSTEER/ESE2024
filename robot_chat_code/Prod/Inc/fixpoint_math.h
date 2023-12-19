@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-#define CORDIC_ITER 10 //number of iterations of the CORDIC algorithm, max = 16 (or add more values to atan2i table)
+#define CORDIC_ITER 8 //number of iterations of the CORDIC algorithm, max = 16 (limited by atan2i table), ~50c/iter
 #define CORDIC_CONSTANT 0x136E9 //multiplicative constant to get accurate norm, Q.16.16
 
 typedef struct vector_t_struct {

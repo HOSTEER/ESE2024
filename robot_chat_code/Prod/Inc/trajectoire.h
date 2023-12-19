@@ -4,6 +4,7 @@
 #define INC_TRAJECTOIRE_H_
 
 #include "main.h"
+#include "odometry.h"
 
 #define MAX_POS_ERROR (5<<16) //mm Q.16
 
@@ -14,6 +15,6 @@ typedef struct trajectory_t_struct {
 
 } trajectory_t;
 
-void follow_trajectory(hOdometry_t hOdometry, int32_t x, int32_t y, int32_t *angle, int32_t *mot_speed);
+void follow_trajectory(hOdometry_t *hOdometry, int32_t x, int32_t y, int32_t *angle, int32_t *mot_speed);
 
 #endif /* INC_TRAJECTOIRE_H_ */
