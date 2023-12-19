@@ -82,79 +82,83 @@ void CORDIC_vector(vector_t *vector)
 {
 	uint8_t quadrant;
 	uint32_t x_curr,x_next; //Q16.16
-	int32_t y_curr,y_next; 	//Q15.16
-	int32_t z_curr,z_next; 	//Q15.16
+	int32_t y_curr; 	//Q15.16
+	int32_t z_curr = 0; 	//Q15.16
 
 	//shifts all coordinates in quadrant 1, x0 = |x|/2, y0 = |y|/2, z0 = 0
 	if(vector->x >= 0)
 	{
-		x_curr = (uint32_t)vector->x >> 1;
+		x_curr = vector->x >> 1;
 		if(vector->y >= 0)
 		{
 			quadrant = 1;
-			y_curr = (int32_t)((uint32_t)vector->y >> 1);
+			y_curr = vector->y >> 1;
 		}
 		else
 		{
 			quadrant = 4;
-			y_curr = (int32_t)((uint32_t)(-1*vector->y) >> 1);
+			y_curr = -1*vector->y >> 1;
 		}
 	}
 	else
 	{
-		x_curr = (uint32_t)(-1*vector->x) >> 1;
+		x_curr = -1*vector->x >> 1;
 		if(vector->y >= 0)
 		{
 			quadrant = 2;
-			y_curr = (int32_t)((uint32_t)vector->y >> 1);
+			y_curr = vector->y >> 1;
 		}
 		else
 		{
 			quadrant = 3;
-			y_curr = (int32_t)((uint32_t)(-1*vector->y) >> 1);
+			y_curr = -1*vector->y >> 1;
 		}
 	}
 	z_curr = 0;
+	//printf("x_curr = %d, y_curr = %d, z_curr = %d\r\n", (int)x_curr,(int)y_curr,(int)z_curr);
 
 	for(uint8_t i = 0; i < CORDIC_ITER; i++)
 	{
-		//xk+1 = xk - sign(yk)*yk/2
-		//yk+1 = yk + sign(yk)xk/2
+		//xk+1 = xk + sign(yk)*yk/2
+		//yk+1 = yk - sign(yk)*xk/2
 		//zk+1 = z0 - sign(yk)*Arctan(2^-i)
 		//
 		//xn = K*sqrt(x0^2 + y0^2)
 		//yn = 0
 		//zn = z0 - Arctan(y0/x0)
 
-		if(y_curr < 0)
+		if(y_curr < 0) //3c
 		{
-			x_next = x_curr + ((uint32_t)(-1*y_curr) >> 1);
-			y_next = y_curr + (int32_t)(x_curr >> 1);
-			z_next = z_curr + atan2i[i];
+			x_next = x_curr + (-1*y_curr >> i); //10c
+			y_curr += x_curr >> i; //10c
+			z_curr += atan2i[i]; //10c
 		}
 		else
 		{
-			x_next = x_curr + ((uint32_t)y_curr >> 1);
-			y_next = y_curr - (int32_t)(x_curr >> 1);
-			z_next = z_curr - atan2i[i];
+			x_next = x_curr + (y_curr >> i); //10c
+			y_curr -= x_curr >> i; //10c
+			z_curr -= atan2i[i]; //10c
 		}
 		x_curr = x_next;
-		y_curr = y_next;
-		z_curr = z_next;
+		//printf("i = %d, x_curr = %d, y_curr = %d, z_curr = %d\r\n",(int)i, (int)x_curr, (int)y_curr, (int)z_curr);
 	}
 
-	vector->norm = fixed_mul_16(x_curr, CORDIC_CONSTANT); //Q16.16
+	vector->norm = (uint64_t)x_curr*CORDIC_CONSTANT >> 16; //Q16.16 30c
 
 	switch(quadrant)
 	{
 		case 1:
-			vector->angle = HALF_PI + z_curr;
+			vector->angle = -1*z_curr;
+			break;
 		case 2:
-			vector->angle = HALF_PI - z_curr;
+			vector->angle = PI + z_curr;
+			break;
 		case 3:
-			vector->angle = z_curr - HALF_PI;
+			vector->angle = -1*(PI + z_curr);
+			break;
 		default: //case 4:
 			vector->angle = z_curr;
+			break;
 	}
 
 

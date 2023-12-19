@@ -36,6 +36,7 @@
 #include "fixpoint_math.h"
 #include "control.h"
 #include "odometry.h"
+#include "trajectoire.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,6 +106,7 @@ int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
 uint8_t odom_overflow = 0;
+//vector_t test_vect = {-1*(2<<16),1<<16};
 strat_mode_t strat_mode = PREY;
 /* USER CODE END PV */
 
@@ -184,7 +186,7 @@ void task_init(void * unused)
 
 	printf("Task init ok\r\n");
 	for(;;){
-		imu_dev(&h_imu);
+		//imu_dev(&h_imu);
 		//printf("Task init looping\r\n");
 		HAL_GPIO_TogglePin(USER_LED0_GPIO_Port, USER_LED0_Pin);
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
@@ -221,8 +223,8 @@ void IMU_taskRead(void * unused)
 		}*/
 
 
-		sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
-		xQueueSend(q_printf, (void *)msg, 5);
+		//sprintf(msg, "Lecture des accelerations :\r\n- Gyro X :%d\r\n- Gyro Y :%d\r\n- Gyro Z :%d\r\n", h_imu.gyro[0],  h_imu.gyro[1], h_imu.gyro[2]);
+		//xQueueSend(q_printf, (void *)msg, 5);
 
 		//printf("Task init looping\r\n");
 		//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
@@ -322,10 +324,16 @@ void task_Motor(void * unused)
 	Rmot.current_offset = Rmot.adc_dma_buff[Rmot.dma_buff_index];
 	Lmot.current_offset = Lmot.adc_dma_buff[Lmot.dma_buff_index];
 	int32_t speed = 0;
+	int32_t angle = 0;
+	uint32_t norm = 0;
 	for(;;)
 	{
 		vTaskDelay(500);
 		speed = Rmot.speed_measured[Rmot.speed_index];
+		//CORDIC_vector(&test_vect);
+		//angle = test_vect.angle*10;
+		//norm = test_vect.norm*100;
+		//printf("angle = %d, norme = %d\r\n", (int)angle/(1<<24), (int)norm/(1<<16));
 		//printf("FWD %d\r\n",(int)(int16_t)__HAL_TIM_GET_COMPARE(Lmot.tim_FWD,TIM_CHANNEL_1));
 		//printf("REV %d\r\n",(int)(int16_t)__HAL_TIM_GET_COMPARE(Lmot.tim_REV,TIM_CHANNEL_1));
 		//printf("L Vdiff %d\r\n", (int)(fixed_div(Lmot.speed_output[Lmot.speed_index],128<<16,16) - fixed_div(Lmot.speed_measured[Lmot.speed_index],80<<16,16))/(1<<16));
