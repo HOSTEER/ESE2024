@@ -38,6 +38,7 @@
 #include "odometry.h"
 #include "strategy.h"
 #include "config.h"
+#include "trajectoire.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,9 +55,9 @@
 #define DEFAULT_LIDAR_SPEED 950
 #define TRUNC_FIXP 1000000000000
 
-#define WHEEL_DIAMETER (43UL<<24) 	//43mm diameter, Q8.24
-#define WHEEL_DIST (153UL<<16) 		//153mm distance between wheels, Q16.16
-#define ENC_TICKSPERREV 400<<16	//618.18 encoder ticks per revolution, Q16.16
+#define WHEEL_DIAMETER 0x2A800000	//42.5mm diameter, Q.24
+#define WHEEL_DIST (155UL<<16) 		//155mm distance between wheels, Q.16
+#define ENC_TICKSPERREV (896<<16)	//618.18 encoder ticks per revolution, Q.16
 #define ODOMETRY_FREQ 50UL 			//50Hz odometry refresh frequency
 
 
@@ -270,7 +271,7 @@ void task_lidar(void * unused)
 	lidar.end_angl = 0;
 	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	memset(lidar.sorted_dist,10000,360);
 	ydlidar_x4_scan(&lidar);//permet de lancer le scan du lidar
@@ -319,7 +320,8 @@ void task_tracking(void * unused)
 				HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 			}
 		}
-		vTaskDelay(50);
+		//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
+		vTaskDelay(100);
 	}
 }
 #ifdef SE
@@ -433,6 +435,7 @@ void task_MotorSpeed(void * unused)
 		//V = battery_get_voltage();
 		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
 		odometry_update_pos(&hOdometry);
+		angle = follow_trajectory(&hOdometry, 1700<<16, 450<<16,&mot_speed);
 		//motor_get_speed(&Rmot);
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
@@ -445,15 +448,16 @@ void task_MotorSpeed(void * unused)
 		{
 			mot_speed = 0;
 		}*/
-		//angle_corr = set_angle_corr(&hOdometry, angle);
+		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (300<<16) + fixed_mul(300<<16, angle_corr, 24);
 		Lspeed = (300<<16) - fixed_mul(300<<16, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
-		//motor_set_PWM(&Rmot, 1024);
+		//motor_set_PWM(&Lmot, -mot_speed*512);
+		//motor_set_PWM(&Rmot, mot_speed*512);
 		//printf("vitesse moteur = %d.%u mm/s, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
 		//printf("counts = %d, mesure : %d.%u mm/s, error : %d.%u mm/s, output : %d.%u, integral : %d.%u\r\n", (int)cnt, (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF, TRUNC_FIXP),(int)(Rmot.speed_error[Rmot.speed_index]/(1<<16)), (unsigned int)conv_frac16_dec((Rmot.speed_error[Rmot.speed_index]) & 0xFFFF, TRUNC_FIXP), (int)Rmot.speed_output[Rmot.speed_index]/(1<<16), (unsigned int)conv_frac16_dec(Rmot.speed_output[Rmot.speed_index] & 0xFFFF, TRUNC_FIXP), (int)(Rmot.speed_integral/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.speed_integral & 0xFFFF, TRUNC_FIXP));
-		set_speed_PID(&Rmot,mot_speed*Rspeed);	// 1<<14 = 150rpm , 1<<13 = 75rpm
-		set_speed_PID(&Lmot,-(mot_speed*Lspeed));
+		set_speed_PID(&Rmot,mot_speed*Rspeed);
+		set_speed_PID(&Lmot,mot_speed*Lspeed);
 		//printf("vitesse moteur = %d.%u rpm, courant moteur = %d.%u mA, tension batterie = %d.%u V\r\n", (int)(speed/(1<<16)), (unsigned int)conv_frac16_dec(speed & 0xFFFF,TRUNC_FIXP), (int)(Rmot.current_measured[Rmot.current_index]/(1<<16)), (unsigned int)conv_frac16_dec(Rmot.current_measured[Rmot.current_index] & 0xFFFF, TRUNC_FIXP) , (int)(V/(1<<16)),(unsigned int)conv_frac16_dec(V & 0xFFFF,TRUNC_FIXP));
 		//printf("adc buffer 0: %d, 1: %d, 2: %d, i = %d, count = %d\r\n", (int)adcBuff[0],(int)adcBuff[1],(int)adcBuff[2], k, (int)__HAL_TIM_GET_COUNTER(&htim15));
 		vTaskDelay(20);
@@ -525,12 +529,12 @@ int main(void)
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	//q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
-	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1);
-
 	current_sense_start();
 
-	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
-	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
+	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<16, 0, 1023<<16, 10);
+
+	//switch TIM15 and TIM16 to reverse motor polarity.
+	motor_init(&Lmot, &htim16, &htim15, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10);
 
 	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 

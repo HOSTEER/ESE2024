@@ -17,13 +17,14 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 {
 	hOdometry->Rmot = Rmot;
 	hOdometry->Lmot = Lmot;
-	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul((int32_t)PI, (int32_t)diameter, 24),(int32_t)CPR,16); // mm/tick, Q8.24
+	hOdometry->Cnt_dist_coeff = fixed_div(fixed_mul(PI,diameter, 32),CPR,24); // mm/tick, Q8.24
 	hOdometry->wheel_dist = wheel_dist; //mm, Q16.16
 	hOdometry->freq = freq;
 	hOdometry->dr = 0;
 	hOdometry->angle = 0;
 	hOdometry->x = 0;
 	hOdometry->y = 0;
+	//printf("cnt_dist_coeff = %d\r\n", (int)hOdometry->Cnt_dist_coeff);
 }
 
 /**
@@ -37,25 +38,32 @@ void odometry_update_pos(hOdometry_t *hOdometry)
 	hMotor_t *Rmot = hOdometry->Rmot;
 	hMotor_t *Lmot = hOdometry->Lmot;
 
-	int16_t Rcount = (int16_t)__HAL_TIM_GET_COUNTER(Rmot->tim_ENC);
-	int16_t Lcount = (int16_t)__HAL_TIM_GET_COUNTER(Lmot->tim_ENC);
+	int16_t Rcount = -1*(int16_t)__HAL_TIM_GET_COUNTER(Rmot->tim_ENC);
+	int16_t Lcount = -1*(int16_t)__HAL_TIM_GET_COUNTER(Lmot->tim_ENC);
 
 	__HAL_TIM_SET_COUNTER(Rmot->tim_ENC, 0);
 	__HAL_TIM_SET_COUNTER(Lmot->tim_ENC, 0);
 
 
-	int32_t Rdelta = fixed_mul((int32_t)Rcount , hOdometry->Cnt_dist_coeff, 0); //mm Q8.24
-	int32_t Ldelta = -1*fixed_mul((int32_t)Lcount , hOdometry->Cnt_dist_coeff, 0); //mm Q8.24
+	int32_t Rdelta = Rcount * hOdometry->Cnt_dist_coeff; //mm Q8.24
+	int32_t Ldelta = Lcount * hOdometry->Cnt_dist_coeff; //mm Q8.24
+
+	//printf("R,L = %d, %d\r\n",(int)Rdelta/(1<<16),(int)Ldelta/(1<<16));
 
 	Rmot->speed_measured[Rmot->speed_index] = fixed_mul(Rdelta, (int32_t)hOdometry->freq, 9) + Rmot->speed_measured[(Rmot->speed_index + 2)%3]/2; //right motor speed, mm/s, Q16.16
 	Lmot->speed_measured[Lmot->speed_index] = fixed_mul(Ldelta, (int32_t)hOdometry->freq, 9) + Lmot->speed_measured[(Lmot->speed_index + 2)%3]/2; //left motor speed, mm/s, Q16.16
 
-	hOdometry->dr = Rdelta/2 - Ldelta/2; //mm, Q8.24
-	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,16) + fixed_div(Ldelta, hOdometry->wheel_dist, 16); //rad, Q8.24
+	//printf("Rs,Ls = %d, %d\r\n",(int)Rmot->speed_measured[Rmot->speed_index]/(1<<16),(int)Lmot->speed_measured[Lmot->speed_index]/(1<<16));
+
+	hOdometry->dr = Rdelta/2 + Ldelta/2; //mm, Q8.24
+	int32_t dalpha = fixed_div(Rdelta, hOdometry->wheel_dist,16) - fixed_div(Ldelta, hOdometry->wheel_dist, 16); //rad, Q8.24
+
+	//printf("dr,da = %d, %d\r\n",(int)hOdometry->dr/(1<<16),(int)dalpha/(1<<16));
 
 	int32_t dx = fixed_mul(hOdometry->dr, fpcos(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
 	int32_t dy = fixed_mul(hOdometry->dr, fpsin(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
 
+	//printf("x,y,a %d, %d, %d\r\n", (int)hOdometry->x/(1<<16),(int)hOdometry->y/(1<<16),10*(int)hOdometry->angle/(1<<24));
 	hOdometry->angle = modulo_2pi(hOdometry->angle + dalpha);
 
 

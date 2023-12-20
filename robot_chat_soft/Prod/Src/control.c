@@ -17,7 +17,7 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 
 	hMotor->speed_output[hMotor->speed_index] = fixed_mul_16(hMotor->speed_error[hMotor->speed_index], (int32_t)hMotor->speed_corr_params[0]) +
 												fixed_mul_16(hMotor->speed_integral, (int32_t)hMotor->speed_corr_params[1]) +
-												fixed_mul_16(hMotor->speed_measured[(hMotor->speed_index + 2)%3] - hMotor->speed_measured[hMotor->speed_index], (int32_t)hMotor->current_corr_params[2]) +
+												fixed_mul_16(hMotor->speed_measured[(hMotor->speed_index + 2)%3] - hMotor->speed_measured[hMotor->speed_index], (int32_t)hMotor->speed_corr_params[2]) +
 												fixed_mul(input,5<<12,16) /*hMotor->speed_output[(hMotor->speed_index + 2)%3] /*+
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 2)%3], (hMotor->speed_corr_params[1] - hMotor->speed_corr_params[2])*2) +
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 1)%3], hMotor->speed_corr_params[1] + hMotor->speed_corr_params[2] - hMotor->speed_corr_params[0]) +
@@ -66,7 +66,7 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 	int32_t output = 0; //Q7.24
 	int32_t error = modulo_2pi(input - hOdometry->angle); //Q7.24
 
-	output = 2*error;
+	output = error/2;
 	if(output > 1<<24)
 	{
 		output = 1<<24;
