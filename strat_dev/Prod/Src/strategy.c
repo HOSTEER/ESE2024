@@ -30,14 +30,14 @@ static champ_vect_t champ_vect;
 
 
 void init_champ_vect(void){
-	champ_vect.vitesse_avance = (VITESSE_CIRCUIT<<16);
-	champ_vect.vitesse_correctrice = (VITESSE_CORRECTION<<16);
-	champ_vect.pt_lim_haut = (HAUTEUR_CHAMP<<16);
+	champ_vect.vitesse_avance = (VITESSE_CIRCUIT<<8);
+	champ_vect.vitesse_correctrice = (VITESSE_CORRECTION<<8);
+	champ_vect.pt_lim_haut = (HAUTEUR_CHAMP<<8);
 	champ_vect.pt_lim_bas = -1*champ_vect.pt_lim_haut;
-	champ_vect.pt_lim_droite = (LARGEUR_CHAMP<<16);
+	champ_vect.pt_lim_droite = (LARGEUR_CHAMP<<8);
 	champ_vect.pt_lim_gauche = -1*champ_vect.pt_lim_droite;
 
-	champ_vect.offset = (CHAMP_VECT_MARGE<<16);
+	champ_vect.offset = (CHAMP_VECT_MARGE<<8);
 }
 
 
@@ -111,7 +111,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			}
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
+	printf("x: %d, y: %d\n\r", dir_vect.x>>8, dir_vect.y>>8);
 	return 0;
 }
 
@@ -157,8 +157,8 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 	//Cas de la zone milieu, il faut calculer la position le long des droites
 	if((zone_h + 3*(zone_v - 1)) == 5){
 
-		int32_t fAB = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
-		int32_t fCD = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
+		int32_t fAB = fixed_mul(hOdometry->x, fixed_div(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche,8),8);
+		int32_t fCD = fixed_mul(hOdometry->x, fixed_div(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche,8),8);
 
 		if(hOdometry->y >= fAB){
 			if(hOdometry->y >= fCD){
@@ -201,22 +201,22 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 	switch(zone){
 	case 2: //Zone haute
 		//sens = +1;
-		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->y = fixed_mul(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice,8);
 		dir_vect->x = +sens*champ_vect->vitesse_avance;
 		break;
 	case 4: //Zone Gauche
 		//sens = +1;
-		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->x = fixed_mul(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice,8);
 		dir_vect->y = +sens*champ_vect->vitesse_avance;
 		break;
 	case 6: //Zone droite
 		//sens = -1;
-		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->x = fixed_mul(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice,8);
 		dir_vect->y = -sens*champ_vect->vitesse_avance;
 		break;
 	case 8: //Zone basse
 		//sens = -1;
-		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->y = fixed_mul(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice,8);
 		dir_vect->x = -sens*champ_vect->vitesse_avance;
 		break;
 	default:
@@ -268,12 +268,25 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 	norm = Dvect.norm;
 
 	d = champ_vect->offset - norm;
+	if (((-d)>>8)>2000){
+		d = -((2000)<<8);
+		norm = ((2000)<<8);
+	}
 	//Calcul consigne de direction
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect->x = fixed_div_16(fixed_mul_16(-d, Dx), norm) + sens*fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm);
-	dir_vect->y = fixed_div_16(fixed_mul_16(-d, Dy), norm) + sens*fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm);
+	int32_t comp_x_corr = fixed_mul(champ_vect->vitesse_correctrice,fixed_div(fixed_mul(d, Dx, 8), norm, 8), 8);
+	int32_t comp_y_corr = fixed_mul(champ_vect->vitesse_correctrice,fixed_div(fixed_mul(d, Dy, 8), norm, 8), 8);
+	int32_t comp_x_tang =sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+	int32_t comp_y_tang =sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
+
+	if(d <0){
+		comp_x_corr = -comp_x_corr;
+		comp_y_corr = -comp_y_corr;
+	}
+	dir_vect->x = comp_x_corr + sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+	dir_vect->y = comp_y_corr + sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
 
 	return 0;
 }

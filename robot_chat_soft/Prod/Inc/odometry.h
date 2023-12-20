@@ -5,7 +5,6 @@
 #include "motor.h"
 
 
-
 typedef struct hOdometry_t_struct {
 	hMotor_t *Rmot; //right motor
 	hMotor_t *Lmot; //left motor

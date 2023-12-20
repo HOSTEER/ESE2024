@@ -58,6 +58,8 @@
 #define WHEEL_DIST (153UL<<16) 		//153mm distance between wheels, Q16.16
 #define ENC_TICKSPERREV 400<<16	//618.18 encoder ticks per revolution, Q16.16
 #define ODOMETRY_FREQ 50UL 			//50Hz odometry refresh frequency
+
+#define SE
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -101,7 +103,10 @@ int16_t cnt = 0;
 int32_t angle = 0;
 int32_t avg_speed = DEFAULT_SPEED;
 uint8_t odom_overflow = 0;
+int32_t angle_corr = 0;
 strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
+
+uint8_t msg[QUEUE_PRINTF_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -139,7 +144,6 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef * huart){
 	if(huart->Instance == USART2){
-		HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(printf_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
@@ -247,17 +251,16 @@ void IMU_taskRead(void * unused)
 
 void printfTask(void * unused)
 {
-	uint8_t msg[QUEUE_PRINTF_SIZE];
+	uint8_t printMsg[QUEUE_PRINTF_SIZE];
 	BaseType_t ret;
 	HAL_StatusTypeDef status;
 
 	for(;;){
-		ret = xQueueReceive(q_printf, (void *)msg, portMAX_DELAY);
-		uint16_t msg_len = strlen(msg);
-		HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		ret = xQueueReceive(q_printf, (void *)printMsg, portMAX_DELAY);
+		uint16_t msg_len = strlen(printMsg);
 		if(ret == pdTRUE && msg_len != 0){
 			//printf(msg);
-			status = HAL_UART_Transmit_IT(&huart2, msg, msg_len);
+			status = HAL_UART_Transmit_IT(&huart2, printMsg, msg_len);
 			xSemaphoreTake(printf_semaphore, portMAX_DELAY);
 		}
 
@@ -327,6 +330,7 @@ void task_BTN_ISR(void * unused)
 	}
 }
 
+
 void task_Motor(void * unused)
 {
 	vTaskDelay(10);
@@ -338,14 +342,17 @@ void task_Motor(void * unused)
 	for(;;)
 	{
 		vTaskDelay(500);
-		speed = Rmot.speed_measured[Rmot.speed_index];
+		//speed = Rmot.speed_measured[Rmot.speed_index];
 		//printf("FWD %d\r\n",(int)(int16_t)__HAL_TIM_GET_COMPARE(Lmot.tim_FWD,TIM_CHANNEL_1));
 		//printf("REV %d\r\n",(int)(int16_t)__HAL_TIM_GET_COMPARE(Lmot.tim_REV,TIM_CHANNEL_1));
 		//printf("L Vdiff %d\r\n", (int)(fixed_div(Lmot.speed_output[Lmot.speed_index],128<<16,16) - fixed_div(Lmot.speed_measured[Lmot.speed_index],80<<16,16))/(1<<16));
 		//printf("angle %d\r\n", (int)(hOdometry.angle*10/(1<<24)));
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
-		//printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		//TODO printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
+		sprintf(msg,"Odom : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+				xQueueSendToFront(q_printf, (void *)msg, 1);
+
 
 		/*motor_set_PWM(&Rmot, 512);
 		motor_set_PWM(&Lmot, 512);
@@ -362,7 +369,6 @@ void task_MotorSpeed(void * unused)
 {
 	uint32_t V = 0;
 	int32_t speed = 0;
-	int32_t angle_corr = 0;
 	int32_t Lspeed = 0;
 	int32_t Rspeed = 0;
 	for(;;)
@@ -382,6 +388,8 @@ void task_MotorSpeed(void * unused)
 		{
 			mot_speed = 0;
 		}*/
+		//angle_corr = set_angle_corr(&hOdometry, angle);
+
 		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
 		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
@@ -496,8 +504,8 @@ int main(void)
 
 	current_sense_start();
 
-	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
-	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10, 0, 0, 0, 0);
+	motor_init(&Rmot, &htim17, &htim14, &htim3, 1, 5<<16, 1<<16, 0, 1023<<16, 10);
+	motor_init(&Lmot, &htim15, &htim16, &htim1, 2, 5<<16, 1<<16, 0, 1023<<16, 10);
 
 	odometry_init(&hOdometry, &Rmot, &Lmot, WHEEL_DIAMETER, ENC_TICKSPERREV, WHEEL_DIST, ODOMETRY_FREQ);
 

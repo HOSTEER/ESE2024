@@ -2,7 +2,11 @@
 #include "control.h"
 #include "fixpoint_math.h"
 
-
+/**
+  * @brief Motor speed control loop, this function should be called right after odometry_update_pos()
+  * @param *hMotor : address of motor structure containing motor parameters.
+  *	@retval None
+  */
 void set_speed_PID(hMotor_t * hMotor,int32_t input)
 {
 	hMotor->speed_error[hMotor->speed_index] = input - hMotor->speed_measured[hMotor->speed_index];
@@ -13,8 +17,8 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 
 	hMotor->speed_output[hMotor->speed_index] = fixed_mul_16(hMotor->speed_error[hMotor->speed_index], (int32_t)hMotor->speed_corr_params[0]) +
 												fixed_mul_16(hMotor->speed_integral, (int32_t)hMotor->speed_corr_params[1]) +
-												fixed_mul_16(hMotor->speed_measured[(hMotor->speed_index + 2)%3] - hMotor->speed_measured[hMotor->speed_index], (int32_t)hMotor->current_corr_params[2]) +
-												fixed_mul(input,5<<12,16) /*hMotor->speed_output[(hMotor->speed_index + 2)%3] +
+												fixed_mul_16(hMotor->speed_measured[(hMotor->speed_index + 2)%3] - hMotor->speed_measured[hMotor->speed_index], (int32_t)hMotor->speed_corr_params[2]) +
+												fixed_mul(input,5<<12,16) /*hMotor->speed_output[(hMotor->speed_index + 2)%3] /*+
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 2)%3], (hMotor->speed_corr_params[1] - hMotor->speed_corr_params[2])*2) +
 												fixed_mul_16(hMotor->speed_error[(hMotor->speed_index + 1)%3], hMotor->speed_corr_params[1] + hMotor->speed_corr_params[2] - hMotor->speed_corr_params[0]) +
 												hMotor->speed_output[(hMotor->speed_index - 2)%3]*/;
@@ -51,20 +55,18 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 	//TODO fully implement feedforward
 }
 
+/**
+  * @brief Angular position control loop, this function should be called regularly.
+  * TODO implement full corrector
+  * @param *hMotor : address of motor structure containing motor parameters.
+  *	@retval diff : return L/R speed coefficient
+  */
 int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 {
-	int32_t output = 0; //Q8.24
-	int32_t error = input - hOdometry->angle; //Q8.24
-	if(error > PI<<1)
-		{
-			error = -(PI<<1) + error%(PI<<1);
-		}
-	else if(error < -(PI<<1))
-		{
-			error = (PI<<1) - error%(PI<<1);
-		}
+	int32_t output = 0; //Q7.24
+	int32_t error = modulo_2pi(input - hOdometry->angle); //Q7.24
 
-	output = error;
+	output = 2*error;
 	if(output > 1<<24)
 	{
 		output = 1<<24;
@@ -75,4 +77,3 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 	}
 	return output;
 }
-

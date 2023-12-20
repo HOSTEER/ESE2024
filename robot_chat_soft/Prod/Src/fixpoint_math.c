@@ -13,7 +13,7 @@ static uint64_t frac16[16] = {152587890625, 305175781250, 610351562500, 12207031
 							  625000000000000, 1250000000000000, 2500000000000000, 5000000000000000};
 
 static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7FF55, 0x3FFEA, 0x1FFFD,
-							 0xFFFF,0x7FFF,0x3FFF,0x1FFF,0xFFF,0x7FF, 0x3FF, 0x1FF}; // arctan(2^-i) Q7.24
+							 0xFFFF,0x7FFF,0x3FFF,0x1FFF,0xFFF,0x7FF, 0x3FF, 0x1FF}; // arctan(2^-i) lookup table, Q7.24
 
 
 
@@ -27,36 +27,107 @@ static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7
 	return out/scale;
 }*/
 
+/**
+  * @brief maps angle in [-pi, pi].
+  * @param angle : input angle, Q7.24
+  *	@retval output angle, Q7.24
+  */
+int32_t modulo_2pi(int32_t angle)
+{
+	if(angle > PI)
+	{
+		return -PI + angle%TWO_PI;
+	}
+	else if(angle < -PI)
+	{
+		return PI - angle%TWO_PI;
+	}
+	return angle;
+}
+
+/**
+  * @brief returns x/y, result in Q15.16 format
+  * @param x : numerator, Q15.16
+  * @param y : denominator, Q15.16
+  *	@retval q : x/y, Q15.16
+  */
 int32_t fixed_div_16(int32_t x, int32_t y)
 {
 	return (((int64_t)x) * (1 << 16)) / y;
 }
 
+/**
+  * @brief returns x*y, result in Q15.16 format
+  * @param x : input 1, Q15.16
+  * @param y : input 2, Q15.16
+  *	@retval q : x*y, Q15.16
+  */
 int32_t fixed_mul_16(int32_t x, int32_t y)
 {
-    return ((int64_t)x * (int64_t)y) / (1 << 16);
+	if((x & (1<<31)) == (y & (1<<31)))
+	{
+		return ((int64_t)x * (int64_t)y) >> 16;
+	}
+	else
+	{
+		return -1*((-1*(int64_t)x * (int64_t)y) >> 16);
+	}
 }
 
-int32_t fixed_mul(int32_t x, int32_t y, uint8_t qout)
+/**
+  * @brief returns x*y >> rs, output format depends on input's formats and rs:
+  * 	   eg : x in Q15.16, y in Q7.24, rs = 32, output decimal place will be
+  * 	   is 16+24-32 = 8, so q in Q23.8
+  * @param x : input 1
+  * @param y : input 2
+  * @param rs : right shift
+  *	@retval q : x*y >> rs
+  */
+int32_t fixed_mul(int32_t x, int32_t y, uint8_t rs)
 {
-	return ((int64_t)x * (int64_t)y) / (1 << qout);
+	if((x & (1<<31)) == (y & (1<<31)))
+	{
+		return ((int64_t)x * (int64_t)y) >> rs;
+	}
+	else
+	{
+		return -1*((-1*(int64_t)x * (int64_t)y) >> rs);
+	}
 }
 
+/**
+  * @brief returns x/y << ls, output format depends on input's formats and ls:
+  * 	   eg : x in Q7.24, y in Q15.16, ls = 8, output decimal place will be
+  * 	   is 24-16+8 = 16, so q in Q15.16, make sure this number is > 0, otherwise
+  * 	   output will be clipped.
+  * @param x : input 1
+  * @param y : input 2
+  * @param rs : right shift
+  *	@retval q : x/y << ls
+  */
 int32_t fixed_div(int32_t x, int32_t y, uint8_t qout)
 {
 	return (((int64_t)x) * (1 << qout)) / y;
 }
 
-int16_t fpsin(int16_t i)
+
+/**
+  * @brief returns the sinus of input
+  * @param angle : input angle from -pi to pi, Q7.24
+  * @param qout : output decimal place, Q.qout, qout = 24 for Q7.24, qout = 16 for Q15.16
+  *	@retval sin(angle)
+  */
+int32_t fpsin(int32_t angle, uint8_t qout)
 {
+	angle = fixed_mul(angle, INV_PI, 34);
     /* Convert (signed) input to a value between 0 and 8192. (8192 is pi/2, which is the region of the curve fit). */
     /* ------------------------------------------------------------------- */
-    i <<= 1;
-    uint8_t c = i<0; //set carry for output pos/neg
+    angle <<= 1;
+    uint8_t c = angle<0; //set carry for output pos/neg
 
-    if(i == (i|0x4000)) // flip input value to corresponding value in range [0..8192)
-        i = (1<<15) - i;
-    i = (i & 0x7FFF) >> 1;
+    if(angle == (angle|0x4000)) // flip input value to corresponding value in range [0..8192)
+        angle = (1<<15) - angle;
+    angle = (angle & 0x7FFF) >> 1;
     /* ------------------------------------------------------------------- */
 
     /* The following section implements the formula:
@@ -64,20 +135,25 @@ int16_t fpsin(int16_t i)
     Where the constants are defined as follows:
     */
     enum {A1=3370945099UL, B1=2746362156UL, C1=292421UL};
-    enum {n=13, p=32, q=31, r=3, a=12};
+    enum {n=13, p=32, q=31, r=3, a=24};
 
-    uint32_t y = (C1*((uint32_t)i))>>n;
-    y = B1 - (((uint32_t)i*y)>>r);
-    y = (uint32_t)i * (y>>n);
-    y = (uint32_t)i * (y>>n);
+    uint32_t y = (C1*((uint32_t)angle))>>n;
+    y = B1 - (((uint32_t)angle*y)>>r);
+    y = (uint32_t)angle * (y>>n);
+    y = (uint32_t)angle * (y>>n);
     y = A1 - (y>>(p-q));
-    y = (uint32_t)i * (y>>n);
-    y = (y+(1UL<<(q-a-1)))>>(q-a); // Rounding
+    y = (uint32_t)angle * (y>>n);
+    y = (y+(1UL<<(q-qout-1)))>>(q-qout); // Rounding
 
     return c ? -y : y;
 }
 
-//Vector mode CORDIC, compute sqrt(x^2 + y^2) and Arctan(y/x)
+/**
+  * @brief vector mode CORDIC, to compute norm and argument of a vector.
+  * 	   Fills norm and angle inside vector structure.
+  * @param *vector : address of vector structure containing x,y coordinates in Q15.16 format
+  *
+  */
 void CORDIC_vector(vector_t *vector)
 {
 	uint8_t quadrant;
@@ -115,7 +191,6 @@ void CORDIC_vector(vector_t *vector)
 		}
 	}
 	z_curr = 0;
-	//printf("x_curr = %d, y_curr = %d, z_curr = %d\r\n", (int)x_curr,(int)y_curr,(int)z_curr);
 
 	for(uint8_t i = 0; i < CORDIC_ITER; i++)
 	{
@@ -140,7 +215,6 @@ void CORDIC_vector(vector_t *vector)
 			z_curr -= atan2i[i]; //10c
 		}
 		x_curr = x_next;
-		//printf("i = %d, x_curr = %d, y_curr = %d, z_curr = %d\r\n",(int)i, (int)x_curr, (int)y_curr, (int)z_curr);
 	}
 
 	vector->norm = (uint64_t)x_curr*CORDIC_CONSTANT >> 16; //Q16.16 30c
@@ -163,4 +237,5 @@ void CORDIC_vector(vector_t *vector)
 
 
 }
+
 

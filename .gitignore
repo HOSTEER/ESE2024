@@ -4,7 +4,7 @@
 */Drivers
 */Debug
 */.settings/*
-*/.metadata
+*/.metadata/*
 !*/.settings/org.eclipse.core.resources.prefs
 */Core/Src/*
 !*/Core/Src/main.c

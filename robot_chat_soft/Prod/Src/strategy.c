@@ -88,8 +88,8 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//Aucun obstacle
 			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 
-			dir_vect.x = 10<<16;
-			dir_vect.y = 10<<16;
+			//dir_vect.x = 10<<16;
+			//dir_vect.y = 10<<16;
 			hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
 			CORDIC_vector(&dir_vect);
 			//TODO appel fonction detection obstacle le + proche
@@ -97,7 +97,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//TODO màj consigne commande
 
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15)) * (1<<4));
+			avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15), 24) * (1<<4));
 
 			angle = dir_vect.angle;
 			//printf("Comportement fuite \n\r");
@@ -129,7 +129,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	}
 
 
-	sprintf(&msg,"x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
+	sprintf(&msg,"Direc: x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	xQueueSend(q_printf, (void *)msg, 1);
 	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
