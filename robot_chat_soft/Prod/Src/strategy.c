@@ -1,7 +1,7 @@
 #include "strategy.h"
-
+#include "string.h"
 #include "config.h"
-
+#include "cmsis_os.h"
 
 #define ZONE_MILIEU 2
 #define ZONE_DROITE 3
@@ -28,6 +28,9 @@
 extern int32_t angle;
 extern int32_t avg_speed;
 static champ_vect_t champ_vect;
+extern QueueHandle_t q_printf;
+
+static uint8_t msg[100];
 
 
 void init_champ_vect(void){
@@ -44,7 +47,8 @@ void init_champ_vect(void){
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	vector_t dir_vect;
-	int32_t test_angle, test_avg_speed;
+	//int32_t test_angle, test_avg_speed;
+
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
@@ -55,7 +59,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		}
 		else{
 			//Obstacle détecté
-			printf("Comportement obstacle \n\r");
+			//printf("Comportement obstacle \n\r");
 			switch(*strat_mode&0xFF){
 			case FALL_FORWARD:
 				//TODO commande recul rectiligne
@@ -93,14 +97,14 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//TODO màj consigne commande
 
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			test_avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15)) * (1<<4));
+			avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15)) * (1<<4));
 
-			test_angle = dir_vect.angle;
-			printf("Comportement fuite \n\r");
+			angle = dir_vect.angle;
+			//printf("Comportement fuite \n\r");
 		}
 		else{
 			//Obstacle détecté
-			printf("Comportement obstacle \n\r");
+			//printf("Comportement obstacle \n\r");
 			switch(*strat_mode&0xFF){
 			case FALL_FORWARD:
 				//TODO commande recul rectiligne
@@ -123,7 +127,11 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			}
 		}
 	}
-	printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
+
+
+	sprintf(&msg,"x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
+	xQueueSend(q_printf, (void *)msg, 1);
+	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
 }
 
@@ -138,6 +146,9 @@ int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 	else{
 		status = zone_circulaire(champ_vect, strat_mode, hOdometry, zone, dir_vect);
 	}
+
+	sprintf(msg,"Zone : %d\n\r", zone);
+	xQueueSendToFront(q_printf, (void *)msg, 1);
 	return status;
 }
 

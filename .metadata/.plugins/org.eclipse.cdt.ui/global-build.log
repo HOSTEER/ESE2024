@@ -1,63 +1,83 @@
-11:54:35 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+15:17:30 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
-arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
-../Prod/Src/strategy.c: In function 'strategy':
-../Prod/Src/strategy.c:58:25: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
-   58 |                         printf("Comportement obstacle \n\r");
-      |                         ^~~~~~
-../Prod/Src/strategy.c:4:1: note: include '<stdio.h>' or provide a declaration of 'printf'
-    3 | #include "config.h"
-  +++ |+#include <stdio.h>
-    4 | 
-../Prod/Src/strategy.c:58:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
-   58 |                         printf("Comportement obstacle \n\r");
-      |                         ^~~~~~
-../Prod/Src/strategy.c:58:25: note: include '<stdio.h>' or provide a declaration of 'printf'
-../Prod/Src/strategy.c:99:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
-   99 |                         printf("Comportement fuite \n\r");
-      |                         ^~~~~~
-../Prod/Src/strategy.c:99:25: note: include '<stdio.h>' or provide a declaration of 'printf'
-../Prod/Src/strategy.c:103:25: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
-  103 |                         printf("Comportement obstacle \n\r");
-      |                         ^~~~~~
-../Prod/Src/strategy.c:103:25: note: include '<stdio.h>' or provide a declaration of 'printf'
-../Prod/Src/strategy.c:126:9: warning: incompatible implicit declaration of built-in function 'printf' [-Wbuiltin-declaration-mismatch]
-  126 |         printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
-      |         ^~~~~~
-../Prod/Src/strategy.c:126:9: note: include '<stdio.h>' or provide a declaration of 'printf'
-../Prod/Src/strategy.c:126:21: warning: format '%d' expects argument of type 'int', but argument 2 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  126 |         printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
-      |                    ~^              ~~~~~~~~~~~~~~
-      |                     |                        |
-      |                     int                      int32_t {aka long int}
-      |                    %ld
-../Prod/Src/strategy.c:126:28: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
-  126 |         printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
-      |                           ~^                       ~~~~~~~~~~~~~~
-      |                            |                                 |
-      |                            int                               int32_t {aka long int}
-      |                           %ld
-../Prod/Src/strategy.c:47:29: warning: variable 'test_avg_speed' set but not used [-Wunused-but-set-variable]
-   47 |         int32_t test_angle, test_avg_speed;
-      |                             ^~~~~~~~~~~~~~
-../Prod/Src/strategy.c:47:17: warning: variable 'test_angle' set but not used [-Wunused-but-set-variable]
-   47 |         int32_t test_angle, test_avg_speed;
-      |                 ^~~~~~~~~~
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'printfTask':
+../Core/Src/main.c:256:43: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
+  256 |                 uint16_t msg_len = strlen(msg);
+      |                                           ^~~
+      |                                           |
+      |                                           uint8_t * {aka unsigned char *}
+In file included from ../Core/Src/main.c:32:
+C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/string.h:41:18: note: expected 'const char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+   41 | size_t   strlen (const char *);
+      |                  ^~~~~~~~~~~~
+../Core/Src/main.c:252:27: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+  252 |         HAL_StatusTypeDef status;
+      |                           ^~~~~~
+../Core/Src/main.c: In function 'task_Motor':
+../Core/Src/main.c:337:17: warning: variable 'speed' set but not used [-Wunused-but-set-variable]
+  337 |         int32_t speed = 0;
+      |                 ^~~~~
+../Core/Src/main.c: In function 'task_MotorSpeed':
+../Core/Src/main.c:364:17: warning: unused variable 'speed' [-Wunused-variable]
+  364 |         int32_t speed = 0;
+      |                 ^~~~~
+../Core/Src/main.c:363:18: warning: unused variable 'V' [-Wunused-variable]
+  363 |         uint32_t V = 0;
+      |                  ^
 arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: robot_chat_soft.elf
  
 arm-none-eabi-size   robot_chat_soft.elf 
 arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  58292	    192	  31104	  89588	  15df4	robot_chat_soft.elf
+  61744	    192	  31216	  93152	  16be0	robot_chat_soft.elf
 Finished building: default.size.stdout
  
 Finished building: robot_chat_soft.list
  
-11:58:06 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+15:17:36 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-size   robot_chat_soft.elf 
    text	   data	    bss	    dec	    hex	filename
-  58292	    192	  31104	  89588	  15df4	robot_chat_soft.elf
+  61744	    192	  31216	  93152	  16be0	robot_chat_soft.elf
 Finished building: default.size.stdout
+ 
+15:18:30 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+make -j12 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'printfTask':
+../Core/Src/main.c:256:43: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
+  256 |                 uint16_t msg_len = strlen(msg);
+      |                                           ^~~
+      |                                           |
+      |                                           uint8_t * {aka unsigned char *}
+In file included from ../Core/Src/main.c:32:
+C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/string.h:41:18: note: expected 'const char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+   41 | size_t   strlen (const char *);
+      |                  ^~~~~~~~~~~~
+../Core/Src/main.c:252:27: warning: variable 'status' set but not used [-Wunused-but-set-variable]
+  252 |         HAL_StatusTypeDef status;
+      |                           ^~~~~~
+../Core/Src/main.c: In function 'task_Motor':
+../Core/Src/main.c:337:17: warning: variable 'speed' set but not used [-Wunused-but-set-variable]
+  337 |         int32_t speed = 0;
+      |                 ^~~~~
+../Core/Src/main.c: In function 'task_MotorSpeed':
+../Core/Src/main.c:364:17: warning: unused variable 'speed' [-Wunused-variable]
+  364 |         int32_t speed = 0;
+      |                 ^~~~~
+../Core/Src/main.c:363:18: warning: unused variable 'V' [-Wunused-variable]
+  363 |         uint32_t V = 0;
+      |                  ^
+arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: robot_chat_soft.elf
+ 
+arm-none-eabi-size   robot_chat_soft.elf 
+arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
+   text	   data	    bss	    dec	    hex	filename
+  61728	    192	  31216	  93136	  16bd0	robot_chat_soft.elf
+Finished building: default.size.stdout
+ 
+Finished building: robot_chat_soft.list
  

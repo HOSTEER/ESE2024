@@ -85,6 +85,7 @@ SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t stm_RX_semaphore;
 SemaphoreHandle_t BTN_STATUS_semaphore;
 SemaphoreHandle_t BTN_START_semaphore;
+SemaphoreHandle_t printf_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
@@ -109,7 +110,7 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 int __io_putchar(int ch)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
 	return ch;
 }
@@ -132,6 +133,15 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 	if(huart->Instance == USART1){
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef * huart){
+	if(huart->Instance == USART2){
+		HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
+		xSemaphoreGiveFromISR(printf_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
 }
@@ -164,16 +174,16 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 
 	if(GPIO_Pin == FBD_EXTI1_Pin) {
 		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
+		//strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
 	}
 	if(GPIO_Pin == BBD_EXTI2_Pin) {
 		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-		strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
+		//strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
 	}
 
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
 		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+		//strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
 	}
 }
 
@@ -182,15 +192,15 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
 		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
 		//Le masque | NO_OBSTACLE est optionnel mais permet une meilleure lecture du code
-		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		//strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
 	}
 	if(GPIO_Pin == BBD_EXTI2_Pin) {
 		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
-		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		//strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
 	}
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
 		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+		//strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
 	}
 }
 
@@ -239,13 +249,19 @@ void printfTask(void * unused)
 {
 	uint8_t msg[QUEUE_PRINTF_SIZE];
 	BaseType_t ret;
+	HAL_StatusTypeDef status;
+
 	for(;;){
 		ret = xQueueReceive(q_printf, (void *)msg, portMAX_DELAY);
 		uint16_t msg_len = strlen(msg);
-		if(ret == pdTRUE){
+		HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		if(ret == pdTRUE && msg_len != 0){
 			//printf(msg);
-			HAL_UART_Transmit_IT(&huart2, msg, msg_len);
+			status = HAL_UART_Transmit_IT(&huart2, msg, msg_len);
+			xSemaphoreTake(printf_semaphore, portMAX_DELAY);
 		}
+
+
 	}
 }
 
@@ -328,7 +344,7 @@ void task_Motor(void * unused)
 		//printf("L Vdiff %d\r\n", (int)(fixed_div(Lmot.speed_output[Lmot.speed_index],128<<16,16) - fixed_div(Lmot.speed_measured[Lmot.speed_index],80<<16,16))/(1<<16));
 		//printf("angle %d\r\n", (int)(hOdometry.angle*10/(1<<24)));
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
-		printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		//printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
 
 		/*motor_set_PWM(&Rmot, 512);
@@ -358,14 +374,14 @@ void task_MotorSpeed(void * unused)
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
 		//motor_get_current(&Lmot);
-		if(hOdometry.x > 1000<<16)
+		/*if(hOdometry.x > 1000<<16)
 		{
 			angle = PI;
 		}
 		if(hOdometry.y > 1000<<16)
 		{
 			mot_speed = 0;
-		}
+		}*/
 		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
 		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
@@ -473,6 +489,7 @@ int main(void)
 	stm_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 	BTN_START_semaphore = xSemaphoreCreateBinary();
+	printf_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
 	//HAL_TIM_PWM_Start_IT(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
@@ -543,12 +560,12 @@ int main(void)
 		Error_Handler();
 	}
 
-	/*ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
+	ret = xTaskCreate(printfTask, "printf_task", DEFAULT_STACK_SIZE, NULL, DEFAULT_TASK_PRIORITY +11, &h_printf);
 	if(ret != pdPASS)
 	{
 		printf("Could not create printf task\r\n");
 		Error_Handler();
-	}*/
+	}
 
 #endif
 

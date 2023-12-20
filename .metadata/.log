@@ -5610,3 +5610,18 @@ java.lang.Exception: localhost:61234: Connection timed out.
 
 !ENTRY org.eclipse.cdt.dsf 4 10005 2023-12-19 11:26:09.193
 !MESSAGE Request for monitor: 'RequestMonitor (org.eclipse.cdt.dsf.gdb.internal.ui.actions.DsfTerminateCommand$3$1@5f75468b): Status OK: unknown code=0 OK' resulted in a rejected execution exception.
+!SESSION 2023-12-20 13:52:11.676 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-20 13:52:34.817
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-20 13:52:34.826
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-20 13:52:48.266
+!MESSAGE Started RMI Server, listening on port 41337
