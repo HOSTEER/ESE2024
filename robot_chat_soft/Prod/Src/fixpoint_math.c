@@ -38,11 +38,15 @@ int32_t modulo_2pi(int32_t angle)
 	{
 		return -PI + angle%TWO_PI;
 	}
-	else if(angle < -PI)
+	else if(angle < -(int32_t)PI)
 	{
 		return PI + angle%TWO_PI;
 	}
-	return angle;
+	else
+	{
+		return angle;
+	}
+
 }
 
 /**

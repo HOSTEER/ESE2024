@@ -65,6 +65,7 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 {
 	int32_t output = 0; //Q7.24
 	int32_t error = modulo_2pi(input - hOdometry->angle); //Q7.24
+	//printf("a_err = %d\r\n",10*(int)hOdometry->angle/(1<<24));
 
 	output = error/2;
 	if(output > 1<<24)

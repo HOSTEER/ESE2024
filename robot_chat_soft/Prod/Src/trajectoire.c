@@ -29,7 +29,7 @@ int32_t follow_trajectory(hOdometry_t *hOdometry, int32_t *x, int32_t *y, int32_
 			CORDIC_vector(&test_vector);
 			if(test_vector.norm < MAX_POS_ERROR)
 			{
-				*x = 0;
+				*x = 10;
 			}
 			else
 			{
