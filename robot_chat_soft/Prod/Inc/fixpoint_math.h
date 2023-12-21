@@ -35,7 +35,7 @@ int32_t modulo_2pi(int32_t angle);
 
 int32_t fpcos(int32_t angle, uint8_t qout);
 
-//Cos(x) = sin(x + pi/2)
+int32_t Arctan(int32_t x);
 
 
 

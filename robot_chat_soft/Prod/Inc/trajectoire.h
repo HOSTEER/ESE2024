@@ -6,7 +6,7 @@
 #include "main.h"
 #include "odometry.h"
 
-#define MAX_POS_ERROR (50<<16) //mm Q.16
+#define MAX_POS_ERROR (5<<16) //mm Q.16
 
 typedef struct trajectory_t_struct {
 	int32_t x,y;

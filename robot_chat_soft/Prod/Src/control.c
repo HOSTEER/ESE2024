@@ -55,6 +55,9 @@ void set_speed_PID(hMotor_t * hMotor,int32_t input)
 	//TODO fully implement feedforward
 }
 
+int32_t error_old = 0;
+int32_t integral = 0;
+int32_t anti_windup = 1;
 /**
   * @brief Angular position control loop, this function should be called regularly.
   * TODO implement full corrector
@@ -65,17 +68,22 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 {
 	int32_t output = 0; //Q7.24
 	int32_t error = modulo_2pi(input - hOdometry->angle); //Q7.24
+	integral += anti_windup*error/10;
+	anti_windup = 1;
 	//printf("a_err = %d\r\n",10*(int)hOdometry->angle/(1<<24));
 
-	output = error/2;
-	if(output > 1<<24)
+	output = 5*error - 15*(hOdometry->angle - error_old);
+	error_old = hOdometry->angle;
+
+	if(output > 1<<23)
 	{
-		output = 1<<24;
+		anti_windup = 0;
 	}
-	else if(output < -(1<<24))
+	else if(output < -1<<23)
 	{
-		output = -(1<<24);
+		anti_windup = 0;
 	}
-	return output;
+	return fixed_mul(Arctan(output/(1<<8)),INV_PI,23);
+	//return output;
 }
 

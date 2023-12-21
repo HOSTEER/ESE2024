@@ -15,26 +15,26 @@ int32_t follow_trajectory(hOdometry_t *hOdometry, int32_t *x, int32_t *y, int32_
 	//printf("angle = %d\r\n",10*(int)(trajectory_vector.angle)/(1<<24));
 	if(trajectory_vector.norm < MAX_POS_ERROR)
 	{
-		test_vector.x = (1000<<16)-hOdometry->x;
+		test_vector.x = (500<<16)-hOdometry->x;
 		test_vector.y = hOdometry->y;
 		CORDIC_vector(&test_vector);
 		if(test_vector.norm < MAX_POS_ERROR)
 		{
-			*y = 1000<<16;
+			*y = -(500<<16);
 		}
 		else
 		{
-			test_vector.x = (1000<<16) - hOdometry->x;
-			test_vector.y = (1000<<16) - hOdometry->y;
+			test_vector.x = (500<<16) - hOdometry->x;
+			test_vector.y = -(500<<16) - hOdometry->y;
 			CORDIC_vector(&test_vector);
 			if(test_vector.norm < MAX_POS_ERROR)
 			{
-				*x = 10;
+				*x = 0;
 			}
 			else
 			{
 				test_vector.x = hOdometry->x;
-				test_vector.y = (1000<<16) - hOdometry->y;
+				test_vector.y = -(500<<16) - hOdometry->y;
 				CORDIC_vector(&test_vector);
 				if(test_vector.norm < MAX_POS_ERROR)
 				{
@@ -47,7 +47,7 @@ int32_t follow_trajectory(hOdometry_t *hOdometry, int32_t *x, int32_t *y, int32_
 					CORDIC_vector(&test_vector);
 					if(test_vector.norm < MAX_POS_ERROR)
 					{
-						*x = 1000<<16;
+						*x = 500<<16;
 					}
 				}
 			}

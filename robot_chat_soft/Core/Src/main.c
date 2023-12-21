@@ -105,6 +105,7 @@ int32_t angle = 0;
 uint8_t odom_overflow = 0;
 strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
 int32_t angle_corr = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -419,11 +420,10 @@ void task_MotorSpeed(void * unused)
 {
 	int32_t Lspeed = 0;
 	int32_t Rspeed = 0;
-	int32_t x = 1000<<16;
+	int32_t x = 500<<16;
 	int32_t y = 0;
 	for(;;)
 	{
-		//V = battery_get_voltage();
 		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
 		odometry_update_pos(&hOdometry);
 		angle = follow_trajectory(&hOdometry, &x, &y,&mot_speed);
@@ -431,6 +431,30 @@ void task_MotorSpeed(void * unused)
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
 		//motor_get_current(&Lmot);
+		/*
+		if(hOdometry.x > 400<<15)
+		{
+			angle += HALF_PI;
+			hOdometry.x = 0;
+		}
+		if(hOdometry.y > 400<<15)
+		{
+			angle += HALF_PI;
+			hOdometry.y = 0;
+			//mot_speed = 0;
+		}
+		if(hOdometry.x < -400<<15)
+		{
+			angle += HALF_PI;
+			hOdometry.x = 0;
+		}
+		if(hOdometry.y < -400<<15)
+		{
+			angle += HALF_PI;
+			hOdometry.y = 0;
+			//mot_speed = 0;
+		}*/
+		//angle = modulo_2pi(angle);
 		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (300<<16) + fixed_mul(300<<16, angle_corr, 24);
 		Lspeed = (300<<16) - fixed_mul(300<<16, angle_corr, 24);
@@ -532,6 +556,7 @@ int main(void)
 	init_champ_vect();
 
 	//IMU_init(&h_imu);
+	printf("battery voltage = %dmV\r\n", 1000*(int)battery_get_voltage()/(1<<16));
 
 
 #ifndef DEV_MODE
