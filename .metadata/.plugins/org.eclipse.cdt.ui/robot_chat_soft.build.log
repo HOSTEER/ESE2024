@@ -1,10 +1,71 @@
-16:42:35 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+11:04:29 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
+arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
+../Prod/Src/strategy.c: In function 'strategy':
+../Prod/Src/strategy.c:135:9: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:5:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+    4 | #include "cmsis_os.h"
+  +++ |+#include <stdio.h>
+    5 | 
+../Prod/Src/strategy.c:135:9: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:135:9: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Prod/Src/strategy.c:135:17: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |                 ^~~
+      |                 |
+      |                 uint8_t * {aka unsigned char *}
+../Prod/Src/strategy.c:135:17: note: expected 'char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+../Prod/Src/strategy.c:135:33: warning: format '%d' expects argument of type 'int', but argument 3 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |                                ~^                          ~~~~~~~~~~~~~~
+      |                                 |                                    |
+      |                                 int                                  int32_t {aka long int}
+      |                                %ld
+../Prod/Src/strategy.c:135:40: warning: format '%d' expects argument of type 'int', but argument 4 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |                                       ~^                                   ~~~~~~~~~~~~~~
+      |                                        |                                             |
+      |                                        int                                           int32_t {aka long int}
+      |                                       %ld
+../Prod/Src/strategy.c:135:52: warning: format '%d' expects argument of type 'int', but argument 5 has type 'int32_t' {aka 'long int'} [-Wformat=]
+  135 |         sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+      |                                                   ~^                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                    |                                                                                          |
+      |                                                    int                                                                                        int32_t {aka long int}
+      |                                                   %ld
+../Prod/Src/strategy.c: In function 'champ_vectoriel':
+../Prod/Src/strategy.c:153:9: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  153 |         sprintf(msg,"Zone : %d\n\r", zone);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:153:9: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Prod/Src/strategy.c:153:17: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  153 |         sprintf(msg,"Zone : %d\n\r", zone);
+      |                 ^~~
+      |                 |
+      |                 uint8_t * {aka unsigned char *}
+../Prod/Src/strategy.c:153:17: note: expected 'char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+../Prod/Src/strategy.c: In function 'zone_circulaire':
+../Prod/Src/strategy.c:338:17: warning: unused variable 'comp_y_tang' [-Wunused-variable]
+  338 |         int32_t comp_y_tang = sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
+      |                 ^~~~~~~~~~~
+../Prod/Src/strategy.c:337:17: warning: unused variable 'comp_x_tang' [-Wunused-variable]
+  337 |         int32_t comp_x_tang = sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+      |                 ^~~~~~~~~~~
+arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: robot_chat_soft.elf
+ 
 arm-none-eabi-size   robot_chat_soft.elf 
+arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  61820	    192	  31208	  93220	  16c24	robot_chat_soft.elf
+  60936	    192	  31208	  92336	  168b0	robot_chat_soft.elf
 Finished building: default.size.stdout
  
+Finished building: robot_chat_soft.list
+ 
 
-16:42:35 Build Finished. 0 errors, 0 warnings. (took 316ms)
+11:04:30 Build Finished. 0 errors, 10 warnings. (took 1s.175ms)
 

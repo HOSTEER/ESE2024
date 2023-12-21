@@ -116,7 +116,7 @@ void MX_FREERTOS_Init(void);
 int __io_putchar(int ch)
 {
 	//HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-	HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
 	return ch;
 }
 
@@ -147,6 +147,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef * huart){
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(printf_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+		//HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
 	}
 }
 
@@ -260,7 +261,8 @@ void printfTask(void * unused)
 		uint16_t msg_len = strlen(printMsg);
 		if(ret == pdTRUE && msg_len != 0){
 			//printf(msg);
-			status = HAL_UART_Transmit_IT(&huart2, printMsg, msg_len);
+			//status = HAL_UART_Transmit_DMA(&huart2, printMsg, msg_len);
+			status = HAL_UART_Transmit_DMA(&huart2, printMsg, msg_len);
 			xSemaphoreTake(printf_semaphore, portMAX_DELAY);
 		}
 
@@ -350,8 +352,8 @@ void task_Motor(void * unused)
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
 		//TODO printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
-		sprintf(msg,"Odom : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
-				xQueueSendToFront(q_printf, (void *)msg, 1);
+		sprintf(msg,"\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		xQueueSendToFront(q_printf, (void *)msg, 1);
 
 
 		/*motor_set_PWM(&Rmot, 512);
@@ -389,6 +391,7 @@ void task_MotorSpeed(void * unused)
 			mot_speed = 0;
 		}*/
 		//angle_corr = set_angle_corr(&hOdometry, angle);
+
 
 		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);

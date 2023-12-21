@@ -34,14 +34,14 @@ static uint8_t msg[100];
 
 
 void init_champ_vect(void){
-	champ_vect.vitesse_avance = (VITESSE_CIRCUIT<<16);
-	champ_vect.vitesse_correctrice = (VITESSE_CORRECTION<<16);
-	champ_vect.pt_lim_haut = (HAUTEUR_CHAMP<<16);
+	champ_vect.vitesse_avance = (VITESSE_CIRCUIT<<8);
+	champ_vect.vitesse_correctrice = (VITESSE_CORRECTION<<8);
+	champ_vect.pt_lim_haut = (HAUTEUR_CHAMP<<8);
 	champ_vect.pt_lim_bas = -1*champ_vect.pt_lim_haut;
-	champ_vect.pt_lim_droite = (LARGEUR_CHAMP<<16);
+	champ_vect.pt_lim_droite = (LARGEUR_CHAMP<<8);
 	champ_vect.pt_lim_gauche = -1*champ_vect.pt_lim_droite;
 
-	champ_vect.offset = (CHAMP_VECT_MARGE<<16);
+	champ_vect.offset = (CHAMP_VECT_MARGE<<8);
 }
 
 
@@ -86,20 +86,23 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		//Le robot est la proie
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
 			//Aucun obstacle
+			//Calcul de suivi de courbe
 			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 
 			//dir_vect.x = 10<<16;
 			//dir_vect.y = 10<<16;
-			hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
+			//hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
+			//Calcul angle entre vecteur de consigne et avant du robot + calcul norme
 			CORDIC_vector(&dir_vect);
+
 			//TODO appel fonction detection obstacle le + proche
 			//TODO somme 2 consignes
-			//TODO màj consigne commande
 
+			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
 			avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15), 24) * (1<<4));
-
 			angle = dir_vect.angle;
+
 			//printf("Comportement fuite \n\r");
 		}
 		else{
@@ -129,7 +132,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	}
 
 
-	sprintf(&msg,"Direc: x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
+	sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
 	xQueueSend(q_printf, (void *)msg, 1);
 	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
@@ -155,22 +158,37 @@ int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 	int8_t zone_v; //Zone verticale dans laquelle est le robot
 	int8_t zone_h; //Zone horizontale dans laquelle est le robot
+	int32_t x_robot, y_robot;
+
+	//Récupération de la position du robot en Q24.8
+		if(hOdometry->x <0){
+			x_robot = -((-hOdometry->x)>>8);
+		}
+		else{
+			x_robot = hOdometry->x>>8;
+		}
+		if(hOdometry->y <0){
+			y_robot = -((-hOdometry->y)>>8);
+		}
+		else{
+			y_robot = hOdometry->y>>8;
+		}
 
 	//Detection de la zone parmi les 9 dans laquelle se trouve le robot
-	if (hOdometry->x >= champ_vect->pt_lim_droite){
+	if (x_robot >= champ_vect->pt_lim_droite){
 		zone_h = ZONE_DROITE;
 	}
-	else if (hOdometry->x < champ_vect->pt_lim_gauche){
+	else if (x_robot < champ_vect->pt_lim_gauche){
 		zone_h = ZONE_GAUCHE;
 	}
 	else{
 		zone_h = ZONE_MILIEU;
 	}
 
-	if (hOdometry->y >= champ_vect->pt_lim_haut){
+	if (y_robot >= champ_vect->pt_lim_haut){
 		zone_v = ZONE_HAUTE;
 	}
-	else if (hOdometry->y < champ_vect->pt_lim_bas){
+	else if (y_robot < champ_vect->pt_lim_bas){
 		zone_v = ZONE_BASSE;
 	}
 	else{
@@ -180,11 +198,11 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 	//Cas de la zone milieu, il faut calculer la position le long des droites
 	if((zone_h + 3*(zone_v - 1)) == 5){
 
-		int32_t fAB = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
-		int32_t fCD = fixed_mul_16(hOdometry->x, fixed_div_16(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche));
+		int32_t fAB = fixed_mul(x_robot, fixed_div(champ_vect->pt_lim_bas - champ_vect->pt_lim_haut, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche,8),8);
+		int32_t fCD = fixed_mul(x_robot, fixed_div(champ_vect->pt_lim_haut - champ_vect->pt_lim_bas, champ_vect->pt_lim_droite - champ_vect->pt_lim_gauche,8),8);
 
-		if(hOdometry->y >= fAB){
-			if(hOdometry->y >= fCD){
+		if(y_robot >= fAB){
+			if(y_robot >= fCD){
 				//Zone haute
 				return 2;
 			}
@@ -194,7 +212,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 			}
 		}
 		else{
-			if(hOdometry->y >= fCD){
+			if(y_robot >= fCD){
 				//Zone gauche
 				return 4;
 			}
@@ -212,6 +230,7 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry){
 
 int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect){
 	int32_t sens;
+	int32_t x_robot, y_robot;
 
 	if((*strat_mode & 0x0F00)  == TURN_TRIGO){
 		sens = +1;
@@ -220,26 +239,40 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 		sens = -1;
 	}
 
-	//int32_t dir_vect[2];
+	//Récupération de la position du robot en Q24.8
+	if(hOdometry->x <0){
+		x_robot = -((-hOdometry->x)>>8);
+	}
+	else{
+		x_robot = hOdometry->x>>8;
+	}
+	if(hOdometry->y <0){
+		y_robot = -((-hOdometry->y)>>8);
+	}
+	else{
+		y_robot = hOdometry->y>>8;
+	}
+
+	//Calcul vecteur consigne
 	switch(zone){
 	case 2: //Zone haute
 		//sens = +1;
-		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_haut + champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->y = fixed_mul(((champ_vect->pt_lim_haut + champ_vect->offset) - y_robot), champ_vect->vitesse_correctrice,8);
 		dir_vect->x = +sens*champ_vect->vitesse_avance;
 		break;
 	case 4: //Zone Gauche
 		//sens = +1;
-		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_gauche - champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->x = fixed_mul(((champ_vect->pt_lim_gauche - champ_vect->offset) - x_robot), champ_vect->vitesse_correctrice,8);
 		dir_vect->y = +sens*champ_vect->vitesse_avance;
 		break;
 	case 6: //Zone droite
 		//sens = -1;
-		dir_vect->x = fixed_mul_16(((champ_vect->pt_lim_droite + champ_vect->offset) - hOdometry->x), champ_vect->vitesse_correctrice);
+		dir_vect->x = fixed_mul(((champ_vect->pt_lim_droite + champ_vect->offset) - x_robot), champ_vect->vitesse_correctrice,8);
 		dir_vect->y = -sens*champ_vect->vitesse_avance;
 		break;
 	case 8: //Zone basse
 		//sens = -1;
-		dir_vect->y = fixed_mul_16(((champ_vect->pt_lim_bas - champ_vect->offset) - hOdometry->y), champ_vect->vitesse_correctrice);
+		dir_vect->y = fixed_mul(((champ_vect->pt_lim_bas - champ_vect->offset) - y_robot), champ_vect->vitesse_correctrice,8);
 		dir_vect->x = -sens*champ_vect->vitesse_avance;
 		break;
 	default:
@@ -284,19 +317,28 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 		return ERR_ZONE_404;
 	}
 
-	Dx = (hOdometry->x - xb);
-	Dy = (hOdometry->y - yb);
+	Dx = (hOdometry->x<0)?(-((-hOdometry->x)>>8) - xb):((hOdometry->x>>8) - xb);
+	Dy = (hOdometry->y<0)?(-((-hOdometry->y)>>8) - yb):((hOdometry->y>>8) - yb);
 	vector_t Dvect = {Dx, Dy};
 	CORDIC_vector(&Dvect);
 	norm = Dvect.norm;
 
 	d = champ_vect->offset - norm;
+	if (((-d)>>8)>1000 && -d > champ_vect->offset){
+		d = -((1000)<<8);
+		norm = ((1000)<<8);
+	}
 	//Calcul consigne de direction
 	//vect colinéaire = {-Dx/norm, -Dy/norm}
 	//vect tangentiel = {Dy/norm, -Dx/norm}
 	//consigne = d*vect_colin + sens*vitesse*vect_tang
-	dir_vect->x = fixed_div_16(fixed_mul_16(-d, Dx), norm) + sens*fixed_div_16(fixed_mul_16(champ_vect->vitesse_avance, Dy), norm);
-	dir_vect->y = fixed_div_16(fixed_mul_16(-d, Dy), norm) + sens*fixed_div_16(fixed_mul_16(-champ_vect->vitesse_avance, Dx), norm);
+	int32_t comp_x_corr = fixed_mul(champ_vect->vitesse_correctrice,fixed_mul(d,fixed_div( Dx, norm, 8), 8), 8);
+	int32_t comp_y_corr = fixed_mul(champ_vect->vitesse_correctrice,fixed_mul(d,fixed_div( Dy, norm, 8), 8), 8);
+	int32_t comp_x_tang = sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+	int32_t comp_y_tang = sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
+
+	dir_vect->x = comp_x_corr + sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+	dir_vect->y = comp_y_corr + sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
 
 	return 0;
 }
