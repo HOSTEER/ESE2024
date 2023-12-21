@@ -297,7 +297,7 @@ void task_tracking(void * unused)
 		}
 		if(min_v < 4000){
 			target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-			angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+			//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
 			if(target_angle < 130){
 				//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 				HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
@@ -309,8 +309,9 @@ void task_tracking(void * unused)
 				HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 			}
 		}
-		//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
-		vTaskDelay(100);
+		//printf("sin = %d, cos = %d\r\n", 10*(int)fpsin(-(1<<24),16)/(1<<16), 10*(int)fpcos(-(1<<24),16)/(1<<16));
+		//printf("x,y,alpha = %d, %d, %d\r\n",(int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16), 10*(int)hOdometry.angle/(1<<24));
+		vTaskDelay(200);
 	}
 }
 
@@ -416,28 +417,20 @@ void task_Motor(void * unused)
 
 void task_MotorSpeed(void * unused)
 {
-	uint32_t V = 0;
-	int32_t speed = 0;
 	int32_t Lspeed = 0;
 	int32_t Rspeed = 0;
+	int32_t x = 1000<<16;
+	int32_t y = 0;
 	for(;;)
 	{
 		//V = battery_get_voltage();
 		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
 		odometry_update_pos(&hOdometry);
-		angle = follow_trajectory(&hOdometry, 1000<<16, 400<<16,&mot_speed);
+		angle = follow_trajectory(&hOdometry, &x, &y,&mot_speed);
 		//motor_get_speed(&Rmot);
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
 		//motor_get_current(&Lmot);
-		/*if(hOdometry.x > 1000<<16)
-		{
-			angle = PI;
-		}
-		if(hOdometry.y > 1000<<16)
-		{
-			mot_speed = 0;
-		}*/
 		angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (300<<16) + fixed_mul(300<<16, angle_corr, 24);
 		Lspeed = (300<<16) - fixed_mul(300<<16, angle_corr, 24);
