@@ -54,13 +54,19 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
-	uint16_t angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/((lidar->LSN)/10);
+	uint16_t angle_per_dist;
+	uint16_t dif_angles = abs(lidar->end_angl - lidar->start_angl);
+	if(dif_angles < 100){
+		angle_per_dist = (uint16_t) abs(lidar->end_angl-lidar->start_angl)/((lidar->LSN)/10);
+	}else{
+		angle_per_dist = (uint16_t) abs((lidar->end_angl + 360)-lidar->start_angl)/((lidar->LSN)/10);
+	}
 	uint16_t first_angle=lidar->start_angl;
 	for(;smpl_idx<lidar->LSN;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
-			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= lidar->smpl[smpl_idx];
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10)%359]= lidar->smpl[smpl_idx];
 		}else{
-			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10 + 338)%360]= 10000;
+			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10)%359]= 10000;
 		}
 	}
 	//ydlidar_x4_sort_smpl(lidar, revoltion_idx);

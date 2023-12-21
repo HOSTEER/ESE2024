@@ -4,15 +4,15 @@ import processing.serial.*;
 Serial myPort;  // Create object from Serial class
 byte[] rx_buffer = new byte[720];      // Data received from the serial port
 int[]  lidar_value = new int[360];
-int packet = 0;
 
 void setup() 
 {
   size(720, 720);
   String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 115200);
-  myPort.buffer(36);
-  myPort.write(0xAA); //<>//
+  myPort = new Serial(this, portName, 38400);
+  myPort.buffer(720);
+  myPort.write(0xBB);
+  myPort.write(0xAA);
 }
 
 void draw()
@@ -29,8 +29,7 @@ void draw()
     float y_A = sin(angle_btwn_line*i)*30;
     float x_B = cos(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + x_A;
     float y_B = sin(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + y_A;
-    circle(origine_x + x_B, origine_y + y_B,  5+i>>5);
-
+    circle(origine_x + x_B, origine_y + y_B,  5);
     //println("angle :",i); 
     //println("dist :",lidar_value[i]); 
     //line(origine_x + x_A, origine_y + y_A, origine_x + x_B, origine_y + y_B);
@@ -39,18 +38,13 @@ void draw()
 
 void serialEvent(Serial myPort){
   rx_buffer = myPort.readBytes();
-  int i=0;
-  for(;i<36;i++){
-    if((i+packet)%2==0){
-      lidar_value[(i+packet)>>1] = rx_buffer[i];
-      lidar_value[(i+packet)>>1] = lidar_value[(i+packet)>>1]<<8;
+  for(int i=0;i<720;i++){
+    if(i%2==0){
+      lidar_value[i>>1] = rx_buffer[i];
+      lidar_value[i>>1] = lidar_value[i>>1]<<8;
     }else{
-      lidar_value[(i+packet)>>1] = lidar_value[(i+packet)>>1] + rx_buffer[i];
+      lidar_value[i>>1] = lidar_value[i>>1] + rx_buffer[i];
     }
-  }
-  packet+=i; //<>//
-  if(packet>=720){
-    packet = 0;
   }
   myPort.write(0xAA);
 }
