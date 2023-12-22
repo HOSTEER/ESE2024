@@ -23,7 +23,7 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 	hOdometry->dr = 0;
 	hOdometry->angle = 0;
 	hOdometry->x = 0;
-	hOdometry->y = 0;
+	hOdometry->y = 350<<16;
 	//printf("cnt_dist_coeff = %d\r\n", (int)hOdometry->Cnt_dist_coeff);
 }
 
@@ -60,8 +60,8 @@ void odometry_update_pos(hOdometry_t *hOdometry)
 
 	//printf("dr,da = %d, %d\r\n",(int)hOdometry->dr/(1<<16),(int)dalpha/(1<<16));
 
-	int32_t dx = fixed_mul(hOdometry->dr, fpcos(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
-	int32_t dy = fixed_mul(hOdometry->dr, fpsin(hOdometry->angle + dalpha/2, 24), 32); //mm, Q15.16
+	int32_t dx = fixed_mul(hOdometry->dr, fpcos(modulo_2pi(hOdometry->angle + dalpha/2), 24), 32); //mm, Q15.16
+	int32_t dy = fixed_mul(hOdometry->dr, fpsin(modulo_2pi(hOdometry->angle + dalpha/2), 24), 32); //mm, Q15.16
 
 	//printf("x,y,a %d, %d, %d\r\n", (int)hOdometry->x/(1<<16),(int)hOdometry->y/(1<<16),10*(int)hOdometry->angle/(1<<24));
 	hOdometry->angle = modulo_2pi(hOdometry->angle + dalpha);

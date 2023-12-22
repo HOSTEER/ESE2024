@@ -117,4 +117,3 @@ void motor_get_current(hMotor_t *hMotor)
 	hMotor->current_measured = fixed_div_16(((int32_t)(hMotor->adc_dma_buff[hMotor->dma_buff_index] - hMotor->current_offset))*(1<<16),CURRENT_GAIN);
 }
 
-

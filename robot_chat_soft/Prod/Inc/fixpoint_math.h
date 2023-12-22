@@ -33,8 +33,10 @@ int32_t fpsin(int32_t angle, uint8_t qout);
 
 int32_t modulo_2pi(int32_t angle);
 
-//Cos(x) = sin(x + pi/2)
-#define fpcos(angle, qout) fpsin(angle + HALF_PI, qout)
+int32_t fpcos(int32_t angle, uint8_t qout);
+
+int32_t Arctan(int32_t x);
+
 
 
 #endif /* INC_FIXPOINT_MATH_H_ */

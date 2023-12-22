@@ -34,15 +34,20 @@ static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7
   */
 int32_t modulo_2pi(int32_t angle)
 {
+	angle = angle%TWO_PI;
 	if(angle > PI)
 	{
-		return -PI + angle%TWO_PI;
+		return -PI + angle%PI;
 	}
-	else if(angle < -PI)
+	else if(angle < -(int32_t)PI)
 	{
-		return PI - angle%TWO_PI;
+		return PI - angle%PI;
 	}
-	return angle;
+	else
+	{
+		return angle;
+	}
+
 }
 
 /**
@@ -119,15 +124,16 @@ int32_t fixed_div(int32_t x, int32_t y, uint8_t qout)
   */
 int32_t fpsin(int32_t angle, uint8_t qout)
 {
-	angle = fixed_mul(angle, INV_PI, 34);
+	int16_t i;
+	i = (int16_t)fixed_mul(angle, INV_PI, 34);
     /* Convert (signed) input to a value between 0 and 8192. (8192 is pi/2, which is the region of the curve fit). */
     /* ------------------------------------------------------------------- */
-    angle <<= 1;
-    uint8_t c = angle<0; //set carry for output pos/neg
+    i <<= 1;
+    uint8_t c = i<0; //set carry for output pos/neg
 
-    if(angle == (angle|0x4000)) // flip input value to corresponding value in range [0..8192)
-        angle = (1<<15) - angle;
-    angle = (angle & 0x7FFF) >> 1;
+    if(i == (i|0x4000)) // flip input value to corresponding value in range [0..8192)
+        i = (1<<15) - i;
+    i = (i & 0x7FFF) >> 1;
     /* ------------------------------------------------------------------- */
 
     /* The following section implements the formula:
@@ -137,15 +143,21 @@ int32_t fpsin(int32_t angle, uint8_t qout)
     enum {A1=3370945099UL, B1=2746362156UL, C1=292421UL};
     enum {n=13, p=32, q=31, r=3, a=24};
 
-    uint32_t y = (C1*((uint32_t)angle))>>n;
-    y = B1 - (((uint32_t)angle*y)>>r);
-    y = (uint32_t)angle * (y>>n);
-    y = (uint32_t)angle * (y>>n);
+    uint32_t y = (C1*((uint32_t)i))>>n;
+    y = B1 - (((uint32_t)i*y)>>r);
+    y = (uint32_t)i * (y>>n);
+    y = (uint32_t)i * (y>>n);
     y = A1 - (y>>(p-q));
-    y = (uint32_t)angle * (y>>n);
+    y = (uint32_t)i * (y>>n);
     y = (y+(1UL<<(q-qout-1)))>>(q-qout); // Rounding
 
     return c ? -y : y;
+}
+
+//cos(x) = sin(x + pi/2)
+int32_t fpcos(int32_t angle, uint8_t qout)
+{
+	return fpsin(angle + HALF_PI, qout);
 }
 
 /**
@@ -236,6 +248,15 @@ void CORDIC_vector(vector_t *vector)
 	}
 
 
+}
+
+int32_t Arctan(int32_t x)
+{
+	vector_t vector;
+	vector.x = 1<<16;
+	vector.y = x; //Q15.16
+	CORDIC_vector(&vector);
+	return vector.angle; //Q7.24
 }
 
 
