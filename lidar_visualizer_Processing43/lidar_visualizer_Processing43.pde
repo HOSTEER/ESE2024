@@ -29,7 +29,7 @@ void draw()
     float y_A = sin(angle_btwn_line*i)*30;
     float x_B = cos(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + x_A;
     float y_B = sin(angle_btwn_line*i)*(abs(lidar_value[i]/2)) + y_A;
-    circle(origine_x + x_B, origine_y + y_B,  5+i>>5);
+    circle(origine_x + x_B, origine_y + y_B,  8+(i>>6));
 
     //println("angle :",i); 
     //println("dist :",lidar_value[i]); 

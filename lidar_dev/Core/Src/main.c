@@ -207,13 +207,11 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	printf("Task lidar ok\r\n");
+
 	lidar.serial_drv.transmit = lidar_uart_transmit;
 	lidar.serial_drv.receive = lidar_uart_receive;
-	lidar.decode_state = SCANNING;
-	lidar.serial_drv.receive(lidar.buf_DMA);
-	lidar.LSN = 0;
-	lidar.start_angl = 0;
-	lidar.end_angl = 0;
+
+	ydlidar_x4_init(&lidar);
 
 	stm_RX_semaphore = xSemaphoreCreateBinary();
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
