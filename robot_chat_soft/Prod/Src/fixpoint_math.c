@@ -34,15 +34,20 @@ static int32_t atan2i[16] = {0xC90FDA, 0x76B19C,0x3EB6EB, 0x1FD5BA, 0xFFAAD, 0x7
   */
 int32_t modulo_2pi(int32_t angle)
 {
+	angle = angle%TWO_PI;
 	if(angle > PI)
 	{
-		return -PI + angle%TWO_PI;
+		return -PI + angle%PI;
 	}
-	else if(angle < -PI)
+	else if(angle < -(int32_t)PI)
 	{
-		return PI + angle%TWO_PI;
+		return PI - angle%PI;
 	}
-	return angle;
+	else
+	{
+		return angle;
+	}
+
 }
 
 /**
@@ -244,5 +249,15 @@ void CORDIC_vector(vector_t *vector)
 
 
 }
+
+int32_t Arctan(int32_t x)
+{
+	vector_t vector;
+	vector.x = 1<<16;
+	vector.y = x; //Q15.16
+	CORDIC_vector(&vector);
+	return vector.angle; //Q7.24
+}
+
 
 

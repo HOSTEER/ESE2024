@@ -31,7 +31,7 @@ typedef enum ydlidar_x4_command_enum
 typedef enum ydlidar_x4_parsing_enum
 {
 	SCANNING			= 1,
-	PARSING_SMPL		= 2,
+	PARSING_LSN 		= 2,
 	PARSING_START_ANGL 	= 3,
 	PARSING_END_ANGL	= 4,
 	PARSING_DIST		= 5
@@ -62,7 +62,7 @@ typedef struct h_ydlidar_x4_struct
 	uint8_t time_stmp[600];
 	ydlidar_x4_parsing_t decode_state;
 	// bien demarre
-	uint8_t nb_smpl;
+	uint8_t LSN;
 	uint16_t start_angl;
 	uint16_t end_angl;
 
