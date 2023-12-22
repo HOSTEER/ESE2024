@@ -9,6 +9,7 @@
 //#define BIG_ENDIAN
 
 #ifdef LITTLE_ENDIAN
+
 typedef enum ydlidar_x4_command_enum
 {
 	CMD_SCAN   	= 0x60A5,

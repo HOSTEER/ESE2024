@@ -30,7 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include "ydlidar_x4.h"
+//#include "ydlidar_x4.h"	called in "mask.h"
 #include "imu.h"
 #include "motor.h"
 #include "fixpoint_math.h"
@@ -39,6 +39,7 @@
 #include "strategy.h"
 #include "config.h"
 #include "trajectoire.h"
+#include "mask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,6 +94,7 @@ SemaphoreHandle_t printf_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
+h_mask_target_t h_target;
 h_imu_drv_t h_imu;
 uint8_t rx_pc;
 uint8_t string_display[720];
@@ -298,7 +300,7 @@ void task_lidar(void * unused)
 	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	memset(lidar.sorted_dist,10000,360);
-	ydlidar_x4_scan(&lidar);//permet de lancer le scan du lidar
+	ydlidar_x4_scan(&lidar);	// start lidar scan
 	vTaskDelete(0);
 }
 
@@ -315,6 +317,7 @@ void task_tracking(void * unused)
 {
 	printf("Task tracking ok\r\n");
 	int32_t target_angle_rad;
+	/* TODO suppress if working find_taget
 	uint16_t target_angle;
 	for(;;){
 		uint16_t min_v = 4000, last_min=4000;
@@ -326,26 +329,26 @@ void task_tracking(void * unused)
 				target_angle = i;
 				last_min = min_v;
 			}
+		}*/
+	find_target(&lidar, &h_target);
+	if(h_target.target_shape[10] < MAX_TARGET_DIST){
+		target_angle_rad = (h_target.target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		if(h_target.target_angle < 130){
+			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
+			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		}else if(h_target.target_angle > 170){
+			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
+			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		}else{
+			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
+			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		}
-		if(min_v < 4000){
-			target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-			//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
-			if(target_angle < 130){
-				//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
-				HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
-			}else if(target_angle > 170){
-				//angle_corr = set_angle_corr(&hOdometry, 1<<24);
-				HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
-			}else{
-				//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
-				HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
-			}
-		}
-		//printf("sin = %d, cos = %d\r\n", 10*(int)fpsin(-(1<<24),16)/(1<<16), 10*(int)fpcos(-(1<<24),16)/(1<<16));
-		//printf("x,y,alpha = %d, %d, %d\r\n",(int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16), 10*(int)hOdometry.angle/(1<<24));
-		vTaskDelay(200);
 	}
+	//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
+	vTaskDelay(100);
 }
+
 
 #ifdef SE
 void task_RX_ISR(void * unused)
@@ -557,47 +560,47 @@ void task_Strategy(void * unused){
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+	/* USER CODE END 1 */
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
+	/* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+	/* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+	/* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+	/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_TIM1_Init();
-  MX_TIM3_Init();
-  MX_TIM14_Init();
-  MX_TIM15_Init();
-  MX_TIM16_Init();
-  MX_TIM17_Init();
-  MX_SPI1_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_USART3_UART_Init();
-  MX_TIM7_Init();
-  /* USER CODE BEGIN 2 */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_DMA_Init();
+	MX_ADC1_Init();
+	MX_TIM1_Init();
+	MX_TIM3_Init();
+	MX_TIM14_Init();
+	MX_TIM15_Init();
+	MX_TIM16_Init();
+	MX_TIM17_Init();
+	MX_SPI1_Init();
+	MX_USART1_UART_Init();
+	MX_USART2_UART_Init();
+	MX_USART3_UART_Init();
+	MX_TIM7_Init();
+	/* USER CODE BEGIN 2 */
 	lidar_RX_semaphore = xSemaphoreCreateBinary();
 	com_RX_semaphore = xSemaphoreCreateBinary();
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
@@ -698,67 +701,67 @@ int main(void)
 
 
 	vTaskStartScheduler();
-  /* USER CODE END 2 */
+	/* USER CODE END 2 */
 
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+	/* Call init function for freertos objects (in freertos.c) */
+	MX_FREERTOS_Init();
 
-  /* Start scheduler */
-  osKernelStart();
+	/* Start scheduler */
+	osKernelStart();
 
-  /* We should never get here as control is now taken by the scheduler */
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+	/* We should never get here as control is now taken by the scheduler */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-    /* USER CODE END WHILE */
+		/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+		/* USER CODE BEGIN 3 */
 	}
-  /* USER CODE END 3 */
+	/* USER CODE END 3 */
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage
-  */
-  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+	/** Configure the main internal regulator output voltage
+	 */
+	HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 8;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+	RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+	RCC_OscInitStruct.PLL.PLLN = 8;
+	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+	RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+	{
+		Error_Handler();
+	}
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+			|RCC_CLOCKTYPE_PCLK1;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 /* USER CODE BEGIN 4 */
@@ -766,55 +769,55 @@ void SystemClock_Config(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM6 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM6 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  /* USER CODE BEGIN Callback 0 */
+	/* USER CODE BEGIN Callback 0 */
 
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
+	/* USER CODE END Callback 0 */
+	if (htim->Instance == TIM6) {
+		HAL_IncTick();
+	}
+	/* USER CODE BEGIN Callback 1 */
 
-  /* USER CODE END Callback 1 */
+	/* USER CODE END Callback 1 */
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
+	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	HAL_GPIO_WritePin(USER_LED2_GPIO_Port, USER_LED2_Pin, 1);
 	__disable_irq();
 	while (1)
 	{
 	}
-  /* USER CODE END Error_Handler_Debug */
+	/* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
+	/* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
