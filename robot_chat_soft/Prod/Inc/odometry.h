@@ -13,7 +13,7 @@ typedef struct hOdometry_t_struct {
 	uint32_t wheel_dist; //distance between wheels, mm, Q16.16
 	uint32_t freq;	//refresh rate, Hz
 	int32_t dr;
-	int32_t x,y; //robot coordinates Q16.16
+	int32_t x,y; //robot coordinates Q15.16
 
 	int32_t angle; //robot angle Q8.24 [-pi, pi]
 

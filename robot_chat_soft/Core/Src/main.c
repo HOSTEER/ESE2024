@@ -30,7 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-//#include "ydlidar_x4.h"
+//#include "ydlidar_x4.h"	called in "mask.h"
 #include "imu.h"
 #include "motor.h"
 #include "fixpoint_math.h"
@@ -268,7 +268,7 @@ void task_lidar(void * unused)
 	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
 	memset(lidar.sorted_dist,10000,360);
-	ydlidar_x4_scan(&lidar);//permet de lancer le scan du lidar
+	ydlidar_x4_scan(&lidar);	// start lidar scan
 	vTaskDelete(0);
 }
 
@@ -286,7 +286,6 @@ void task_tracking(void * unused)
 	printf("Task tracking ok\r\n");
 	int32_t target_angle_rad;
 	/* TODO suppress if working find_taget
-	int32_t target_angle_rad;
 	uint16_t target_angle;
 	for(;;){
 		uint16_t min_v = 4000, last_min=4000;

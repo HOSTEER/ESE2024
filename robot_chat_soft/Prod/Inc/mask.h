@@ -9,11 +9,15 @@
 #define INC_MASK_H_
 
 #include "ydlidar_x4.h"
+#include "fixpoint_math.h"
+#include "odometry.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_TARGET_DIST 3600		// On the game table, furthest points are 3600mm apart
+#define MAX_TARGET_DIST 3600	// On the game table, furthest points are 3600mm apart
 #define TARGET_LIM 50			// object limit if distance difference btwn 2 consecutive lidar points is > 5cm
+#define X_CENTER (1500<<16)		// Q15.16
+#define Y_CENTER (1000<<16)		// Q15.16
 
 typedef struct h_mask_target_struct
 {
