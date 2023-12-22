@@ -13,19 +13,21 @@ int find_target(h_ydlidar_x4_t * lidar, h_mask_target_t * target){
 			min_dist = lidar->sorted_dist[i];
 		}
 		if(min_dist < last_min){
-			target->target_angle = i;
+			target->angle_rad = (i-160)*DEG2RAD;
 			last_min = min_dist;
 		}
 	}
 
 	// Identifying target
-	target->target_shape[10] = min_dist;
+	target->shape[10] = min_dist;
 	for(int k=1 ; k<11 ; k++){
-		if(abs(lidar->sorted_dist[target->target_angle + k] - lidar->sorted_dist[target->target_angle + (k+1)]) <= TARGET_LIM){
-			target->target_shape[10 + k] = lidar->sorted_dist[target->target_angle + k];
+		if(abs(lidar->sorted_dist[target->angle + k] - lidar->sorted_dist[target->angle + (k+1)]) <= TARGET_LIM){
+			target->shape[10 + k] = lidar->sorted_dist[target->angle + k];
+			target->shape_ang_max = target->angle + k;
 		}
-		if(abs(lidar->sorted_dist[target->target_angle - k] - lidar->sorted_dist[target->target_angle - (k+1)]) <= TARGET_LIM){
-			target->target_shape[10 - k] = lidar->sorted_dist[target->target_angle - k];
+		if(abs(lidar->sorted_dist[target->angle - k] - lidar->sorted_dist[target->angle - (k+1)]) <= TARGET_LIM){
+			target->shape[10 - k] = lidar->sorted_dist[target->angle - k];
+			target->shape_ang_min = target->angle - k;
 		}
 	}
 	return 0;
@@ -38,12 +40,17 @@ int find_target(h_ydlidar_x4_t * lidar, h_mask_target_t * target){
 int target_dist_center(h_mask_target_t * target, hOdometry_t * odometry){
 	int32_t xR = odometry->x;	// Robot coordinates
 	int32_t yR = odometry->y;
-	vector_t CR, RT, TC; 		// CR : Center->Robot, RT : Robot->Target, TC : Target->Center
+	vector_t CR, RT, CT; 		// CR : Center->Robot, RT : Robot->Target, CT : Center->Target
 	CR.x = xR - X_CENTER;
 	CR.y = yR - Y_CENTER;
-	RT.x = fpcos(target->target_angle + odometry->angle);
+	RT.x = (target->shape[10])*fpcos(modulo_2pi(target->angle + odometry->angle), 16);
+	RT.y = (target->shape[10])*fpsin(modulo_2pi(target->angle + odometry->angle), 16);
 
-
+	// CT = CR+RT
+	CT.x = CR.x + RT.x;
+	CT.y = CR.y + RT.y;
+	CORDIC_vector(&CT);
+	target->dist_center = CT.norm;
 }
 
 

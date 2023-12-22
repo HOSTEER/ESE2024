@@ -72,7 +72,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//QueueHandle_t q_printf = NULL;
+QueueHandle_t q_printf = NULL;
 
 TaskHandle_t h_task_init = NULL;
 TaskHandle_t h_IMU_taskRead = NULL;
@@ -331,13 +331,13 @@ void task_tracking(void * unused)
 			}
 		}*/
 	find_target(&lidar, &h_target);
-	if(h_target.target_shape[10] < MAX_TARGET_DIST){
-		target_angle_rad = (h_target.target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+	if(h_target.shape[10] < MAX_TARGET_DIST){
+		target_angle_rad = (h_target.angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
 		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
-		if(h_target.target_angle < 130){
+		if(h_target.angle < 130){
 			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
-		}else if(h_target.target_angle > 170){
+		}else if(h_target.angle > 170){
 			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
 			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
 		}else{
