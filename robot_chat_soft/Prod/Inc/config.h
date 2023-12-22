@@ -12,7 +12,7 @@
 //#define DEV_MODE
 
 //Stratégie
-#define VITESSE_CIRCUIT 200
+#define VITESSE_CIRCUIT 100
 #define VITESSE_CORRECTION 2
 #define CHAMP_VECT_MARGE 50
 #define HAUTEUR_CHAMP 300
