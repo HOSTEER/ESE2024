@@ -5810,3 +5810,18 @@ java.lang.IllegalStateException: Disconnected before saving. Please post stacktr
 
 !ENTRY com.st.stm32cube.ide.mcu.debug 4 0 2023-12-21 10:51:47.175
 !MESSAGE Existing sessions are:
+!SESSION 2023-12-22 08:10:51.520 -----------------------------------------------
+eclipse.buildId=Version 1.13.1
+java.version=17.0.6
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2023-12-22 08:11:08.580
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2023-12-22 08:11:08.590
+!MESSAGE Log4j2 initialized with config file C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2023-12-22 08:11:20.765
+!MESSAGE Started RMI Server, listening on port 41337

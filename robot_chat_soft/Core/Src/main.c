@@ -352,7 +352,7 @@ void task_Motor(void * unused)
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
 		//TODO printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
-		sprintf(msg,"\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		sprintf(msg,"\t\t\t\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		xQueueSendToFront(q_printf, (void *)msg, 1);
 
 

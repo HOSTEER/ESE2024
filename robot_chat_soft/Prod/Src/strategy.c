@@ -100,7 +100,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 
 			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			avg_speed = fixed_mul_16(dir_vect.norm, (int32_t)fpcos(fixed_div(dir_vect.angle - hOdometry->angle, PI<<1, 15), 24) * (1<<4));
+			avg_speed = fixed_mul_16(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 16));
 			angle = dir_vect.angle;
 
 			//printf("Comportement fuite \n\r");
