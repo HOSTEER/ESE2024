@@ -23,7 +23,7 @@ void odometry_init(hOdometry_t *hOdometry, hMotor_t *Rmot, hMotor_t *Lmot, uint3
 	hOdometry->dr = 0;
 	hOdometry->angle = 0;
 	hOdometry->x = 0;
-	hOdometry->y = 0;
+	hOdometry->y = 350<<16;
 	//printf("cnt_dist_coeff = %d\r\n", (int)hOdometry->Cnt_dist_coeff);
 }
 

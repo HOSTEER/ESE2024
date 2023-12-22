@@ -86,4 +86,3 @@ int32_t set_angle_corr(hOdometry_t * hOdometry, int32_t input)
 	return fixed_mul(Arctan(output/(1<<8)),INV_PI,23);
 	//return output;
 }
-
