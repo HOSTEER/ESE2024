@@ -41,7 +41,7 @@ int target_dist_center(h_mask_target_t * target, hOdometry_t * odometry){
 	vector_t CR, RT, TC; 		// CR : Center->Robot, RT : Robot->Target, TC : Target->Center
 	CR.x = xR - X_CENTER;
 	CR.y = yR - Y_CENTER;
-	RT.x = fpcos(target->target_angle + odometry->angle);
+	//RT.x = fpcos(target->target_angle + odometry->angle);
 
 
 }

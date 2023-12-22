@@ -6,18 +6,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-int ydlidar_x4_init(h_ydlidar_x4_t * lidar){
-	lidar->decode_state = SCANNING;
-	lidar->serial_drv.receive(lidar->buf_DMA);
-	lidar->nb_smpl = 0;
-	lidar->start_angl = 0;
-	lidar->end_angl = 0;
-	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	memset(lidar->sorted_dist,10000,strlen((char *)lidar->sorted_dist));
-	ydlidar_x4_scan(lidar);//permet de lancer le scan du lidar
-	return 0;
-}
 
 int ydlidar_x4_init(h_ydlidar_x4_t * lidar){
 	lidar->decode_state = SCANNING;
