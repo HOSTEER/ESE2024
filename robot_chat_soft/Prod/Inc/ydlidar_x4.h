@@ -65,6 +65,7 @@ typedef struct h_ydlidar_x4_struct
 
 } h_ydlidar_x4_t;
 
+int ydlidar_x4_init(h_ydlidar_x4_t * lidar);
 int ydlidar_x4_stop(h_ydlidar_x4_t * h_ydlidar_x4);
 int ydlidar_x4_info(h_ydlidar_x4_t * h_ydlidar_x4);
 int ydlidar_x4_scan(h_ydlidar_x4_t * h_ydlidar_x4);
@@ -72,4 +73,4 @@ int ydlidar_x4_restart(h_ydlidar_x4_t * h_ydlidar_x4);
 int ydlidar_x4_irq_cb(h_ydlidar_x4_t * h_ydlidar_x4);
 int ydlidar_x4_get_angle(h_ydlidar_x4_t * h_ydlidar_x4, uint16_t angle_LSB, uint16_t angle_MSB);
 int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB);
-int ydlidar_x4_sort_smpl(h_ydlidar_x4_t *h_ydlidar_x4, uint16_t revoltion_idx);
+int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar);
