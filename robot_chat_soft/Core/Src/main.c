@@ -276,6 +276,16 @@ void task_lidar_ISR(void * unused)
 
 void task_tracking(void * unused)
 {
+	lidar.decode_state = SCANNING;
+	lidar.serial_drv.receive(lidar.buf_DMA);
+	lidar.nb_smpl = 0;
+	lidar.start_angl = 0;
+	lidar.end_angl = 0;
+	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
+	vTaskDelay(50);
+	ydlidar_x4_scan(&lidar);
+
 	printf("Task tracking ok\r\n");
 	int32_t target_angle_rad;
 	 //TODO suppress if working find_taget
@@ -306,9 +316,9 @@ void task_tracking(void * unused)
 			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		}
 	}
-	}
 	//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
-	vTaskDelay(100);
+	vTaskDelay(50);
+	}
 }
 
 
@@ -393,7 +403,6 @@ void task_BTN_ISR(void * unused)
 	printf("Task BTN ok\r\n");
 	for(;;){
 		xSemaphoreTake(BTN_STATUS_semaphore, portMAX_DELAY);
-		ydlidar_x4_scan(&lidar);
 		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 	}
 }
@@ -476,7 +485,7 @@ void task_MotorSpeed(void * unused)
 		//angle_corr = set_angle_corr(&hOdometry, angle);
 
 
-		angle_corr = set_angle_corr(&hOdometry, angle);
+		//angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
 		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
@@ -586,10 +595,9 @@ int main(void)
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	printf_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
+
 	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1 | TIM_CHANNEL_2);
 	__HAL_TIM_SET_COMPARE(&htim15, TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED);
-	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
 	lidar.serial_drv.transmit = lidar_uart_transmit;
 	lidar.serial_drv.receive = lidar_uart_receive;
 	ydlidar_x4_init(&lidar);
