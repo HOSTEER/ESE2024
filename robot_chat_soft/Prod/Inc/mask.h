@@ -24,6 +24,7 @@ typedef struct h_mask_target_struct
 	uint16_t angle;			// in °
 	int32_t angle_rad;		// in radians
 	uint16_t shape[21];		// identifying target shape on 20°
+	uint16_t dist_min;
 	uint16_t shape_ang_max;
 	uint16_t shape_ang_min;
 	int32_t dist_center;

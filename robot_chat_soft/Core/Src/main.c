@@ -291,10 +291,8 @@ void task_tracking(void * unused)
 
 	for(;;){
 		find_target(&lidar, &h_target);
-		if(h_target.shape[10] < MAX_TARGET_DIST){
-			//TODO suppress next line
-			target_angle_rad = (h_target.angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-			angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		if(h_target.dist_min < MAX_TARGET_DIST){
+			angle_corr = set_angle_corr(&hOdometry, h_target.angle_rad + hOdometry.angle);
 			if(h_target.angle < 130){
 				//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 				HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
@@ -307,6 +305,7 @@ void task_tracking(void * unused)
 			}
 		}
 		//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
+		//printf("shape = %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d %02.d\r\n", (int)h_target.shape[0],(int)h_target.shape[1],(int)h_target.shape[2],(int)h_target.shape[3],(int)h_target.shape[4],(int)h_target.shape[5],(int)h_target.shape[6],(int)h_target.shape[7],(int)h_target.shape[8],(int)h_target.shape[9],(int)h_target.shape[10],(int)h_target.shape[11],(int)h_target.shape[12],(int)h_target.shape[13],(int)h_target.shape[14],(int)h_target.shape[15],(int)h_target.shape[16],(int)h_target.shape[17],(int)h_target.shape[18],(int)h_target.shape[19]);
 		vTaskDelay(50);
 	}
 }
