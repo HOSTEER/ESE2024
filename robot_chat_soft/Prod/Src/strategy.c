@@ -56,28 +56,34 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//TODO appel fonction detection obstacle le + proche
 			//TODO somme 2 consignes
 			//TODO màj consigne commande
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 		}
 		else{
 			//Obstacle détecté
 			//printf("Comportement obstacle \n\r");
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
 			case FALL_FORWARD:
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD | COLLIDE:
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			default: //COLLIDE sans FALL_x
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO consigne vitesse nulle
+				avg_speed = 0;
 				break;
 			}
 		}
@@ -85,6 +91,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	else{
 		//Le robot est la proie
 		if((*strat_mode & 0xFF) == NO_OBSTACLE){
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 			//Aucun obstacle
 			//Calcul de suivi de courbe
 			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
@@ -100,7 +107,7 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 
 			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			avg_speed = fixed_mul_16(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 16));
+			avg_speed = dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
 			angle = dir_vect.angle;
 
 			//printf("Comportement fuite \n\r");
@@ -108,31 +115,36 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		else{
 			//Obstacle détecté
 			//printf("Comportement obstacle \n\r");
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
 			case FALL_FORWARD:
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD | COLLIDE:
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			default: //COLLIDE sans FALL_x
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO consigne vitesse nulle
+				avg_speed = 0;
 				break;
 			}
 		}
 	}
 
 
-	sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
+	sprintf(msg,"Direc: x: %d, y: %d, angle : %d, a_brut %d\n\r", dir_vect.x>>8, dir_vect.y>>8, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16,angle);
 	xQueueSend(q_printf, (void *)msg, 1);
 	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
