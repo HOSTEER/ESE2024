@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief YDLIDAR X4 LIDAR control functions
+ */
+
 #include "main.h"
 #include "gpio.h"
 #include "usart.h"
@@ -6,8 +11,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-
+/**
+ * @brief Initialize the YDLIDAR X4 sensor
+ * @param lidar Pointer to the YDLIDAR X4 sensor structure
+ * @return 0 if initialization is successful, otherwise an error code
+ */
 int ydlidar_x4_init(h_ydlidar_x4_t * lidar){
+	// Initialization steps
 	lidar->decode_state = SCANNING;
 	lidar->serial_drv.receive(lidar->buf_DMA);
 	lidar->nb_smpl = 0;
@@ -17,7 +27,13 @@ int ydlidar_x4_init(h_ydlidar_x4_t * lidar){
 	return 0;
 }
 
+/**
+ * @brief Stop scanning for the YDLIDAR X4 sensor
+ * @param lidar Pointer to the YDLIDAR X4 sensor structure
+ * @return 0 if stopping is successful, otherwise an error code
+ */
 int ydlidar_x4_stop(h_ydlidar_x4_t * lidar){
+	// Sends a stop command to the LIDAR
 	lidar->cmd = CMD_STOP;
 	lidar->serial_drv.transmit((uint8_t *) &(lidar->cmd), 2);
 	return 0;
@@ -62,15 +78,24 @@ int ydlidar_x4_get_dist(uint16_t * dist, uint16_t dist_LSB, uint16_t dist_MSB){
 	return 0;
 }
 
+/**
+ * @brief Store sampled data from the YDLIDAR X4 sensor
+ * @param lidar Pointer to the YDLIDAR X4 sensor structure
+ * @return 0 if successful, otherwise an error code
+ */
 int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	uint8_t smpl_idx=0;
 	uint16_t angle_per_dist;
 	uint16_t first_angle=lidar->start_angl;
+
+	// Calculate angle per distance
 	if(lidar->end_angl < first_angle){
 		angle_per_dist = (uint16_t) ((lidar->end_angl + 360)-first_angle)>>2;
 	}else{
 		angle_per_dist = (uint16_t) (lidar->end_angl-first_angle)>>2;
 	}
+
+	// Loop through sampled data
 	for(;smpl_idx<40;smpl_idx++){
 		if(lidar->smpl[smpl_idx] > 0){
 			lidar->sorted_dist[(first_angle + (angle_per_dist*smpl_idx)/10)%359]= lidar->smpl[smpl_idx];
@@ -81,7 +106,13 @@ int ydlidar_x4_store_smpl(h_ydlidar_x4_t * lidar){
 	return 0;
 }
 
+/**
+ * @brief Interrupt callback function for YDLIDAR X4 sensor
+ * @param lidar Pointer to the YDLIDAR X4 sensor structure
+ * @return 0 if callback is successful, otherwise an error code
+ */
 int ydlidar_x4_irq_cb(h_ydlidar_x4_t * lidar){
+	// Handle data received from the sensor in interrupt
 	ydlidar_x4_parsing_t * state = &lidar->decode_state;
 	uint8_t * dma_mem = lidar->buf_DMA;
 	uint8_t * frame_smpl = &lidar->nb_smpl;
