@@ -13,6 +13,7 @@ int find_target(h_ydlidar_x4_t * lidar, h_mask_target_t * target){
 			min_dist = lidar->sorted_dist[i];
 		}
 		if(min_dist < last_min){
+			target->angle = i;
 			target->angle_rad = (i-160)*DEG2RAD;
 			last_min = min_dist;
 		}
