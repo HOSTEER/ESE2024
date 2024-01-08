@@ -91,6 +91,7 @@ SemaphoreHandle_t com_RX_semaphore;
 SemaphoreHandle_t BTN_STATUS_semaphore;
 SemaphoreHandle_t BTN_START_semaphore;
 SemaphoreHandle_t printf_semaphore;
+SemaphoreHandle_t tracking_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
@@ -104,7 +105,7 @@ hOdometry_t hOdometry;
 int32_t mot_speed = 0;
 int16_t cnt = 0;
 int32_t angle = 0;
-int32_t avg_speed = DEFAULT_SPEED;
+int32_t avg_speed = DEFAULT_SPEED<<8;
 uint8_t odom_overflow = 0;
 int32_t angle_corr = 0;
 strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
@@ -176,11 +177,37 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
 	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(GPIO_Pin == BTN_GAME_STATUS_Pin) {
+		//Changement manuel du rôle de fonctionnement
+		if (strat_mode&0xF000 == HUNTER){
+			strat_mode = strat_mode&0x0FFF | PREY;
+		}
+		else{
+			strat_mode = strat_mode&0x0FFF | HUNTER;
+		}
+		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(BTN_STATUS_semaphore, &xHigherPriorityTaskToken);
 	}
 	if(GPIO_Pin == BTN_GAME_START_Pin) {
 		mot_speed ^= 1;
 		xSemaphoreGiveFromISR(BTN_START_semaphore, &xHigherPriorityTaskToken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
+	}
+
+	if(GPIO_Pin == FBD_EXTI_Pin) {
+		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
+		 HAL_UART_Transmit_DMA(&huart3, "Chute avant\r\n", 13);
+	}
+	if(GPIO_Pin == BBD_EXTI_Pin) {
+		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
+		strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
+		HAL_UART_Transmit_DMA(&huart3, "Chute arriere\r\n", 15);
+	}
+
+	if(GPIO_Pin == BUMP_EXTI_Pin) {
+		//HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+		HAL_UART_Transmit_DMA(&huart3, "Collison\r\n", 10);
 	}
 	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
@@ -188,18 +215,18 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
 	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(GPIO_Pin == FBD_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
 		//Le masque | NO_OBSTACLE est optionnel mais permet une meilleure lecture du code
-		//strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		strat_mode = (strat_mode & 0xFFF0) | PREVIOUS_OBSTACLE;
 	}
 	if(GPIO_Pin == BBD_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
-		//strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
+		strat_mode = (strat_mode & 0xFFF0) | PREVIOUS_OBSTACLE;
 	}
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		//strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+		//HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
+		strat_mode = (strat_mode & 0xFF0F) | PREVIOUS_OBSTACLE;
 	}
 	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
@@ -304,7 +331,8 @@ void task_tracking(void * unused)
 	//find_target(&lidar, &h_target);
 	if(min_v < 4000){
 		target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		//Recuperation de la variable par la strategie
+		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
 		if(target_angle < 130){
 			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
@@ -353,7 +381,7 @@ void task_RX_ISR(void * unused)
 			rx_pc = 0xFF;
 			mot_speed = 1;
 			ydlidar_x4_scan(&lidar);
-			HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+			//HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
 		}*/
 	}
@@ -427,8 +455,7 @@ void task_Motor(void * unused)
 		//printf("dr %d\r\n", (int)(hOdometry.dr/(1<<24)));
 		//TODO printf("x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//printf("counts %d\r\n", (int)cnt);
-		sprintf(msg,"\t\t\t\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
-		xQueueSendToFront(q_printf, (void *)msg, 1);
+
 
 
 		/*motor_set_PWM(&Rmot, 512);
@@ -485,9 +512,11 @@ void task_MotorSpeed(void * unused)
 		//angle_corr = set_angle_corr(&hOdometry, angle);
 
 
-		//angle_corr = set_angle_corr(&hOdometry, angle);
-		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
-		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
+		angle_corr = set_angle_corr(&hOdometry, angle);
+		//Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
+		//Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
+		Rspeed = (avg_speed<<8) + fixed_mul(avg_speed<<8, angle_corr, 24);
+		Lspeed = (avg_speed<<8) - fixed_mul(avg_speed<<8, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
 		//motor_set_PWM(&Lmot, -mot_speed*512);
 		//motor_set_PWM(&Rmot, mot_speed*512);
@@ -504,7 +533,11 @@ void task_MotorSpeed(void * unused)
 void task_Strategy(void * unused){
 
 	for(;;){
-		//strategy(&strat_mode, &hOdometry);
+		strategy(&strat_mode, &hOdometry);
+		sprintf(msg,"\t\t\t\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
+		xQueueSendToFront(q_printf, (void *)msg, 1);
+		sprintf(msg,"\t\t\t\t\tConsigne : %d\r\n", (int)avg_speed);
+		xQueueSendToFront(q_printf, (void *)msg, 1);
 		/*hOdometry.x = 100<<16;
 		hOdometry.y = 100<<16;
 		strategy(&strat_mode, &hOdometry);
@@ -594,6 +627,7 @@ int main(void)
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	printf_semaphore = xSemaphoreCreateBinary();
+	tracking_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
 	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1 | TIM_CHANNEL_2);
