@@ -30,7 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-//#include "ydlidar_x4.h"	called in "mask.h"
+//#include "ydlidar_x4.h"	//called in "mask.h"
 #include "imu.h"
 #include "motor.h"
 #include "fixpoint_math.h"
@@ -62,6 +62,7 @@
 #define ODOMETRY_FREQ 50UL 			//50Hz odometry refresh frequency
 
 #define SE
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -77,7 +78,6 @@ QueueHandle_t q_printf = NULL;
 TaskHandle_t h_task_init = NULL;
 TaskHandle_t h_IMU_taskRead = NULL;
 TaskHandle_t h_printf = NULL;
-TaskHandle_t h_task_lidar = NULL;
 TaskHandle_t h_task_lidar_ISR = NULL;
 TaskHandle_t h_task_RX_ISR = NULL;
 TaskHandle_t h_task_BTN_ISR = NULL;
@@ -85,6 +85,8 @@ TaskHandle_t h_task_Motor = NULL;
 TaskHandle_t h_task_MotorSpeed = NULL;
 TaskHandle_t h_task_strategy = NULL;
 TaskHandle_t h_task_tracking = NULL;
+
+h_mask_target_t h_target;
 
 SemaphoreHandle_t lidar_RX_semaphore;
 SemaphoreHandle_t com_RX_semaphore;
@@ -94,7 +96,7 @@ SemaphoreHandle_t printf_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
-h_mask_target_t h_target;
+//h_mask_target_t h_target;
 h_imu_drv_t h_imu;
 uint8_t rx_pc;
 uint8_t string_display[720];
@@ -119,40 +121,36 @@ void MX_FREERTOS_Init(void);
 
 int __io_putchar(int ch)
 {
-	//HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
-	//HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
 	return ch;
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef * huart){
+	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(huart->Instance == USART1){
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
 #ifdef SE
 	if(huart->Instance == USART2){
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(com_RX_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
 #endif
 #ifdef BT
 	if(huart->Instance == USART3){
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(com_RX_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
 #endif
+	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
 
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 {
+	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(huart->Instance == USART1){
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(lidar_RX_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
+	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef * huart){
@@ -178,34 +176,19 @@ int lidar_uart_receive(uint8_t *p_data)
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
+	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(GPIO_Pin == BTN_GAME_STATUS_Pin) {
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(BTN_STATUS_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
 	if(GPIO_Pin == BTN_GAME_START_Pin) {
 		mot_speed ^= 1;
-		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(BTN_START_semaphore, &xHigherPriorityTaskToken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 	}
-
-	if(GPIO_Pin == FBD_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-		//strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
-	}
-	if(GPIO_Pin == BBD_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 1);
-		//strat_mode = (strat_mode & 0xFFF0) | FALL_BACKWARD;
-	}
-
-	if(GPIO_Pin == BUMP_EXTI_Pin) {
-		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		//strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
-	}
+	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
 
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
+	BaseType_t xHigherPriorityTaskToken = pdFALSE;
 	if(GPIO_Pin == FBD_EXTI_Pin) {
 		HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
@@ -220,6 +203,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
 		HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 		//strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
 	}
+	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
 
 
@@ -280,28 +264,7 @@ void printfTask(void * unused)
 			status = HAL_UART_Transmit_DMA(&huart2, printMsg, msg_len);
 			xSemaphoreTake(printf_semaphore, portMAX_DELAY);
 		}
-
-
 	}
-}
-
-void task_lidar(void * unused)
-{
-	printf("Task lidar ok\r\n");
-	lidar.serial_drv.transmit = lidar_uart_transmit;
-	lidar.serial_drv.receive = lidar_uart_receive;
-	lidar.decode_state = SCANNING;
-	lidar.serial_drv.receive(lidar.buf_DMA);
-	lidar.nb_smpl = 0;
-	lidar.start_angl = 0;
-	lidar.end_angl = 0;
-	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
-	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
-	memset(lidar.sorted_dist,10000,360);
-	ydlidar_x4_scan(&lidar);	// start lidar scan
-	vTaskDelete(0);
 }
 
 void task_lidar_ISR(void * unused)
@@ -313,13 +276,24 @@ void task_lidar_ISR(void * unused)
 	}
 }
 
+
 void task_tracking(void * unused)
 {
+	lidar.decode_state = SCANNING;
+	lidar.serial_drv.receive(lidar.buf_DMA);
+	lidar.nb_smpl = 0;
+	lidar.start_angl = 0;
+	lidar.end_angl = 0;
+	HAL_GPIO_WritePin(LIDAR_RANGING_EN_GPIO_Port, LIDAR_RANGING_EN_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LIDAR_EN_GPIO_Port, LIDAR_EN_Pin, GPIO_PIN_SET);
+	vTaskDelay(50);
+	ydlidar_x4_scan(&lidar);
+
 	printf("Task tracking ok\r\n");
 	int32_t target_angle_rad;
-	/* TODO suppress if working find_taget
-	uint16_t target_angle;
+
 	for(;;){
+		/*TODO suppress if working find_taget
 		uint16_t min_v = 4000, last_min=4000;
 		for(int i=0;i<360;i++){
 			if((lidar.sorted_dist[i] > 0) && (min_v > lidar.sorted_dist[i])){
@@ -329,24 +303,26 @@ void task_tracking(void * unused)
 				target_angle = i;
 				last_min = min_v;
 			}
-		}*/
-	find_target(&lidar, &h_target);
-	if(h_target.shape[10] < MAX_TARGET_DIST){
-		target_angle_rad = (h_target.angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
-		if(h_target.angle < 130){
-			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
-			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
-		}else if(h_target.angle > 170){
-			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
-			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
-		}else{
-			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
-			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		}
+		 */
+		find_target(&lidar, &h_target);
+		if(h_target.shape[10] < MAX_TARGET_DIST){
+			target_angle_rad = (h_target.angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+			angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+			if(h_target.angle < 130){
+				//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
+				HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+			}else if(h_target.angle > 170){
+				//angle_corr = set_angle_corr(&hOdometry, 1<<24);
+				HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+			}else{
+				//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
+				HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
+			}
+		}
+		//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
+		vTaskDelay(50);
 	}
-	//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
-	vTaskDelay(100);
 }
 
 
@@ -355,27 +331,35 @@ void task_RX_ISR(void * unused)
 {
 	printf("Task RX ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-	//HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
+	int packet = 0;
 	for(;;){
 		xSemaphoreTake(com_RX_semaphore, portMAX_DELAY);
 		if(rx_pc == 0xAA){
 			rx_pc = 0xFF;
-			for(int i=0;i<720;i++){
+			int i=0;
+			for(;i<36;i++){
 				if(i%2 == 0){
-					string_display[i] = (lidar.sorted_dist[i>>1])>>8;
+					string_display[i+packet] = (lidar.sorted_dist[(i+packet)>>1])>>8;
 				}else{
-					string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
+					string_display[i+packet] = (lidar.sorted_dist[(i+packet)>>1]) & 0x00FF;
 				}
 			}
-			HAL_UART_Transmit_DMA(&huart2,string_display, 720);
+			packet+=i;
+			HAL_UART_Transmit_DMA(&huart2,&string_display[packet-36], 36);
+			if(packet >= 720){
+				packet = 0;
+			}
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-		}else if(rx_pc == 0xBB){
+		}else{
+			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+		}
+		/*else if(rx_pc == 0xBB){
 			rx_pc = 0xFF;
 			mot_speed = 1;
 			ydlidar_x4_scan(&lidar);
 			HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
-		}
+		}*/
 	}
 }
 #endif
@@ -385,26 +369,35 @@ void task_RX_ISR(void * unused)
 {
 	printf("Task RX ISR ok\r\n");
 	HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
+	int packet = 0;
 	for(;;){
 		xSemaphoreTake(com_RX_semaphore, portMAX_DELAY);
 		if(rx_pc == 0xAA){
 			rx_pc = 0xFF;
-			for(int i=0;i<720;i++){
+			int i=0;
+			for(;i<36;i++){
 				if(i%2 == 0){
-					string_display[i] = (lidar.sorted_dist[i>>1])>>8;
+					string_display[i+packet] = (lidar.sorted_dist[(i+packet)>>1])>>8;
 				}else{
-					string_display[i] = (lidar.sorted_dist[i>>1]) & 0x00FF;
+					string_display[i+packet] = (lidar.sorted_dist[(i+packet)>>1]) & 0x00FF;
 				}
 			}
-			HAL_UART_Transmit_DMA(&huart3,string_display, 720);
-			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
-		}else if(rx_pc == 0xBB){
-			rx_pc = 0xFF;
-			ydlidar_x4_scan(&lidar);
-			HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
-			mot_speed = 1;
-			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
+			packet+=i;
+			HAL_UART_Transmit_DMA(&huart2,&string_display[packet-36], 36);
+			if(packet >= 720){
+				packet = 0;
+			}
+			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+		}else{
+			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
 		}
+		/*else if(rx_pc == 0xBB){
+					rx_pc = 0xFF;
+					mot_speed = 1;
+					ydlidar_x4_scan(&lidar);
+					HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
+					HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+		}*/
 	}
 }
 #endif
@@ -414,7 +407,6 @@ void task_BTN_ISR(void * unused)
 	printf("Task BTN ok\r\n");
 	for(;;){
 		xSemaphoreTake(BTN_STATUS_semaphore, portMAX_DELAY);
-		ydlidar_x4_scan(&lidar);
 		HAL_GPIO_TogglePin(USER_LED1_GPIO_Port, USER_LED1_Pin);
 	}
 }
@@ -464,7 +456,7 @@ void task_MotorSpeed(void * unused)
 	{
 		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
 		odometry_update_pos(&hOdometry);
-		angle = follow_trajectory(&hOdometry, &x, &y,&mot_speed);
+		//angle = follow_trajectory(&hOdometry, &x, &y,&mot_speed);
 		//motor_get_speed(&Rmot);
 		//motor_get_speed(&Lmot);
 		//motor_get_current(&Rmot);
@@ -497,7 +489,7 @@ void task_MotorSpeed(void * unused)
 		//angle_corr = set_angle_corr(&hOdometry, angle);
 
 
-		angle_corr = set_angle_corr(&hOdometry, angle);
+		//angle_corr = set_angle_corr(&hOdometry, angle);
 		Rspeed = (avg_speed<<16) + fixed_mul(avg_speed<<16, angle_corr, 24);
 		Lspeed = (avg_speed<<16) - fixed_mul(avg_speed<<16, angle_corr, 24);
 		//speed = Rmot.speed_measured[Rmot.speed_index];
@@ -516,7 +508,7 @@ void task_MotorSpeed(void * unused)
 void task_Strategy(void * unused){
 
 	for(;;){
-		strategy(&strat_mode, &hOdometry);
+		//strategy(&strat_mode, &hOdometry);
 		/*hOdometry.x = 100<<16;
 		hOdometry.y = 100<<16;
 		strategy(&strat_mode, &hOdometry);
@@ -608,11 +600,11 @@ int main(void)
 	printf_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
-	HAL_TIM_PWM_Start(&htim15,TIM_CHANNEL_1 | TIM_CHANNEL_2);
-	__HAL_TIM_SET_COMPARE(&htim15,TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED-1);
-	//ydlidar_x4_init(&lidar);
+	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1 | TIM_CHANNEL_2);
+	__HAL_TIM_SET_COMPARE(&htim15, TIM_CHANNEL_2, DEFAULT_LIDAR_SPEED);
 	lidar.serial_drv.transmit = lidar_uart_transmit;
 	lidar.serial_drv.receive = lidar_uart_receive;
+	ydlidar_x4_init(&lidar);
 
 	current_sense_start();
 
