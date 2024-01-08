@@ -2,6 +2,7 @@
 #include "string.h"
 #include "config.h"
 #include "cmsis_os.h"
+#include "ydlidar_x4.h"
 
 #define ZONE_MILIEU 2
 #define ZONE_DROITE 3
@@ -30,6 +31,8 @@ extern int32_t avg_speed;
 static champ_vect_t champ_vect;
 extern QueueHandle_t q_printf;
 
+extern h_ydlidar_x4_t lidar;
+
 static uint8_t msg[100];
 
 
@@ -46,16 +49,19 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	vector_t dir_vect;
+	vector_t dir_vect, ennemy;
 	//int32_t test_angle, test_avg_speed;
 
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
-		if((*strat_mode & 0xFF) == NO_OBSTACLE){
+		if(((*strat_mode & 0xFF) == NO_OBSTACLE) || ((*strat_mode & 0xFF) == PREVIOUS_OBSTACLE)){
 			//Aucun obstacle
 			//TODO appel fonction detection obstacle le + proche
-			//TODO somme 2 consignes
+			nearest_enemy(&ennemy, hOdometry);
+			angle = ennemy.angle;
+			avg_speed = + DEFAULT_SPEED<<9;
 			//TODO màj consigne commande
+
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 		}
 		else{
@@ -94,16 +100,23 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 			//Aucun obstacle
 			//Calcul de suivi de courbe
-			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
+			//champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 
-			//dir_vect.x = 10<<16;
-			//dir_vect.y = 10<<16;
+			nearest_enemy(&ennemy, hOdometry);
+
+
+			dir_vect.x = 0;
+			dir_vect.y = 0;
+			//TODO somme 2 consignes
+			dir_vect.x = dir_vect.x - ennemy.x;
+			dir_vect.y = dir_vect.y - ennemy.y;
+
+
 			//hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
 			//Calcul angle entre vecteur de consigne et avant du robot + calcul norme
 			CORDIC_vector(&dir_vect);
 
-			//TODO appel fonction detection obstacle le + proche
-			//TODO somme 2 consignes
+
 
 			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
@@ -117,6 +130,16 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//printf("Comportement obstacle \n\r");
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
+			case PREVIOUS_OBSTACLE:
+				nearest_enemy(&ennemy, hOdometry);
+				dir_vect.x = - ennemy.x;
+				dir_vect.y =- ennemy.y;
+
+				CORDIC_vector(&dir_vect);
+				avg_speed = dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
+				angle = dir_vect.angle;
+
+				break;
 			case FALL_FORWARD:
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
@@ -353,4 +376,57 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 	dir_vect->y = comp_y_corr + sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
 
 	return 0;
+}
+
+
+int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
+	int32_t speed;
+	int32_t target_angle_rad;
+	 //TODO suppress if working find_taget
+	uint16_t target_angle;
+	uint16_t min_v = 4000, last_min=4000;
+	for(int i=0;i<360;i++){
+		if((lidar.sorted_dist[i] > 0) && (min_v > lidar.sorted_dist[i])){
+			min_v=lidar.sorted_dist[i];
+		}
+		if(min_v <last_min){
+			target_angle = i;
+			last_min = min_v;
+		}
+	}
+	//find_target(&lidar, &h_target);
+	if(min_v < 4000){
+		target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+		//Recuperation de la variable par la strategie
+		enemy->angle = target_angle_rad;
+		enemy->norm = min_v;
+			speed = fixed_mul(DEFAULT_SPEED<<8, 1<<6, 8);
+			if(min_v <500){
+				speed = fixed_mul(DEFAULT_SPEED<<8, 1<<7, 8);
+				if(min_v <400){
+					speed = DEFAULT_SPEED<<8;
+						if(min_v <200){
+							speed = fixed_mul(DEFAULT_SPEED<<8, 2<<8, 8);
+						}
+
+
+				}
+			}
+		int32_t cos_comp =fpcos(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+				int32_t sin_comp =fpsin(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+		enemy->x = fixed_mul( cos_comp, speed, 8);
+		enemy->y = fixed_mul( sin_comp, speed, 8);
+
+		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		if(target_angle < 130){
+			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
+			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		}else if(target_angle > 170){
+			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
+			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		}else{
+			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
+			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
+		}
+	}
 }

@@ -91,6 +91,7 @@ SemaphoreHandle_t com_RX_semaphore;
 SemaphoreHandle_t BTN_STATUS_semaphore;
 SemaphoreHandle_t BTN_START_semaphore;
 SemaphoreHandle_t printf_semaphore;
+SemaphoreHandle_t tracking_semaphore;
 
 BaseType_t ret;
 h_ydlidar_x4_t lidar;
@@ -152,7 +153,7 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef * huart){
-	if(huart->Instance == USART3){
+	if(huart->Instance == USART2){
 		BaseType_t xHigherPriorityTaskToken = pdFALSE;
 		xSemaphoreGiveFromISR(printf_semaphore, &xHigherPriorityTaskToken);
 		portYIELD_FROM_ISR(xHigherPriorityTaskToken);
@@ -217,15 +218,15 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
 		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
 		// Met la valeur du mot utilisé par la detection de chute à la valeur 0 (no obstacle)
 		//Le masque | NO_OBSTACLE est optionnel mais permet une meilleure lecture du code
-		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		strat_mode = (strat_mode & 0xFFF0) | PREVIOUS_OBSTACLE;
 	}
 	if(GPIO_Pin == BBD_EXTI_Pin) {
 		//HAL_GPIO_WritePin(USER_LED3_GPIO_Port, USER_LED3_Pin, 0);
-		strat_mode = (strat_mode & 0xFFF0) | NO_OBSTACLE;
+		strat_mode = (strat_mode & 0xFFF0) | PREVIOUS_OBSTACLE;
 	}
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
 		//HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+		strat_mode = (strat_mode & 0xFF0F) | PREVIOUS_OBSTACLE;
 	}
 	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
 }
@@ -285,7 +286,7 @@ void printfTask(void * unused)
 		if(ret == pdTRUE && msg_len != 0){
 			//printf(msg);
 			//status = HAL_UART_Transmit_DMA(&huart2, printMsg, msg_len);
-			status = HAL_UART_Transmit_DMA(&huart3, printMsg, msg_len);
+			status = HAL_UART_Transmit_DMA(&huart2, printMsg, msg_len);
 			xSemaphoreTake(printf_semaphore, portMAX_DELAY);
 		}
 	}
@@ -330,7 +331,8 @@ void task_tracking(void * unused)
 	//find_target(&lidar, &h_target);
 	if(min_v < 4000){
 		target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
-		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		//Recuperation de la variable par la strategie
+		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
 		if(target_angle < 130){
 			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
@@ -625,6 +627,7 @@ int main(void)
 	BTN_STATUS_semaphore = xSemaphoreCreateBinary();
 	BTN_START_semaphore = xSemaphoreCreateBinary();
 	printf_semaphore = xSemaphoreCreateBinary();
+	tracking_semaphore = xSemaphoreCreateBinary();
 	q_printf = xQueueCreate(QUEUE_PRINTF_LENGTH, QUEUE_PRINTF_SIZE);
 
 	HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_1 | TIM_CHANNEL_2);
