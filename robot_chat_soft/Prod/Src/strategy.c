@@ -50,6 +50,7 @@ void init_champ_vect(void){
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 	vector_t dir_vect, ennemy;
+	int32_t new_speed, new_angle;
 	//int32_t test_angle, test_avg_speed;
 
 	if((*strat_mode & 0xF000) == HUNTER){
@@ -61,8 +62,9 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//angle = modulo_2pi(ennemy.angle);
 			//avg_speed = angleForward( ennemy.angle)*DEFAULT_SPEED<<8;
 			//TODO màj consigne commande
-			avg_speed = angleForward( -ennemy.angle)*ennemy.norm;
-			angle = modulo_2pi(-ennemy.angle);
+			new_speed = angleForward( -ennemy.angle)*(DEFAULT_SPEED<<8);
+			new_angle = modulo_2pi(-ennemy.angle);
+			lissage(new_angle, new_speed);
 
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 		}
@@ -82,24 +84,24 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			case FALL_FORWARD | COLLIDE:
 			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
 
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
-				vTaskDelay(100);
+				//vTaskDelay(100);
 				break;
 			case FALL_BACKWARD | COLLIDE:
 			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
-				vTaskDelay(100);
+				//vTaskDelay(100);
 				break;
 			default: //COLLIDE sans FALL_x
 				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = 0;
-				vTaskDelay(100);
+				//vTaskDelay(100);
 				break;
 			}
 		}
@@ -132,9 +134,11 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
 			//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
 			//angle = modulo_2pi(dir_vect.angle);
-			avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
-			angle = modulo_2pi(-ennemy.angle);
-			//printf("Comportement fuite \n\r");
+			//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+			//angle = modulo_2pi(-ennemy.angle);
+			new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+			new_angle = modulo_2pi(-ennemy.angle);
+			lissage(new_angle, new_speed);
 		}
 		else{
 			//Obstacle détecté
@@ -150,8 +154,12 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
 				//angle = modulo_2pi(dir_vect.angle);
 
-				avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
-				angle = modulo_2pi(-ennemy.angle);
+				//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+				//angle = modulo_2pi(-ennemy.angle);
+
+				new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+				new_angle = modulo_2pi(-ennemy.angle);
+				lissage(new_angle, new_speed);
 
 				break;
 			case FALL_FORWARD:
@@ -164,21 +172,21 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				break;
 			case FALL_FORWARD | COLLIDE:
 			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
 				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			case FALL_BACKWARD | COLLIDE:
 				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
 				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			default: //COLLIDE sans FALL_x
 				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = 0;
 				vTaskDelay(COLLISION_TIMEOUT);
@@ -453,17 +461,18 @@ int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
 	}
 	sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
 	xQueueSendToFront(q_printf, (void *)msg, 1);
+	return 0;
 }
 
 
 int32_t angleForward(int32_t angle){
 	angle = angle%TWO_PI;
-	if(angle > PI/2)
+	if((angle > PI/2) && (angle < (int32_t)(3*PI/2)))
 	{
 		//xQueueSendToFront(q_printf, (void *)"avant haut\n\r", 1);
 		return 1;
 	}
-	else if(angle < -(int32_t)PI/2)
+	else if((angle < -(int32_t)PI/2) && (angle > -(int32_t)(3*PI/2)))
 	{
 		//xQueueSendToFront(q_printf, (void *)"avant bas\n\r", 1);
 		return 1;
@@ -472,4 +481,22 @@ int32_t angleForward(int32_t angle){
 		//xQueueSendToFront(q_printf, (void *)"arriere\n\r", 1);
 		return -1;
 	}
+}
+
+void lissage(int32_t new_angle, int32_t new_speed){
+	if( (avg_speed > 0 && new_speed >0)||(avg_speed < 0 && new_speed <0)){
+			//Moyennage
+			avg_speed = (avg_speed + new_speed)/2;
+		}
+		else{
+			//Changement de coté de déplacement
+			avg_speed = new_speed;
+		}
+
+		if(((angle - new_angle) < PI/4) && ((angle - new_angle) > -PI/4)){
+			angle = (angle + new_angle)/2;
+		}
+		else{
+			angle = new_angle;
+		}
 }

@@ -210,8 +210,9 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 	}
 
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
-		//HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+		HAL_GPIO_WritePin(USER_LED0_GPIO_Port, USER_LED0_Pin, 1);
+		//strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
 		HAL_UART_Transmit_DMA(&huart3, "Collison\r\n", 10);
 	}
 	portYIELD_FROM_ISR(xHigherPriorityTaskToken);
@@ -233,8 +234,10 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
 
 	}
 	if(GPIO_Pin == BUMP_EXTI_Pin) {
-		//HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
-		strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+		HAL_GPIO_WritePin(USER_LED0_GPIO_Port, USER_LED0_Pin, 0);
+		//strat_mode = (strat_mode & 0xFF0F) | NO_OBSTACLE;
+		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
+
 
 		//strat_mode = (strat_mode & 0xFF0F) | PREVIOUS_OBSTACLE;
 	}

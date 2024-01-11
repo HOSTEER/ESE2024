@@ -58,4 +58,5 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry);
 int32_t angleForward(int32_t angle);
 
+void lissage(int32_t new_angle, int32_t new_speed);
 #endif /* INC_STRATEGY_H_ */
