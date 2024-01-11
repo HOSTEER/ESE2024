@@ -58,9 +58,11 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//Aucun obstacle
 			//TODO appel fonction detection obstacle le + proche
 			nearest_enemy(&ennemy, hOdometry);
-			angle = ennemy.angle;
-			avg_speed = + DEFAULT_SPEED<<9;
+			//angle = modulo_2pi(ennemy.angle);
+			//avg_speed = angleForward( ennemy.angle)*DEFAULT_SPEED<<8;
 			//TODO màj consigne commande
+			avg_speed = angleForward( -ennemy.angle)*ennemy.norm;
+			angle = modulo_2pi(-ennemy.angle);
 
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 		}
@@ -78,25 +80,33 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
+
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
+				vTaskDelay(100);
 				break;
 			case FALL_BACKWARD | COLLIDE:
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
+				vTaskDelay(100);
 				break;
 			default: //COLLIDE sans FALL_x
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
 				*strat_mode = (*strat_mode&0xFFF) | PREY;
+				angle = hOdometry->angle;
 				avg_speed = 0;
+				vTaskDelay(100);
 				break;
 			}
 		}
 	}
 	else{
 		//Le robot est la proie
-		if((*strat_mode & 0xFF) == NO_OBSTACLE){
+		if((*strat_mode & 0xFF) == NO_OBSTACLE || ((*strat_mode & 0xFF) == PREVIOUS_OBSTACLE)){
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 			//Aucun obstacle
 			//Calcul de suivi de courbe
@@ -120,9 +130,10 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 
 			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			avg_speed = dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
-			angle = dir_vect.angle;
-
+			//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
+			//angle = modulo_2pi(dir_vect.angle);
+			avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+			angle = modulo_2pi(-ennemy.angle);
 			//printf("Comportement fuite \n\r");
 		}
 		else{
@@ -136,8 +147,11 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				dir_vect.y =- ennemy.y;
 
 				CORDIC_vector(&dir_vect);
-				avg_speed = dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
-				angle = dir_vect.angle;
+				//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
+				//angle = modulo_2pi(dir_vect.angle);
+
+				avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+				angle = modulo_2pi(-ennemy.angle);
 
 				break;
 			case FALL_FORWARD:
@@ -149,26 +163,33 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			case FALL_BACKWARD | COLLIDE:
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			default: //COLLIDE sans FALL_x
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
 				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
+				angle = hOdometry->angle;
 				avg_speed = 0;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			}
 		}
 	}
 
 
-	sprintf(msg,"Direc: x: %d, y: %d, angle : %d, a_brut %d\n\r", dir_vect.x>>8, dir_vect.y>>8, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16,angle);
-	xQueueSend(q_printf, (void *)msg, 1);
+	//sprintf(msg,"Direc: x: %d, y: %d, angle : %d, a_brut %d\n\r", dir_vect.x>>8, dir_vect.y>>8, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16,angle);
+	//xQueueSend(q_printf, (void *)msg, 1);
 	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
 }
@@ -185,8 +206,8 @@ int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 		status = zone_circulaire(champ_vect, strat_mode, hOdometry, zone, dir_vect);
 	}
 
-	sprintf(msg,"Zone : %d\n\r", zone);
-	xQueueSendToFront(q_printf, (void *)msg, 1);
+	//sprintf(msg,"Zone : %d\n\r", zone);
+	//xQueueSendToFront(q_printf, (void *)msg, 1);
 	return status;
 }
 
@@ -406,16 +427,16 @@ int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
 				if(min_v <400){
 					speed = DEFAULT_SPEED<<8;
 						if(min_v <200){
-							speed = fixed_mul(DEFAULT_SPEED<<8, 2<<8, 8);
+							speed = fixed_mul(DEFAULT_SPEED<<8, 1<<8, 8);
 						}
-
-
 				}
 			}
 		int32_t cos_comp =fpcos(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
-				int32_t sin_comp =fpsin(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+		int32_t sin_comp =fpsin(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
 		enemy->x = fixed_mul( cos_comp, speed, 8);
 		enemy->y = fixed_mul( sin_comp, speed, 8);
+
+		enemy->norm = speed;
 
 		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
 		if(target_angle < 130){
@@ -428,5 +449,27 @@ int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
 			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
 			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		}
+
+	}
+	sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+	xQueueSendToFront(q_printf, (void *)msg, 1);
+}
+
+
+int32_t angleForward(int32_t angle){
+	angle = angle%TWO_PI;
+	if(angle > PI/2)
+	{
+		//xQueueSendToFront(q_printf, (void *)"avant haut\n\r", 1);
+		return 1;
+	}
+	else if(angle < -(int32_t)PI/2)
+	{
+		//xQueueSendToFront(q_printf, (void *)"avant bas\n\r", 1);
+		return 1;
+	}
+	else{
+		//xQueueSendToFront(q_printf, (void *)"arriere\n\r", 1);
+		return -1;
 	}
 }

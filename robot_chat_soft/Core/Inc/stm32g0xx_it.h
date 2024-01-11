@@ -55,6 +55,7 @@ void DMA1_Channel1_IRQHandler(void);
 void DMA1_Channel2_3_IRQHandler(void);
 void DMA1_Ch4_7_DMAMUX1_OVR_IRQHandler(void);
 void TIM6_IRQHandler(void);
+void TIM7_IRQHandler(void);
 void TIM15_IRQHandler(void);
 void USART1_IRQHandler(void);
 void USART2_IRQHandler(void);

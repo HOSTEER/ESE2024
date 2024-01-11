@@ -56,5 +56,6 @@ int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdom
 int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
 
 int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry);
+int32_t angleForward(int32_t angle);
 
 #endif /* INC_STRATEGY_H_ */
