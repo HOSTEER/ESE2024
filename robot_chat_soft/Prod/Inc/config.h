@@ -21,6 +21,11 @@
 #define DEFAULT_STRAT_MODE PREY | TURN_TRIGO
 
 //Asserv
-#define DEFAULT_SPEED 250
+#define DEFAULT_SPEED 150
+
+
+#define MATCH_LENGTH 30
+
+#define COLLISION_TIMEOUT 3000
 
 #endif /* INC_CONFIG_H_ */

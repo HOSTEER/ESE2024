@@ -1,7 +1,49 @@
-16:26:15 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+15:20:33 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+make -j12 all 
+arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
+../Prod/Src/strategy.c: In function 'zone_circulaire':
+../Prod/Src/strategy.c:394:17: warning: unused variable 'comp_y_tang' [-Wunused-variable]
+  394 |         int32_t comp_y_tang = sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
+      |                 ^~~~~~~~~~~
+../Prod/Src/strategy.c:393:17: warning: unused variable 'comp_x_tang' [-Wunused-variable]
+  393 |         int32_t comp_x_tang = sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+      |                 ^~~~~~~~~~~
+../Prod/Src/strategy.c: In function 'nearest_enemy':
+../Prod/Src/strategy.c:454:9: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  454 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:6:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+    5 | #include "ydlidar_x4.h"
+  +++ |+#include <stdio.h>
+    6 | 
+../Prod/Src/strategy.c:454:9: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  454 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:454:9: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Prod/Src/strategy.c:454:17: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  454 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+      |                 ^~~
+      |                 |
+      |                 uint8_t * {aka unsigned char *}
+../Prod/Src/strategy.c:454:17: note: expected 'char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
+../Prod/Src/strategy.c:456:1: warning: control reaches end of non-void function [-Wreturn-type]
+  456 | }
+      | ^
+arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: robot_chat_soft.elf
+ 
+arm-none-eabi-size   robot_chat_soft.elf 
+arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
+   text	   data	    bss	    dec	    hex	filename
+  59116	    196	  31308	  90620	  161fc	robot_chat_soft.elf
+Finished building: default.size.stdout
+ 
+Finished building: robot_chat_soft.list
+ 
+15:20:36 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-size   robot_chat_soft.elf 
    text	   data	    bss	    dec	    hex	filename
-  61012	    196	  31212	  92420	  16904	robot_chat_soft.elf
+  59116	    196	  31308	  90620	  161fc	robot_chat_soft.elf
 Finished building: default.size.stdout
  
