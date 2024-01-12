@@ -1,118 +1,53 @@
-16:57:27 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+13:53:47 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Core/Src/main.o"
-../Core/Src/main.c: In function 'HAL_GPIO_EXTI_Rising_Callback':
-../Core/Src/main.c:185:31: warning: suggest parentheses around comparison in operand of '&' [-Wparentheses]
-  185 |                 if (strat_mode&0xF000 == HUNTER){
-      |                               ^
-../Core/Src/main.c:186:48: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
-  186 |                         strat_mode = strat_mode&0x0FFF | PREY;
-      |                                      ~~~~~~~~~~^~~~~~~
-../Core/Src/main.c:189:48: warning: suggest parentheses around arithmetic in operand of '|' [-Wparentheses]
-  189 |                         strat_mode = strat_mode&0x0FFF | HUNTER;
-      |                                      ~~~~~~~~~~^~~~~~~
-../Core/Src/main.c:204:49: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_DMA' differ in signedness [-Wpointer-sign]
-  204 |                  HAL_UART_Transmit_DMA(&huart3, "Chute avant\r\n", 13);
-      |                                                 ^~~~~~~~~~~~~~~~~
-      |                                                 |
-      |                                                 char *
-In file included from ../Core/Inc/stm32g0xx_hal_conf.h:319,
-                 from ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:29,
-                 from ../Core/Inc/main.h:30,
-                 from ../Core/Src/main.c:20:
-../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h:1637:83: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
- 1637 | HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
-      |                                                                    ~~~~~~~~~~~~~~~^~~~~
-../Core/Src/main.c:209:48: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_DMA' differ in signedness [-Wpointer-sign]
-  209 |                 HAL_UART_Transmit_DMA(&huart3, "Chute arriere\r\n", 15);
-      |                                                ^~~~~~~~~~~~~~~~~~~
-      |                                                |
-      |                                                char *
-In file included from ../Core/Inc/stm32g0xx_hal_conf.h:319,
-                 from ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:29,
-                 from ../Core/Inc/main.h:30,
-                 from ../Core/Src/main.c:20:
-../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h:1637:83: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
- 1637 | HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
-      |                                                                    ~~~~~~~~~~~~~~~^~~~~
-../Core/Src/main.c:216:48: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_DMA' differ in signedness [-Wpointer-sign]
-  216 |                 HAL_UART_Transmit_DMA(&huart3, "Collison\r\n", 10);
-      |                                                ^~~~~~~~~~~~~~
-      |                                                |
-      |                                                char *
-In file included from ../Core/Inc/stm32g0xx_hal_conf.h:319,
-                 from ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:29,
-                 from ../Core/Inc/main.h:30,
-                 from ../Core/Src/main.c:20:
-../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h:1637:83: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
- 1637 | HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
-      |                                                                    ~~~~~~~~~~~~~~~^~~~~
-../Core/Src/main.c: In function 'printfTask':
-../Core/Src/main.c:298:43: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
-  298 |                 uint16_t msg_len = strlen(printMsg);
-      |                                           ^~~~~~~~
-      |                                           |
-      |                                           uint8_t * {aka unsigned char *}
-In file included from ../Core/Src/main.c:32:
-C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/string.h:41:18: note: expected 'const char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
-   41 | size_t   strlen (const char *);
-      |                  ^~~~~~~~~~~~
-../Core/Src/main.c:294:27: warning: variable 'status' set but not used [-Wunused-but-set-variable]
-  294 |         HAL_StatusTypeDef status;
-      |                           ^~~~~~
-../Core/Src/main.c: In function 'task_tracking':
-../Core/Src/main.c:330:17: warning: variable 'target_angle_rad' set but not used [-Wunused-but-set-variable]
-  330 |         int32_t target_angle_rad;
-      |                 ^~~~~~~~~~~~~~~~
-../Core/Src/main.c: In function 'task_Motor':
-../Core/Src/main.c:459:17: warning: unused variable 'speed' [-Wunused-variable]
-  459 |         int32_t speed = 0;
-      |                 ^~~~~
-../Core/Src/main.c: In function 'task_MotorSpeed':
-../Core/Src/main.c:490:17: warning: unused variable 'y' [-Wunused-variable]
-  490 |         int32_t y = 0;
-      |                 ^
-../Core/Src/main.c:489:17: warning: unused variable 'x' [-Wunused-variable]
-  489 |         int32_t x = 500<<16;
-      |                 ^
-../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:745:17: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-  745 |         sprintf(msg,"Init Angle cible : %d\r\n", (int)angle);
+arm-none-eabi-gcc "../Prod/Src/strategy.c" -mcpu=cortex-m0plus -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32G070xx -c -I../Core/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc -I../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32G0xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 -I"C:/Users/les_victor/Documents/Vrais_docs/ENSEA/Cours 3A/ESE2024/robot_chat_soft/Prod/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Prod/Src/strategy.d" -MT"Prod/Src/strategy.o" --specs=nano.specs -mfloat-abi=soft -mthumb -o "Prod/Src/strategy.o"
+../Prod/Src/strategy.c: In function 'zone_circulaire':
+../Prod/Src/strategy.c:403:17: warning: unused variable 'comp_y_tang' [-Wunused-variable]
+  403 |         int32_t comp_y_tang = sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
+      |                 ^~~~~~~~~~~
+../Prod/Src/strategy.c:402:17: warning: unused variable 'comp_x_tang' [-Wunused-variable]
+  402 |         int32_t comp_x_tang = sens*fixed_div(fixed_mul(champ_vect->vitesse_avance, Dy,8), norm,8);
+      |                 ^~~~~~~~~~~
+../Prod/Src/strategy.c: In function 'nearest_enemy':
+../Prod/Src/strategy.c:451:9: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
+  451 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:6:1: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+    5 | #include "ydlidar_x4.h"
+  +++ |+#include <stdio.h>
+    6 | 
+../Prod/Src/strategy.c:451:9: warning: incompatible implicit declaration of built-in function 'sprintf' [-Wbuiltin-declaration-mismatch]
+  451 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+      |         ^~~~~~~
+../Prod/Src/strategy.c:451:9: note: include '<stdio.h>' or provide a declaration of 'sprintf'
+../Prod/Src/strategy.c:451:17: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
+  451 |         sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
       |                 ^~~
       |                 |
       |                 uint8_t * {aka unsigned char *}
-In file included from ../Core/Src/main.c:31:
-C:\ST\STM32CubeIDE_1.9.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.0.202305231506\tools\bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/include/stdio.h:254:18: note: expected 'char * restrict' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
-  254 | int     sprintf (char *__restrict, const char *__restrict, ...)
-      |                  ^
-../Core/Src/main.c: In function 'HAL_TIM_PeriodElapsedCallback':
-../Core/Src/main.c:847:50: warning: pointer targets in passing argument 2 of 'HAL_UART_Transmit_DMA' differ in signedness [-Wpointer-sign]
-  847 |                   HAL_UART_Transmit_DMA(&huart3, "System stop\r\n", 13);
-      |                                                  ^~~~~~~~~~~~~~~~~
-      |                                                  |
-      |                                                  char *
-In file included from ../Core/Inc/stm32g0xx_hal_conf.h:319,
-                 from ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:29,
-                 from ../Core/Inc/main.h:30,
-                 from ../Core/Src/main.c:20:
-../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_uart.h:1637:83: note: expected 'const uint8_t *' {aka 'const unsigned char *'} but argument is of type 'char *'
- 1637 | HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef *huart, const uint8_t *pData, uint16_t Size);
-      |                                                                    ~~~~~~~~~~~~~~~^~~~~
+../Prod/Src/strategy.c:451:17: note: expected 'char *' but argument is of type 'uint8_t *' {aka 'unsigned char *'}
 arm-none-eabi-gcc -o "robot_chat_soft.elf" @"objects.list"   -mcpu=cortex-m0plus -T"C:\Users\les_victor\Documents\Vrais_docs\ENSEA\Cours 3A\ESE2024\robot_chat_soft\STM32G070RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="robot_chat_soft.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 Finished building target: robot_chat_soft.elf
  
 arm-none-eabi-size   robot_chat_soft.elf 
 arm-none-eabi-objdump -h -S  robot_chat_soft.elf  > "robot_chat_soft.list"
    text	   data	    bss	    dec	    hex	filename
-  59340	    196	  31308	  90844	  162dc	robot_chat_soft.elf
+  58836	    196	  31220	  90252	  1608c	robot_chat_soft.elf
 Finished building: default.size.stdout
  
 Finished building: robot_chat_soft.list
  
-16:57:29 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+13:53:51 **** Incremental Build of configuration Debug for project robot_chat_soft ****
 make -j12 all 
 arm-none-eabi-size   robot_chat_soft.elf 
    text	   data	    bss	    dec	    hex	filename
-  59340	    196	  31308	  90844	  162dc	robot_chat_soft.elf
+  58836	    196	  31220	  90252	  1608c	robot_chat_soft.elf
+Finished building: default.size.stdout
+ 
+13:54:08 **** Incremental Build of configuration Debug for project robot_chat_soft ****
+make -j12 all 
+arm-none-eabi-size   robot_chat_soft.elf 
+   text	   data	    bss	    dec	    hex	filename
+  58836	    196	  31220	  90252	  1608c	robot_chat_soft.elf
 Finished building: default.size.stdout
  

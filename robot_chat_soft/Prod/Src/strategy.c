@@ -30,6 +30,7 @@ extern int32_t angle;
 extern int32_t avg_speed;
 static champ_vect_t champ_vect;
 extern QueueHandle_t q_printf;
+extern vector_t enemy;
 
 extern h_ydlidar_x4_t lidar;
 
@@ -49,7 +50,7 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	vector_t dir_vect, ennemy;
+	vector_t dir_vect;//, ennemy;
 	int32_t new_speed, new_angle;
 	//int32_t test_angle, test_avg_speed;
 
@@ -58,12 +59,12 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 		if(((*strat_mode & 0xFF) == NO_OBSTACLE) || ((*strat_mode & 0xFF) == PREVIOUS_OBSTACLE)){
 			//Aucun obstacle
 			//TODO appel fonction detection obstacle le + proche
-			nearest_enemy(&ennemy, hOdometry);
+			//nearest_enemy(&ennemy, hOdometry);
 			//angle = modulo_2pi(ennemy.angle);
 			//avg_speed = angleForward( ennemy.angle)*DEFAULT_SPEED<<8;
 			//TODO màj consigne commande
-			new_speed = angleForward( -ennemy.angle)*(DEFAULT_SPEED<<8);
-			new_angle = modulo_2pi(-ennemy.angle);
+			new_speed = angleForward( modulo_2pi(-enemy.angle))*(DEFAULT_SPEED<<8);
+			new_angle = modulo_2pi(-enemy.angle);
 			lissage(new_angle, new_speed);
 
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
@@ -114,14 +115,14 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//Calcul de suivi de courbe
 			//champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 
-			nearest_enemy(&ennemy, hOdometry);
+			//nearest_enemy(&ennemy, hOdometry);
 
 
 			dir_vect.x = 0;
 			dir_vect.y = 0;
 			//TODO somme 2 consignes
-			dir_vect.x = dir_vect.x - ennemy.x;
-			dir_vect.y = dir_vect.y - ennemy.y;
+			dir_vect.x = dir_vect.x - enemy.x;
+			dir_vect.y = dir_vect.y - enemy.y;
 
 
 			//hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
@@ -136,8 +137,8 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			//angle = modulo_2pi(dir_vect.angle);
 			//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
 			//angle = modulo_2pi(-ennemy.angle);
-			new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
-			new_angle = modulo_2pi(-ennemy.angle);
+			new_speed = -angleForward( -enemy.angle)*enemy.norm;
+			new_angle = modulo_2pi(-enemy.angle);
 			lissage(new_angle, new_speed);
 		}
 		else{
@@ -146,9 +147,9 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
 			case PREVIOUS_OBSTACLE:
-				nearest_enemy(&ennemy, hOdometry);
-				dir_vect.x = - ennemy.x;
-				dir_vect.y =- ennemy.y;
+				//nearest_enemy(&ennemy, hOdometry);
+				dir_vect.x = - enemy.x;
+				dir_vect.y =- enemy.y;
 
 				CORDIC_vector(&dir_vect);
 				//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
@@ -157,8 +158,8 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
 				//angle = modulo_2pi(-ennemy.angle);
 
-				new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
-				new_angle = modulo_2pi(-ennemy.angle);
+				new_speed = -angleForward( -enemy.angle)*enemy.norm;
+				new_angle = modulo_2pi(-enemy.angle);
 				lissage(new_angle, new_speed);
 
 				break;
@@ -445,18 +446,6 @@ int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
 		enemy->y = fixed_mul( sin_comp, speed, 8);
 
 		enemy->norm = speed;
-
-		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
-		if(target_angle < 130){
-			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
-			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
-		}else if(target_angle > 170){
-			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
-			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
-		}else{
-			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
-			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
-		}
 
 	}
 	sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);

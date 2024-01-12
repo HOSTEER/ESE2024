@@ -115,6 +115,7 @@ strat_mode_t strat_mode = DEFAULT_STRAT_MODE;
 uint8_t msg[QUEUE_PRINTF_SIZE];
 
 uint32_t watchdog_cnt = 0;
+vector_t enemy;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -341,11 +342,35 @@ void task_tracking(void * unused)
 				last_min = min_v;
 			}
 		}
+int32_t speed;
+		if(min_v < 4000){
+				target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+				//Recuperation de la variable par la strategie
+				enemy.angle = target_angle_rad;
+				enemy.norm = min_v;
+					speed = fixed_mul(DEFAULT_SPEED<<8, 1<<6, 8);
+					if(min_v <500){
+						speed = fixed_mul(DEFAULT_SPEED<<8, 1<<7, 8);
+						if(min_v <400){
+							speed = DEFAULT_SPEED<<8;
+								if(min_v <200){
+									speed = fixed_mul(DEFAULT_SPEED<<8, 1<<8, 8);
+								}
+						}
+					}
+				//int32_t cos_comp =fpcos(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+				//int32_t sin_comp =fpsin(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+				//enemy->x = fixed_mul( cos_comp, speed, 8);
+				//enemy->y = fixed_mul( sin_comp, speed, 8);
+
+				enemy.norm = speed;
+
+			}
 	//find_target(&lidar, &h_target);
-	if(min_v < 4000){
+	/*if(min_v < 4000){
 		target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
 		//Recuperation de la variable par la strategie
-		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
 		if(target_angle < 130){
 			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
 			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
@@ -356,7 +381,7 @@ void task_tracking(void * unused)
 			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
 			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
 		}
-	}
+	}*/
 	//printf("Rs,Ls = %d, %d\r\n",(int)Rmot.speed_measured[Rmot.speed_index]/(1<<16),(int)Lmot.speed_measured[Lmot.speed_index]/(1<<16));
 	vTaskDelay(50);
 	}
@@ -493,33 +518,6 @@ void task_MotorSpeed(void * unused)
 		cnt = (int16_t)__HAL_TIM_GET_COUNTER(Rmot.tim_ENC);
 		odometry_update_pos(&hOdometry);
 		//angle = follow_trajectory(&hOdometry, &x, &y,&mot_speed);
-		//motor_get_speed(&Rmot);
-		//motor_get_speed(&Lmot);
-		//motor_get_current(&Rmot);
-		//motor_get_current(&Lmot);
-		/*
-		if(hOdometry.x > 400<<15)
-		{
-			angle += HALF_PI;
-			hOdometry.x = 0;
-		}
-		if(hOdometry.y > 400<<15)
-		{
-			angle += HALF_PI;
-			hOdometry.y = 0;
-			//mot_speed = 0;
-		}
-		if(hOdometry.x < -400<<15)
-		{
-			angle += HALF_PI;
-			hOdometry.x = 0;
-		}
-		if(hOdometry.y < -400<<15)
-		{
-			angle += HALF_PI;
-			hOdometry.y = 0;
-			//mot_speed = 0;
-		}*/
 		//angle = modulo_2pi(angle);
 
 		//angle_corr = set_angle_corr(&hOdometry, angle);
@@ -549,38 +547,6 @@ void task_Strategy(void * unused){
 		strategy(&strat_mode, &hOdometry);
 		//sprintf(msg,"\t\t\t\t\tOdometry : x %d, y %d\r\n", (int)hOdometry.x/(1<<16), (int)hOdometry.y/(1<<16));
 		//xQueueSendToFront(q_printf, (void *)msg, 1);
-		//sprintf(msg,"\t\t\t\t\tConsigne : %d\r\n", (int)avg_speed);
-		//xQueueSendToFront(q_printf, (void *)msg, 1);
-		/*hOdometry.x = 100<<16;
-		hOdometry.y = 100<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 1100<<16;
-		hOdometry.y = 0<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 1050<<16;
-		hOdometry.y = 0<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 1100<<16;
-		hOdometry.y = 600<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 450<<16;
-		hOdometry.y = 200<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = -100<<16;
-		hOdometry.y = 30<<16;
-		strategy(&strat_mode, &hOdometry);
-		hOdometry.x = 0<<16;
-		hOdometry.y = 600<<16;
-		strat_mode = (strat_mode & 0xF0FF) | TURN_CLOCK;
-		hOdometry.x = 1100<<16;
-		hOdometry.y = 0<<16;
-		strategy(&strat_mode, &hOdometry);
-		strat_mode = (strat_mode & 0xFFF0) | FALL_FORWARD;
-		strategy(&strat_mode, &hOdometry);
-		strat_mode = (strat_mode & 0xFF0F) | COLLIDE;
-		strategy(&strat_mode, &hOdometry);
-		printf("Strat executed\r\n");
-		strat_mode = DEFAULT_STRAT_MODE;*/
 		//Fonctionne à 100Hz
 		vTaskDelay(100);
 	}

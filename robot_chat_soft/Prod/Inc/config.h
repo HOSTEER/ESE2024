@@ -24,7 +24,7 @@
 #define DEFAULT_SPEED 150
 
 
-#define MATCH_LENGTH 30
+#define MATCH_LENGTH 300
 
 #define COLLISION_TIMEOUT 3000
 
