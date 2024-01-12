@@ -61,7 +61,7 @@
 #define ENC_TICKSPERREV (896<<16)	//618.18 encoder ticks per revolution, Q.16
 #define ODOMETRY_FREQ 50UL 			//50Hz odometry refresh frequency
 
-#define SE
+#define BT
 
 /* USER CODE END PD */
 
@@ -379,13 +379,13 @@ void task_RX_ISR(void * unused)
 				}
 			}
 			packet+=i;
-			HAL_UART_Transmit_DMA(&huart2,&string_display[packet-36], 36);
+			HAL_UART_Transmit_DMA(&huart3,&string_display[packet-36], 36);
 			if(packet >= 720){
 				packet = 0;
 			}
-			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 		}else{
-			HAL_UART_Receive_IT(&huart2, &rx_pc, 1);
+			HAL_UART_Receive_IT(&huart3, &rx_pc, 1);
 		}
 		/*else if(rx_pc == 0xBB){
 					rx_pc = 0xFF;
