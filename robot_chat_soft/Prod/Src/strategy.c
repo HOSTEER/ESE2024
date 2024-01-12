@@ -2,6 +2,7 @@
 #include "string.h"
 #include "config.h"
 #include "cmsis_os.h"
+#include "ydlidar_x4.h"
 
 #define ZONE_MILIEU 2
 #define ZONE_DROITE 3
@@ -30,6 +31,8 @@ extern int32_t avg_speed;
 static champ_vect_t champ_vect;
 extern QueueHandle_t q_printf;
 
+extern h_ydlidar_x4_t lidar;
+
 static uint8_t msg[100];
 
 
@@ -46,94 +49,155 @@ void init_champ_vect(void){
 
 
 int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
-	vector_t dir_vect;
+	vector_t dir_vect, ennemy;
+	int32_t new_speed, new_angle;
 	//int32_t test_angle, test_avg_speed;
 
 	if((*strat_mode & 0xF000) == HUNTER){
 		//Le robot est chasseur
-		if((*strat_mode & 0xFF) == NO_OBSTACLE){
+		if(((*strat_mode & 0xFF) == NO_OBSTACLE) || ((*strat_mode & 0xFF) == PREVIOUS_OBSTACLE)){
 			//Aucun obstacle
 			//TODO appel fonction detection obstacle le + proche
-			//TODO somme 2 consignes
+			nearest_enemy(&ennemy, hOdometry);
+			//angle = modulo_2pi(ennemy.angle);
+			//avg_speed = angleForward( ennemy.angle)*DEFAULT_SPEED<<8;
 			//TODO màj consigne commande
+			new_speed = angleForward( -ennemy.angle)*(DEFAULT_SPEED<<8);
+			new_angle = modulo_2pi(-ennemy.angle);
+			lissage(new_angle, new_speed);
+
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 		}
 		else{
 			//Obstacle détecté
 			//printf("Comportement obstacle \n\r");
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
 			case FALL_FORWARD:
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO commande recul rectiligne
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
+
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
+				//vTaskDelay(100);
 				break;
 			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO commande avance rectiligne
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
+				//vTaskDelay(100);
 				break;
 			default: //COLLIDE sans FALL_x
-				*strat_mode = (*strat_mode&0xFFF) | PREY;
-				//TODO consigne vitesse nulle
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 0);
+				*strat_mode = (*strat_mode&0xF0F) | PREY;
+				angle = hOdometry->angle;
+				avg_speed = 0;
+				//vTaskDelay(100);
 				break;
 			}
 		}
 	}
 	else{
 		//Le robot est la proie
-		if((*strat_mode & 0xFF) == NO_OBSTACLE){
+		if((*strat_mode & 0xFF) == NO_OBSTACLE || ((*strat_mode & 0xFF) == PREVIOUS_OBSTACLE)){
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 0);
 			//Aucun obstacle
 			//Calcul de suivi de courbe
-			champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
+			//champ_vectoriel(&champ_vect, strat_mode, hOdometry, &dir_vect);
 
-			//dir_vect.x = 10<<16;
-			//dir_vect.y = 10<<16;
+			nearest_enemy(&ennemy, hOdometry);
+
+
+			dir_vect.x = 0;
+			dir_vect.y = 0;
+			//TODO somme 2 consignes
+			dir_vect.x = dir_vect.x - ennemy.x;
+			dir_vect.y = dir_vect.y - ennemy.y;
+
+
 			//hOdometry->angle = fixed_div(fixed_mul(45<<16,PI,24), 180<<16, 24);
 			//Calcul angle entre vecteur de consigne et avant du robot + calcul norme
 			CORDIC_vector(&dir_vect);
 
-			//TODO appel fonction detection obstacle le + proche
-			//TODO somme 2 consignes
+
 
 			//Mise à jour de la consigne de commande
 			//Vx = cos(angle_vect_dir - angle_robot)*hypotenuse
-			avg_speed = fixed_mul_16(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 16));
-			angle = dir_vect.angle;
-
-			//printf("Comportement fuite \n\r");
+			//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
+			//angle = modulo_2pi(dir_vect.angle);
+			//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+			//angle = modulo_2pi(-ennemy.angle);
+			new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+			new_angle = modulo_2pi(-ennemy.angle);
+			lissage(new_angle, new_speed);
 		}
 		else{
 			//Obstacle détecté
 			//printf("Comportement obstacle \n\r");
+			HAL_GPIO_WritePin(USER_LED4_GPIO_Port, USER_LED4_Pin, 1);
 			switch(*strat_mode&0xFF){
+			case PREVIOUS_OBSTACLE:
+				nearest_enemy(&ennemy, hOdometry);
+				dir_vect.x = - ennemy.x;
+				dir_vect.y =- ennemy.y;
+
+				CORDIC_vector(&dir_vect);
+				//avg_speed = angleForward( dir_vect.angle)*dir_vect.norm;// fixed_mul(dir_vect.norm, fpcos(dir_vect.angle - hOdometry->angle, 8), 8);
+				//angle = modulo_2pi(dir_vect.angle);
+
+				//avg_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+				//angle = modulo_2pi(-ennemy.angle);
+
+				new_speed = -angleForward( -ennemy.angle)*ennemy.norm;
+				new_angle = modulo_2pi(-ennemy.angle);
+				lissage(new_angle, new_speed);
+
+				break;
 			case FALL_FORWARD:
-				//TODO commande recul rectiligne
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
 				break;
 			case FALL_BACKWARD:
-				//TODO commande avance rectiligne
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
 				break;
 			case FALL_FORWARD | COLLIDE:
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO commande recul rectiligne
+			HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
+				angle = hOdometry->angle;
+				avg_speed = + DEFAULT_SPEED<<8;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			case FALL_BACKWARD | COLLIDE:
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO commande avance rectiligne
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
+				angle = hOdometry->angle;
+				avg_speed = - DEFAULT_SPEED<<8;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			default: //COLLIDE sans FALL_x
-				*strat_mode = (*strat_mode&0xFFF) | HUNTER;
-				//TODO consigne vitesse nulle
+				HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, 1);
+				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
+				angle = hOdometry->angle;
+				avg_speed = 0;
+				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			}
 		}
 	}
 
 
-	sprintf(msg,"Direc: x: %d, y: %d, angle : %d\n\r", dir_vect.x>>16, dir_vect.y>>16, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16);
-	xQueueSend(q_printf, (void *)msg, 1);
+	//sprintf(msg,"Direc: x: %d, y: %d, angle : %d, a_brut %d\n\r", dir_vect.x>>8, dir_vect.y>>8, fixed_div_16(fixed_mul_16(angle>>8,360<<16), PI>>8)>>16,angle);
+	//xQueueSend(q_printf, (void *)msg, 1);
 	//printf("x: %d, y: %d\n\r", dir_vect.x>>16, dir_vect.y>>16);
 	return 0;
 }
@@ -150,8 +214,8 @@ int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 		status = zone_circulaire(champ_vect, strat_mode, hOdometry, zone, dir_vect);
 	}
 
-	sprintf(msg,"Zone : %d\n\r", zone);
-	xQueueSendToFront(q_printf, (void *)msg, 1);
+	//sprintf(msg,"Zone : %d\n\r", zone);
+	//xQueueSendToFront(q_printf, (void *)msg, 1);
 	return status;
 }
 
@@ -341,4 +405,98 @@ int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOd
 	dir_vect->y = comp_y_corr + sens*fixed_div(fixed_mul(-champ_vect->vitesse_avance, Dx,8), norm,8);
 
 	return 0;
+}
+
+
+int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry){
+	int32_t speed;
+	int32_t target_angle_rad;
+	 //TODO suppress if working find_taget
+	uint16_t target_angle;
+	uint16_t min_v = 4000, last_min=4000;
+	for(int i=0;i<360;i++){
+		if((lidar.sorted_dist[i] > 0) && (min_v > lidar.sorted_dist[i])){
+			min_v=lidar.sorted_dist[i];
+		}
+		if(min_v <last_min){
+			target_angle = i;
+			last_min = min_v;
+		}
+	}
+	//find_target(&lidar, &h_target);
+	if(min_v < 4000){
+		target_angle_rad = (target_angle - 160)*DEG2RAD; //convert angle from deg to rad Q7.24
+		//Recuperation de la variable par la strategie
+		enemy->angle = target_angle_rad;
+		enemy->norm = min_v;
+			speed = fixed_mul(DEFAULT_SPEED<<8, 1<<6, 8);
+			if(min_v <500){
+				speed = fixed_mul(DEFAULT_SPEED<<8, 1<<7, 8);
+				if(min_v <400){
+					speed = DEFAULT_SPEED<<8;
+						if(min_v <200){
+							speed = fixed_mul(DEFAULT_SPEED<<8, 1<<8, 8);
+						}
+				}
+			}
+		int32_t cos_comp =fpcos(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+		int32_t sin_comp =fpsin(modulo_2pi( target_angle_rad + hOdometry->angle), 8);
+		enemy->x = fixed_mul( cos_comp, speed, 8);
+		enemy->y = fixed_mul( sin_comp, speed, 8);
+
+		enemy->norm = speed;
+
+		//angle_corr = set_angle_corr(&hOdometry, target_angle_rad + hOdometry.angle);
+		if(target_angle < 130){
+			//angle_corr = set_angle_corr(&hOdometry, -1*(1<<24));
+			HAL_GPIO_TogglePin(USER_LED4_GPIO_Port, USER_LED4_Pin);
+		}else if(target_angle > 170){
+			//angle_corr = set_angle_corr(&hOdometry, 1<<24);
+			HAL_GPIO_TogglePin(USER_LED3_GPIO_Port, USER_LED3_Pin);
+		}else{
+			//angle_corr = set_angle_corr(&hOdometry, hOdometry.angle);
+			HAL_GPIO_TogglePin(USER_LED2_GPIO_Port, USER_LED2_Pin);
+		}
+
+	}
+	sprintf(msg,"Angle cible : %d\r\n", (int)target_angle);
+	xQueueSendToFront(q_printf, (void *)msg, 1);
+	return 0;
+}
+
+
+int32_t angleForward(int32_t angle){
+	angle = angle%TWO_PI;
+	if((angle > PI/2) && (angle < (int32_t)(3*PI/2)))
+	{
+		//xQueueSendToFront(q_printf, (void *)"avant haut\n\r", 1);
+		return 1;
+	}
+	else if((angle < -(int32_t)PI/2) && (angle > -(int32_t)(3*PI/2)))
+	{
+		//xQueueSendToFront(q_printf, (void *)"avant bas\n\r", 1);
+		return 1;
+	}
+	else{
+		//xQueueSendToFront(q_printf, (void *)"arriere\n\r", 1);
+		return -1;
+	}
+}
+
+void lissage(int32_t new_angle, int32_t new_speed){
+	if( (avg_speed > 0 && new_speed >0)||(avg_speed < 0 && new_speed <0)){
+			//Moyennage
+			avg_speed = (avg_speed + new_speed)/2;
+		}
+		else{
+			//Changement de coté de déplacement
+			avg_speed = new_speed;
+		}
+
+		if(((angle - new_angle) < PI/4) && ((angle - new_angle) > -PI/4)){
+			angle = (angle + new_angle)/2;
+		}
+		else{
+			angle = new_angle;
+		}
 }

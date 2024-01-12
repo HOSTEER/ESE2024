@@ -19,6 +19,7 @@ typedef enum{
 	PREY			= 0x2000,
 
 	NO_OBSTACLE		= 0x0000,
+	PREVIOUS_OBSTACLE	= 0x00FF,
 
 	//Chute
 	FALL_FORWARD 	= 0x0001,
@@ -54,4 +55,8 @@ int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry);
 int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
 int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
 
+int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry);
+int32_t angleForward(int32_t angle);
+
+void lissage(int32_t new_angle, int32_t new_speed);
 #endif /* INC_STRATEGY_H_ */

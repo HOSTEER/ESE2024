@@ -1,0 +1,60 @@
+/*
+ * strategy.h
+ *
+ *  Created on: Dec 13, 2023
+ *      Author: les_victor
+ */
+
+#ifndef INC_STRATEGY_H_
+#define INC_STRATEGY_H_
+
+#include <stdint.h>
+#include "odometry.h"
+
+#include "fixpoint_math.h"
+
+typedef enum{
+	//Modes de jeu
+	HUNTER			= 0x1000,
+	PREY			= 0x2000,
+
+	NO_OBSTACLE		= 0x0000,
+	PREVIOUS_OBSTACLE	= 0x00FF,
+
+	//Chute
+	FALL_FORWARD 	= 0x0001,
+	FALL_BACKWARD 	= 0x0002,
+
+	//Obstacle
+	COLLIDE 		= 0x0010,
+
+	//Sens de rotation (mode proie)
+	TURN_TRIGO		= 0x0100,
+	TURN_CLOCK		= 0x0200
+}strat_mode_t;
+
+typedef struct CHAMP_VECT_STRUCT_T{
+	// Vitesses d'avance et de rapprochement à la ligne
+	int32_t vitesse_avance, vitesse_correctrice;
+
+	// Coordonnées délimitant les zones du champ			Q16.16
+	int32_t pt_lim_gauche, pt_lim_droite;
+	int32_t pt_lim_haut,  pt_lim_bas;
+
+	// Ecart entre la limite de zone et la ligne à suivre	Q16.16
+	int32_t offset;
+
+}champ_vect_t;
+
+
+int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry);
+
+void init_champ_vect(void);
+int8_t champ_vectoriel(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, vector_t * dir_vect);
+int8_t zone_sorting(champ_vect_t * champ_vect, hOdometry_t * hOdometry);
+int8_t zone_lineaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
+int8_t zone_circulaire(champ_vect_t * champ_vect, strat_mode_t * strat_mode, hOdometry_t * hOdometry, uint8_t zone, vector_t * dir_vect);
+
+int32_t nearest_enemy(vector_t * enemy, hOdometry_t * hOdometry);
+
+#endif /* INC_STRATEGY_H_ */
