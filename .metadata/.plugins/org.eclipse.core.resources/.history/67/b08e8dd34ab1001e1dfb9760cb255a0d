@@ -88,8 +88,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
-				sprintf(msg,"Mode proie, Ahhhhhh\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				//vTaskDelay(100);
 				break;
 			case FALL_BACKWARD | COLLIDE:
@@ -97,8 +95,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
-				sprintf(msg,"Mode proie, Ahhhhhh\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				//vTaskDelay(100);
 				break;
 			default: //COLLIDE sans FALL_x
@@ -106,9 +102,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | PREY;
 				angle = hOdometry->angle;
 				avg_speed = 0;
-
-				sprintf(msg,"Mode proie, Ahhhhhh\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				//vTaskDelay(100);
 				break;
 			}
@@ -183,9 +176,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = + DEFAULT_SPEED<<8;
-
-				sprintf(msg,"Mode chat, j'arrive!\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			case FALL_BACKWARD | COLLIDE:
@@ -193,9 +183,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = - DEFAULT_SPEED<<8;
-
-				sprintf(msg,"Mode chat, j'arrive!\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			default: //COLLIDE sans FALL_x
@@ -203,9 +190,6 @@ int8_t strategy(strat_mode_t * strat_mode, hOdometry_t * hOdometry){
 				*strat_mode = (*strat_mode&0xF0F) | HUNTER;
 				angle = hOdometry->angle;
 				avg_speed = 0;
-
-				sprintf(msg,"Mode chat, j'arrive!\n\r");
-				xQueueSend(q_printf, (void *)msg, 1);
 				vTaskDelay(COLLISION_TIMEOUT);
 				break;
 			}

@@ -21,7 +21,7 @@
 #define DEFAULT_STRAT_MODE PREY | TURN_TRIGO
 
 //Asserv
-#define DEFAULT_SPEED 160
+#define DEFAULT_SPEED 200
 
 
 #define MATCH_LENGTH 300
